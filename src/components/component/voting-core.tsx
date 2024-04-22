@@ -30,7 +30,7 @@ import { makeIPInspector } from 'next-fortress/ip'
 
 export const middleware = makeIPInspector('125.103.20.82', {
   type: 'redirect',
-  destination: '/'
+  destination: '/this-page-probably-does-not-exist'
 })
 
 
