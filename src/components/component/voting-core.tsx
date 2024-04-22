@@ -26,12 +26,12 @@ To read more about using these font, please visit the Next.js documentation:
 'use client'
 import { Button } from "@/components/ui/button"
 import { JSX, SVGProps, useState } from "react"
-import { makeIPInspector } from 'next-fortress/ip'
+/*import { makeIPInspector } from 'next-fortress/ip'
 
 export const middleware = makeIPInspector('125.103.20.82', {
   type: 'redirect',
   destination: '/this-page-probably-does-not-exist'
-})
+})*/
 
 
 export type Tile = {
