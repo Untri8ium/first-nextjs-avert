@@ -1,5 +1,20 @@
 import type { Config } from "tailwindcss";
 
+const { blackA } = require('@radix-ui/colors');
+
+/* @type {import('tailwindcss').Config} 
+module.exports = {
+  content: ['./App.jsx'],
+  theme: {
+    extend: {
+      colors: {
+        ...blackA,
+      },
+    },
+  },
+  plugins: [],
+};*/
+
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
