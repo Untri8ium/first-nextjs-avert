@@ -26,6 +26,8 @@ To read more about using these font, please visit the Next.js documentation:
 "use client";
 import { Button } from "@/components/ui/button";
 import { JSX, SVGProps, useState } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 /*import { makeIPInspector } from 'next-fortress/ip'
 
 export const middleware = makeIPInspector('125.103.20.82', {
@@ -72,6 +74,7 @@ export function VotingCore(props: Props) {
   return (
     // [ + IGNORE THE FOLLOWING: ] the value.id being number may be problematic as it is converted to string and yet it must be considered the same as its original form internally; should there be any code that implement it with ===, we are doomed
     <form onSubmit={handleSubmit}>
+      <Toaster />
       <div
         key="1"
         className="flex flex-col items-center justify-center w-full h-full"
@@ -81,7 +84,12 @@ export function VotingCore(props: Props) {
             {dataToShow.map((value) => (
               <label
                 key={value.id}
-                className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
+                //className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
+                className={
+                  checkboxes[value.id as keyof typeof checkboxes]
+                    ? "bg-[#b4ddaa] border-[#55aa55] dark:bg-[#395530] dark:border-[#55aa55] rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
+                    : "bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
+                }
               >
                 <input
                   className="peer sr-only"
@@ -93,8 +101,9 @@ export function VotingCore(props: Props) {
                   onChange={handleCheckboxChange}
                 />
                 <div className="p-3 flex flex-col items-center justify-center space-y-2">
-                  <CodeIcon className="h-6 w-6 text-indigo-500" />
-                  <h3 className="text-sm font-semibold">{value.name}</h3>
+                  <h3 className="text-sm font-semibold text-center">
+                    {value.name}
+                  </h3>
                   <p className="text-gray-500 dark:text-gray-400 text-center text-xs">
                     {value.description}
                   </p>

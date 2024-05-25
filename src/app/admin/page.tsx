@@ -6,6 +6,14 @@ import { VotingCore, Tile } from "@/components/component/voting-core";
 import { TopArea } from "@/components/component/top-area";
 import { Settings } from "@/components/component/settings";
 
+import React, {
+  createContext,
+  useContext,
+  useState,
+  FC,
+  ReactNode,
+} from "react";
+
 export default async function Home() {
   const header = headers();
   const ip = (header.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];
@@ -13,8 +21,8 @@ export default async function Home() {
   async function loadVGI() {
     try {
       var result = await sql`
-        CREATE TABLE IF NOT EXISTS votinggeneralinfo (votingset boolean, votingstart timestamp with time zone, 
-            votingend timestamp with time zone, maxvotes smallint, name varchar(255), description varchar(255), existence boolean UNIQUE
+        CREATE TABLE IF NOT EXISTS votinggeneralinfo (votingset boolean, votingstart varchar(255), 
+            votingend varchar(255), maxvotes smallint, name varchar(255), description varchar(255), existence boolean UNIQUE
         );`;
 
       const { rows } = await sql`
@@ -85,11 +93,15 @@ export default async function Home() {
     <main>
       <TopArea
         title="管理者パネル"
-        description="仰せのままに。"
+        description="「適用」を押すまで、変更は反映されません。"
         colorFrom="from-[#F18643]"
         colorTo="to-[#F64C6B]"
       />
-      <Settings />
+      <Settings
+        receivedVGI={vgiAns}
+        receivedOPTS={optsAns}
+        receivedCATS={catsAns}
+      />
     </main>
   );
 }
