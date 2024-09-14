@@ -95,11 +95,17 @@ export function AdminOption(props: {
   class IndivCat {
     ID: string;
     name: string;
+    //maxvotes: number;
     orderNo: number;
 
-    constructor(ID: string, name: string, orderNo: number) {
+    constructor(
+      ID: string,
+      name: string,
+      /*maxvotes: number, */ orderNo: number
+    ) {
       this.ID = ID;
       this.name = name;
+      //this.maxvotes = maxvotes;
       this.orderNo = orderNo;
     }
   }
@@ -143,7 +149,9 @@ export function AdminOption(props: {
   function renumberCats(catArray: IndivCat[]): IndivCat[] {
     let arrayToReturn: IndivCat[] = [];
     catArray.map((cat, index) =>
-      arrayToReturn.push(new IndivCat(cat.ID, cat.name, index))
+      arrayToReturn.push(
+        new IndivCat(cat.ID, cat.name, /*cat.maxvotes,*/ index)
+      )
     );
     return arrayToReturn;
   }
@@ -155,6 +163,8 @@ export function AdminOption(props: {
   const [newItemCatSelection, setNewItemCatSelection] = useState<string>();
 
   const [newItemNewCatName, setNewItemNewCatName] = useState<string>();
+
+  //const [newItemNewCatMaxVotes, setNewItemNewCatMaxVotes] = useState<number>();
 
   const [newItemPlaceSelection, setNewItemPlaceSelection] = useState<string>();
 
@@ -169,6 +179,11 @@ export function AdminOption(props: {
     setNewItemDesc(undefined || props.desc);
     setNewItemCatSelection(defaultCatToSet || "createNew");
     setNewItemNewCatName(undefined);
+    /*setNewItemNewCatMaxVotes(
+      undefined ||
+        props.theCats.find((eachCat: IndivCat) => eachCat.ID == defaultCatToSet)
+          .maxvotes
+    );*/
     setNewItemPlaceSelection(
       props.theOptions
         .toReversed()
@@ -214,11 +229,24 @@ export function AdminOption(props: {
     if (
       !newItemName ||
       !newItemDesc ||
-      (newItemCatSelection == "createNew" && !newItemNewCatName)
+      (newItemCatSelection == "createNew" &&
+        !newItemNewCatName) /* || !newItemNewCatMaxVotes*/
     ) {
       setNewItemError("空欄の項目があります！");
     } else {
       const catUUIDforUseIfNecessary = crypto.randomUUID();
+      if (newItemCatSelection == "createNew") {
+        props.catSetter([
+          ...props.theCats,
+          new IndivCat(
+            catUUIDforUseIfNecessary,
+            newItemNewCatName || "カテゴリ命名異常",
+            //newItemNewCatMaxVotes || 0,
+            props.theCats.length
+          ),
+        ]);
+      }
+      console.log(props.theCats);
 
       const newOptionsArray = renumberOptions(
         sortOptions([
@@ -260,6 +288,7 @@ export function AdminOption(props: {
                   new IndivCat(
                     catUUIDforUseIfNecessary,
                     newItemNewCatName || "カテゴリ命名異常",
+                    //newItemNewCatMaxVotes || 0,
                     props.theCats.length
                   ),
                 ].filter((eachCat: IndivCat) =>
@@ -307,6 +336,12 @@ export function AdminOption(props: {
     setNewItemNewCatName(event.target.value);
   };
 
+  /*const handleNewNewCatMaxVotesChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setNewItemNewCatMaxVotes(parseInt(event.target.value));
+  };*/
+
   return (
     <section className="container">
       <div className="grid">
@@ -314,8 +349,10 @@ export function AdminOption(props: {
           key={props.id}
           className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow w-full border border-gray-200 dark:border-gray-700"
         >
-          <div className="p-3 flex flex-col items-center justify-center space-y-2">
-            <h3 className="text-sm font-semibold">{props.name}</h3>
+          <div className="p-2 flex flex-col items-center justify-center space-y-2">
+            <p className="text-md md:text-sm font-semibold">
+              {props.name.replace("「", "「")}
+            </p>
             <p className="text-gray-500 dark:text-gray-400 text-center text-xs">
               {props.desc}
             </p>
@@ -349,18 +386,18 @@ export function AdminOption(props: {
               </DialogHeader>
               <Separator />
               <form className="" onSubmit={handleNewItemSubmit}>
-                <Label>名前</Label>
+                <Label>団体名</Label>
                 <Input
                   id="itemName"
-                  placeholder="3-B「Mission Possible」..."
+                  placeholder="3-B ..."
                   defaultValue={props.name}
                   style={{ marginBottom: "10px" }}
                   onChange={handleNewNameChange}
                 />
-                <Label>説明</Label>
+                <Label>デコ名</Label>
                 <Input
                   id="itemDesc"
-                  placeholder="筑駒を舞台にしたスパイコメディ..."
+                  placeholder="Mission Possible ..."
                   defaultValue={props.desc}
                   style={{ marginBottom: "10px" }}
                   onChange={handleNewDescChange}
@@ -400,6 +437,15 @@ export function AdminOption(props: {
                         style={{ marginBottom: "10px" }}
                         onChange={handleNewNewCatChange}
                       />
+
+                      {/*<Label>カテゴリ票数上限</Label>
+                      <Input
+                        id="itemNewCatMaxVotes"
+                        type="number"
+                        min={1}
+                        style={{ marginBottom: "10px" }}
+                        onChange={handleNewNewCatMaxVotesChange}
+                      />*/}
                     </>
                   ) : null}
                 </div>
@@ -495,7 +541,7 @@ export function AdminOption(props: {
                       {newItemError}
                     </Label>
                   ) : null}
-                  <Button>更新</Button>
+                  <Button>完了</Button>
                 </div>
               </form>
             </DialogContent>
@@ -521,7 +567,7 @@ export function AdminOption(props: {
               <AlertDialogHeader>
                 <AlertDialogTitle>危険！</AlertDialogTitle>
                 <AlertDialogDescription>
-                  この選択肢の全データが削除されます。
+                  適用ボタンを押してからは、この選択肢は投票画面からも、統計画面からも永久に削除されます。
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

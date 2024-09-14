@@ -1,6 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import Router, { useRouter } from "next/navigation";
+
 //import * as Switch from '@radix-ui/react-switch';
 
 //"use server"
@@ -14,6 +17,9 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 import { Separator } from "@/components/ui/separator";
+
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 import {
   getLocalTimeZone,
@@ -86,6 +92,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { TimePickerDemo } from "./time-picker-demo";
+
 /*
 Following is what this component used to return
 
@@ -154,12 +162,22 @@ import { AdminOption } from "./admin-option";
 import { eventNames } from "process";
 import { Description } from "@radix-ui/react-dialog";
 import { AdminConfirm } from "./admin-confirm";
+import { NewAdminConfirm } from "./new-admin-confirm";
+import { QueryResultRow } from "@vercel/postgres";
 
 export function Settings(props: {
   receivedVGI: any;
   receivedOPTS: any;
   receivedCATS: any;
+  receivedVOTS: any;
+  receivedEXQS: any;
+  submitCalledByChild: any;
+  loadingState: number; // 0: default, 1: loading, 2: failed
+
+  //onAction: any;
 }) {
+  console.log("rec: " + JSON.stringify(props.receivedOPTS) + "HEY");
+
   class IndivOption {
     ID: string;
     catID: string;
@@ -185,11 +203,17 @@ export function Settings(props: {
   class IndivCat {
     ID: string;
     name: string;
+    //maxvotes: number;
     orderNo: number;
 
-    constructor(ID: string, name: string, orderNo: number) {
+    constructor(
+      ID: string,
+      name: string,
+      /*maxvotes: number,*/ orderNo: number
+    ) {
       this.ID = ID;
       this.name = name;
+      //this.maxvotes = maxvotes;
       this.orderNo = orderNo;
     }
   }
@@ -231,10 +255,45 @@ export function Settings(props: {
   function renumberCats(catArray: IndivCat[]): IndivCat[] {
     let arrayToReturn: IndivCat[] = [];
     catArray.map((cat, index) =>
-      arrayToReturn.push(new IndivCat(cat.ID, cat.name, index))
+      arrayToReturn.push(
+        new IndivCat(cat.ID, cat.name, /*cat.maxvotes,*/ index)
+      )
     );
     return arrayToReturn;
   }
+
+  const transformPlainObjectToOptions = (obj: QueryResultRow[]) => {
+    var listToReturn: IndivOption[] = [];
+    obj.forEach((element) => {
+      listToReturn.push(
+        new IndivOption(
+          element.id,
+          element.categoryid,
+          element.name,
+          element.description,
+          element.orderno
+        )
+      );
+    });
+    return listToReturn;
+  };
+
+  const transformPlainObjectToCategories = (obj: QueryResultRow[]) => {
+    var listToReturn: IndivCat[] = [];
+    obj.forEach((element) => {
+      listToReturn.push(
+        new IndivCat(
+          element.id,
+          element.name,
+          /*element.maxvotes,*/
+          element.orderno
+        )
+      );
+    });
+    return listToReturn;
+  };
+
+  console.log(props.receivedVGI);
 
   const [votingSet, setVotingSet] = useState<boolean>(
     props.receivedVGI[0].votingset
@@ -245,6 +304,9 @@ export function Settings(props: {
   const [votingDateE, setVotingDateE] = useState<string>(
     props.receivedVGI[0].votingend
   );
+  const [maxVotes, setMaxVotes] = useState<number>(
+    props.receivedVGI[0].maxvotes
+  );
   const [votingName, setVotingName] = useState<string>(
     props.receivedVGI[0].name
   );
@@ -252,10 +314,16 @@ export function Settings(props: {
     props.receivedVGI[0].description
   );
   const [options, setOptions] = useState<IndivOption[]>(
-    sortOptions(props.receivedOPTS)
+    sortOptions(transformPlainObjectToOptions(props.receivedOPTS))
   );
   const [categories, setCategories] = useState<IndivCat[]>(
-    sortCats(props.receivedCATS)
+    sortCats(transformPlainObjectToCategories(props.receivedCATS))
+  );
+  const [dayStartTime, setDayStartTime] = useState<string>(
+    props.receivedVGI[0].daystarttime
+  );
+  const [dayEndTime, setDayEndTime] = useState<string>(
+    props.receivedVGI[0].dayendtime
   );
 
   const [newItemName, setNewItemName] = useState<string>();
@@ -268,6 +336,8 @@ export function Settings(props: {
 
   const [newItemNewCatName, setNewItemNewCatName] = useState<string>();
 
+  //const [newItemNewCatMaxVotes, setNewItemNewCatMaxVotes] = useState<number>();
+
   const [newItemError, setNewItemError] = useState<string>();
 
   const [newItemOpenOne, setNewItemOpenOne] = useState<string>();
@@ -276,9 +346,37 @@ export function Settings(props: {
 
   const [editCatPlaceSelection, setEditCatPlaceSelection] = useState<string>();
 
+  const [editCatMaxVotes, setEditCatMaxVotes] = useState<number>();
+
   const [editCatError, setEditCatError] = useState<string>();
 
   const [editCatOpenOne, setEditCatOpenOne] = useState<string>();
+
+  const [nameError, setNameError] = useState<string>();
+
+  const [maxVotesError, setMaxVotesError] = useState<string>();
+
+  const [dateSError, setDateSError] = useState<string>();
+
+  const [dateEError, setDateEError] = useState<string>();
+
+  const [dayStartTimeError, setDayStartTimeError] = useState<string>();
+
+  const [dayEndTimeError, setDayEndTimeError] = useState<string>();
+
+  const [optionsError, setOptionsError] = useState<string>();
+
+  const [categoriesError, setCategoriesError] = useState<string>();
+
+  const [submitText, setSubmitText] = useState<string>();
+
+  const router = useRouter();
+
+  console.log("receivedOPTS: " + JSON.stringify(props.receivedOPTS));
+  console.log("receivedCATS: " + JSON.stringify(props.receivedCATS));
+
+  console.log("options: " + JSON.stringify(options));
+  console.log("categories: " + JSON.stringify(categories));
 
   /*const [optionsID, setOptionsID] = useState<string[]>(
     props.receivedOPTS.map((option: any) => option.id || undefined)
@@ -306,6 +404,8 @@ export function Settings(props: {
     props.receivedCATS.map((category: any) => category.orderno)
   );*/
 
+  const { toast } = useToast();
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -324,7 +424,8 @@ export function Settings(props: {
     if (
       !newItemName ||
       !newItemDesc ||
-      (newItemCatSelection == "createNew" && !newItemNewCatName)
+      (newItemCatSelection == "createNew" &&
+        !newItemNewCatName) /* || !newItemNewCatMaxVotes*/
     ) {
       setNewItemError("空欄の項目があります！");
     } else {
@@ -335,6 +436,7 @@ export function Settings(props: {
           new IndivCat(
             catUUIDforUseIfNecessary,
             newItemNewCatName || "カテゴリ命名異常",
+            /*newItemNewCatMaxVotes || 0,*/
             categories.length
           ),
         ]);
@@ -380,7 +482,7 @@ export function Settings(props: {
 
   const handleEditCatSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!editCatName) {
+    if (!editCatName || !editCatMaxVotes) {
       setEditCatError("空欄の項目があります！");
     } else {
       console.log(categories);
@@ -403,6 +505,7 @@ export function Settings(props: {
               ),
               ID: editCatOpenOne || "",
               name: editCatName,
+              /*maxvotes: editCatMaxVotes || 0,*/
               orderNo:
                 editCatPlaceSelection == "firstPlace"
                   ? 99999
@@ -410,13 +513,14 @@ export function Settings(props: {
                       categories.find(
                         (eachCat: IndivCat) =>
                           eachCat.ID == editCatPlaceSelection
-                      ) || new IndivCat("", "", 0)
+                      ) || new IndivCat("", "", /*1,*/ 0)
                     ) - 0.5,
             },
           ])
         )
       );
       setEditCatError(undefined);
+      setEditCatMaxVotes(undefined);
       setEditCatOpenOne(undefined);
       console.log(options);
     }
@@ -443,6 +547,16 @@ export function Settings(props: {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setNewItemNewCatName(event.target.value);
+  };
+
+  /*const handleNewNewCatMaxVotesChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setNewItemNewCatMaxVotes(parseInt(event.target.value));
+  };*/
+
+  const handleMaxVotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setMaxVotes(parseInt(event.target.value));
   };
 
   const handleVotingNameChange = (
@@ -475,15 +589,20 @@ export function Settings(props: {
     setNewItemCatSelection(defaultCatToSet || "createNew");
     setNewItemPlaceSelection("firstPlace");
     setNewItemNewCatName(undefined);
+    //setNewItemNewCatMaxVotes(undefined);
     setNewItemError(undefined);
   };
 
   const resetEditCat = (
     defaultNameToSet?: string,
-    defaultPlaceToSet?: string
+    defaultPlaceToSet?: string,
+
+    defaultMaxVotesToSet?: number
   ) => {
     setEditCatName(defaultNameToSet || undefined);
     setEditCatPlaceSelection(defaultPlaceToSet || "firstPlace");
+
+    setEditCatMaxVotes(defaultMaxVotesToSet);
     setEditCatError(undefined);
   };
 
@@ -493,257 +612,412 @@ export function Settings(props: {
     setEditCatName(event.target.value);
   };
 
+  const handleEditCatMaxVotesChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setEditCatMaxVotes(parseInt(event.target.value));
+  };
+
+  const transformOptionsToPlainObject = (options: IndivOption[]) => {
+    return options.map((option) => ({
+      ID: option.ID,
+      catID: option.catID,
+      name: option.name,
+      description: option.description,
+      orderNo: option.orderNo,
+    }));
+  };
+
+  const transformCategoriesToPlainObject = (categories: IndivCat[]) => {
+    return categories.map((category) => ({
+      ID: category.ID,
+      name: category.name,
+      /*maxvotes: category.maxvotes,*/
+      orderNo: category.orderNo,
+    }));
+  };
+
+  const requestSubmit = () => {
+    if (votingSet) {
+      if (votingName) {
+        setNameError(undefined);
+      } else {
+        setNameError("必須項目です！");
+      }
+      if (maxVotes) {
+        if (maxVotes >= 1) {
+          setMaxVotesError(undefined);
+        } else {
+          setMaxVotesError("1票も入れられませんが…");
+        }
+      } else {
+        setMaxVotesError("必須項目です！");
+      }
+      if (votingDateS) {
+        setDateSError(undefined);
+      } else {
+        setDateSError("必須項目です！");
+      }
+      if (votingDateE) {
+        setDateEError(undefined);
+      } else {
+        setDateEError("必須項目です！");
+      }
+      if (options.length != 0) {
+        setOptionsError(undefined);
+      } else {
+        setOptionsError("必須項目です！");
+      }
+      // if (categories.length == 0) {
+      //   setCategoriesError("必須項目です！");
+      // }
+      if (votingDateS && votingDateE) {
+        if (Date.parse(votingDateS) < Date.parse(votingDateE))
+          setDateEError(undefined);
+        else setDateEError("投票時間が0秒以下ですが…");
+      }
+
+      if (dayStartTime) {
+        setDayStartTimeError(undefined);
+      } else {
+        setDayStartTimeError("必須項目です！");
+      }
+
+      if (dayEndTime) {
+        setDayEndTimeError(undefined);
+      } else {
+        setDayEndTimeError("必須項目です！");
+      }
+
+      if (dayStartTime && dayEndTime) {
+        if (Date.parse(dayStartTime) < Date.parse(dayEndTime))
+          setDayEndTimeError(undefined);
+        else setDayEndTimeError("投票時間が0秒以下ですが…");
+      }
+
+      if (
+        maxVotes &&
+        maxVotes >= 1 &&
+        votingName &&
+        votingDateS &&
+        votingDateE &&
+        options.length != 0 &&
+        Date.parse(votingDateS) < Date.parse(votingDateE) &&
+        dayStartTime &&
+        dayEndTime &&
+        Date.parse(dayStartTime) < Date.parse(dayEndTime)
+      ) {
+        router.refresh();
+        props.submitCalledByChild(
+          votingSet,
+          maxVotes,
+          votingName,
+          votingDescription,
+          votingDateS,
+          votingDateE,
+          transformOptionsToPlainObject(options),
+          transformCategoriesToPlainObject(categories),
+          dayStartTime,
+          dayEndTime
+        );
+
+        toast({
+          title: "適用完了…のはず",
+          description: "再読み込みしてご確認ください。",
+        });
+        //setSubmitText("送信完了…のはずです。再読み込みしてご確認ください");
+      }
+    } else {
+      setNameError(undefined);
+      setMaxVotesError(undefined);
+      setDateSError(undefined);
+      setDateEError(undefined);
+      setOptionsError(undefined);
+      setDayStartTimeError(undefined);
+      setDayEndTimeError(undefined);
+
+      router.refresh();
+
+      props.submitCalledByChild(
+        votingSet,
+        maxVotes,
+        votingName,
+        votingDescription,
+        votingDateS,
+        votingDateE,
+        transformOptionsToPlainObject(options),
+        transformCategoriesToPlainObject(categories),
+        dayStartTime,
+        dayEndTime
+      );
+      toast({
+        title: "適用完了…のはず",
+        description: "再読み込みしてご確認ください。",
+      });
+      //setSubmitText("送信完了…のはずです。再読み込みしてご確認ください");
+
+      console.log(props.loadingState);
+    }
+  };
+
   //console.log(categories);
 
   return (
-    <form>
-      <div
-        className="flex items-center"
-        style={{ marginTop: "40px", marginLeft: "30px" }}
-      >
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="votingSetButton"
-            className="data-[state=unchecked]:bg-gray-300"
-            checked={votingSet}
-            onCheckedChange={setVotingSet}
-          />
-          <Label htmlFor="votingSetButton" style={{ marginLeft: "30px" }}>
-            投票
-          </Label>
-        </div>
-        <label
-          style={{ marginLeft: "20px" }}
-          className="text-black dark:text-white text-[15px] leading-none pr-[15px] font-regular text-xs"
+    <>
+      <Toaster />
+      <form>
+        <div
+          className="flex items-center"
+          style={{ marginTop: "40px", marginLeft: "30px" }}
         >
-          無効である限り、票を決して受け付けません。
-        </label>
-      </div>
-
-      <div
-        style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
-      >
-        <Label style={{ marginRight: "20px" }}>投票のタイトル</Label>
-
-        <div>
-          <Input
-            defaultValue={votingName}
-            onChange={handleVotingNameChange}
-            className="dark:border dark:border-[#FFFFFF]"
-          />
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="votingSetButton"
+              className="data-[state=unchecked]:bg-gray-300"
+              checked={votingSet}
+              onCheckedChange={setVotingSet}
+            />
+            <Label
+              htmlFor="votingSetButton"
+              className="text-md w-max block"
+              style={{ marginLeft: "30px", marginBottom: "2px" }}
+            >
+              有効
+            </Label>
+          </div>
+          <label
+            style={{ marginLeft: "20px" }}
+            className="text-black dark:text-white pr-[15px] font-regular text-sm break-keep"
+          >
+            下の設定を反映した投票所を&#8203;開設します。
+          </label>
         </div>
-      </div>
 
-      <div
-        style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
-      >
-        <Label style={{ marginRight: "20px" }}>投票の説明</Label>
+        <div
+          style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
+        >
+          <Label style={{ marginRight: "15px" }} className="text-md">
+            投票のタイトル
+          </Label>
+          <Label className="text-[#EE3333] dark:text-[#DD6666] text-xs">
+            {nameError}
+          </Label>
 
-        <div>
-          <Input
-            defaultValue={votingDescription}
-            onChange={handleVotingDescChange}
-            className="dark:border dark:border-[#FFFFFF]"
-          />
+          <div>
+            <Input
+              defaultValue={votingName}
+              onChange={handleVotingNameChange}
+              className="dark:border dark:border-[#FFFFFF]"
+            />
+          </div>
         </div>
-      </div>
 
-      <div
-        style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
-      >
-        <Label style={{ marginRight: "20px" }}>投票の開始日時</Label>
+        <div
+          style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
+        >
+          <Label style={{ marginRight: "15px" }} className="text-md">
+            投票の説明
+          </Label>
 
-        <div>
-          <DateTimePicker
-            granularity="second"
-            hourCycle={24}
-            label="開始日時"
-            onJsDateChange={(newValue) =>
-              setVotingDateS(newValue.toISOString())
-            }
-            showClearButton={false}
-            defaultValue={
-              votingDateS // making sure this is not null or smth
-                ? toCalendarDateTime(
-                    parseAbsoluteToLocal(votingDateS.replace(" ", "T"))
-                  )
-                : null
-            }
-          />
+          <div>
+            <Input
+              defaultValue={votingDescription}
+              onChange={handleVotingDescChange}
+              className="dark:border dark:border-[#FFFFFF]"
+            />
+          </div>
         </div>
-      </div>
 
-      <div
-        style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
-      >
-        <Label style={{ marginRight: "20px" }}>投票の終了日時</Label>
+        <div
+          style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
+        >
+          <Label style={{ marginRight: "15px" }} className="text-md">
+            票数上限
+          </Label>
+          <Label className="text-[#EE3333] dark:text-[#DD6666] text-xs">
+            {maxVotesError}
+          </Label>
 
-        <div>
-          <DateTimePicker
-            granularity="second"
-            hourCycle={24}
-            label="終了日時"
-            onJsDateChange={(newValue) =>
-              setVotingDateE(newValue.toISOString())
-            }
-            showClearButton={false}
-            defaultValue={
-              votingDateE
-                ? toCalendarDateTime(
-                    parseAbsoluteToLocal(votingDateE.replace(" ", "T"))
-                  ) // not quite sure if this works
-                : null
-            }
-          />
+          <div>
+            <Input
+              defaultValue={maxVotes}
+              type={"number"}
+              min={1}
+              onChange={handleMaxVotesChange}
+              className="dark:border dark:border-[#FFFFFF]"
+            />
+          </div>
         </div>
-      </div>
 
-      <p>{"received vDS is " + props.receivedVGI[0].votingstart}</p>
-      <p>{"votingDateE is " + votingDateE}</p>
+        <div
+          style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
+        >
+          <Label style={{ marginRight: "15px" }} className="text-md">
+            投票解禁日時
+          </Label>
+          <Label className="text-[#EE3333] dark:text-[#DD6666] text-xs">
+            {dateSError}
+          </Label>
 
-      <div
-        style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
-      >
-        <Accordion type="single" collapsible>
-          <AccordionItem value="item-1">
-            <AccordionTrigger>投票先（選択肢・カテゴリ）</AccordionTrigger>
-            <AccordionContent>
-              <ScrollArea className="h-[600px] rounded-md border border-[#888888] dark:border-[#FFFFFF]">
-                {categories.length > 0 ? null : (
-                  <label className="flex grid justify-center items-center bg-[#DDDDDD] dark:bg-[#222222] rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow w-full">
-                    <Dialog
-                      onOpenChange={() => {
-                        resetNewItem();
-                        setNewItemOpenOne(
-                          newItemOpenOne ? undefined : "whenNoCatsPresent"
-                        );
-                      }}
-                      open={newItemOpenOne == "whenNoCatsPresent"}
-                    >
-                      <DialogTrigger
-                        onClick={() => setNewItemOpenOne("whenNoCatsPresent")}
-                        className="" // focus-outline was once used but removed for accessibility
-                      >
-                        <div className="p-3 flex flex-col items-center justify-center space-y-2" />
-                        <BsFillPlusCircleFill
-                          size={40}
-                          className="float-center"
-                        />
-                        <h3 className="text-sm font-semibold invisible">lol</h3>
-                      </DialogTrigger>
-                      <DialogContent
-                        onInteractOutside={(e) => {
-                          e.preventDefault();
-                        }}
-                      >
-                        <DialogHeader className="">
-                          <DialogTitle>選択肢を作成</DialogTitle>
-                          <DialogDescription>
-                            内容は随時変更可能です。
-                          </DialogDescription>
-                        </DialogHeader>
-                        <Separator />
-                        <form className="" onSubmit={handleNewItemSubmit}>
-                          <Label>名前</Label>
-                          <Input
-                            id="itemName"
-                            placeholder="3-B「Mission Possible」..."
-                            style={{ marginBottom: "10px" }}
-                            onChange={handleNewNameChange}
-                          />
-                          <Label>説明</Label>
-                          <Input
-                            id="itemDesc"
-                            placeholder="筑駒を舞台にしたスパイコメディ..."
-                            style={{ marginBottom: "10px" }}
-                            onChange={handleNewDescChange}
-                          />
-                          <Label>カテゴリ</Label>
-                          <Select
-                            onValueChange={setNewItemCatSelection}
-                            defaultValue={"createNew"}
-                          >
-                            <SelectTrigger
-                              className="w-[180px]"
-                              style={{ marginBottom: "10px" }}
-                            >
-                              <SelectValue placeholder="選択..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectGroup>
-                                <SelectItem value="createNew" key="createNew">
-                                  新規作成
-                                </SelectItem>
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                          <div>
-                            {newItemCatSelection == "createNew" ||
-                            !newItemCatSelection ? (
-                              <>
-                                <Label>作成カテゴリ名</Label>
-                                <Input
-                                  id="itemNewCatName"
-                                  placeholder="映画部門..."
-                                  style={{ marginBottom: "10px" }}
-                                  onChange={handleNewNewCatChange}
-                                />
-                              </>
-                            ) : null}
-                          </div>
-                          <div className="flex justify-end items-center">
-                            {newItemError ? (
-                              <Label
-                                className="text-[#EE3333] dark:text-[#DD6666]"
-                                style={{ marginRight: "10px" }}
-                              >
-                                {newItemError}
-                              </Label>
-                            ) : null}
-                            <Button>作成</Button>
-                          </div>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                  </label>
-                )}
-                {categories.map((cat) => (
-                  <section
-                    className="container px-4 md:px-6 lg:px-8 py-2 md:py-3 lg:py-4"
-                    key={cat.ID}
-                  >
-                    <div>
-                      <Label className="text-xl font-bold">{cat.name}</Label>
+          <div>
+            <DateTimePicker
+              granularity="second"
+              hourCycle={24}
+              label="開始日時"
+              onJsDateChange={(newValue) =>
+                setVotingDateS(newValue.toISOString())
+              }
+              showClearButton={false}
+              defaultValue={
+                votingDateS // making sure this is not null or smth
+                  ? toCalendarDateTime(
+                      parseAbsoluteToLocal(votingDateS.replace(" ", "T"))
+                    )
+                  : null
+              }
+            />
+          </div>
+        </div>
+
+        <div
+          style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
+        >
+          <Label style={{ marginRight: "15px" }} className="text-md">
+            投票締切日時
+          </Label>
+          <Label className="text-[#EE3333] dark:text-[#DD6666] text-xs">
+            {dateEError}
+          </Label>
+
+          <div>
+            <DateTimePicker
+              granularity="second"
+              hourCycle={24}
+              label="終了日時"
+              onJsDateChange={(newValue) =>
+                setVotingDateE(newValue.toISOString())
+              }
+              showClearButton={false}
+              defaultValue={
+                votingDateE
+                  ? toCalendarDateTime(
+                      parseAbsoluteToLocal(votingDateE.replace(" ", "T"))
+                    ) // not quite sure if this works
+                  : null
+              }
+            />
+          </div>
+        </div>
+
+        <div
+          style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
+        >
+          <Label style={{ marginRight: "15px" }} className="text-md">
+            各日の投票開始時刻
+          </Label>
+          <Label className="text-[#EE3333] dark:text-[#DD6666] text-xs">
+            {dayStartTimeError}
+          </Label>
+
+          <div>
+            <TimePickerDemo
+              date={new Date(dayStartTime)}
+              setDate={(date) => {
+                setDayStartTime(
+                  new Date(date?.setFullYear(1970, 0, 1) ?? 0).toISOString()
+                );
+              }}
+            />
+            {/* <DateTimePicker
+              granularity="second"
+              hourCycle={24}
+              label="開始時間"
+              onJsDateChange={(newValue) =>
+                setVotingDateE(newValue.toISOString())
+              }
+              showClearButton={false}
+              defaultValue={
+                votingDateE
+                  ? toCalendarDateTime(
+                      parseAbsoluteToLocal(votingDateE.replace(" ", "T"))
+                    ) // not quite sure if this works
+                  : null
+              }
+            /> */}
+          </div>
+        </div>
+
+        <div
+          style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
+        >
+          <Label style={{ marginRight: "15px" }} className="text-md">
+            各日の投票終了時刻
+          </Label>
+          <Label className="text-[#EE3333] dark:text-[#DD6666] text-xs">
+            {dayEndTimeError}
+          </Label>
+
+          <div>
+            <TimePickerDemo
+              date={new Date(dayEndTime)}
+              setDate={(date) => {
+                setDayEndTime(
+                  new Date(date?.setFullYear(1970, 0, 1) ?? 0).toISOString()
+                );
+              }}
+            />
+            {/* <DateTimePicker
+              granularity="second"
+              hourCycle={24}
+              label="開始時間"
+              onJsDateChange={(newValue) =>
+                setVotingDateE(newValue.toISOString())
+              }
+              showClearButton={false}
+              defaultValue={
+                votingDateE
+                  ? toCalendarDateTime(
+                      parseAbsoluteToLocal(votingDateE.replace(" ", "T"))
+                    ) // not quite sure if this works
+                  : null
+              }
+            /> */}
+          </div>
+        </div>
+
+        <div
+          style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
+        >
+          <Accordion type="single" collapsible>
+            <AccordionItem value="item-1">
+              <AccordionTrigger className="text-md">
+                投票先（選択肢・カテゴリ）
+              </AccordionTrigger>
+              <AccordionContent>
+                <ScrollArea className="h-[600px] rounded-md border border-[#888888] dark:border-[#FFFFFF]">
+                  {categories.length > 0 ? null : (
+                    <label className="flex grid justify-center items-center bg-[#DDDDDD] dark:bg-[#222222] rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow w-full">
                       <Dialog
-                        onOpenChange={(e) => {
-                          const initialCatPlace =
-                            cat.orderNo == categories.length - 1
-                              ? "firstPlace"
-                              : categories.find(
-                                  (eachCat: IndivCat) =>
-                                    eachCat.orderNo == cat.orderNo + 1
-                                )?.ID;
-                          resetEditCat(cat.name, initialCatPlace);
-                          setEditCatOpenOne(
-                            editCatOpenOne ? undefined : cat.ID
+                        onOpenChange={() => {
+                          resetNewItem();
+                          setNewItemOpenOne(
+                            newItemOpenOne ? undefined : "whenNoCatsPresent"
                           );
                         }}
-                        open={editCatOpenOne == cat.ID}
+                        open={newItemOpenOne == "whenNoCatsPresent"}
                       >
                         <DialogTrigger
-                          onClick={() => setEditCatOpenOne(cat.ID)}
-                          className="focus:outline-none"
+                          onClick={() => setNewItemOpenOne("whenNoCatsPresent")}
+                          className="" // focus-outline was once used but removed for accessibility
                         >
-                          <Button
-                            variant={"ghost"}
-                            type={"button"}
-                            size={"icon"}
-                          >
-                            <BsSliders
-                              size={18}
-                              style={{ marginLeft: "5px", marginRight: "5px" }}
-                            />
-                          </Button>
+                          <div className="p-3 flex flex-col items-center justify-center space-y-2" />
+                          <BsFillPlusCircleFill
+                            size={40}
+                            className="float-center"
+                          />
+                          <h3 className="text-sm font-semibold invisible">
+                            lol
+                          </h3>
                         </DialogTrigger>
                         <DialogContent
                           onInteractOutside={(e) => {
@@ -751,68 +1025,70 @@ export function Settings(props: {
                           }}
                         >
                           <DialogHeader className="">
-                            <DialogTitle>カテゴリを編集</DialogTitle>
-                            <DialogDescription></DialogDescription>
+                            <DialogTitle>選択肢を作成</DialogTitle>
+                            <DialogDescription>
+                              内容は随時変更可能です。
+                            </DialogDescription>
                           </DialogHeader>
                           <Separator />
-                          <form className="" onSubmit={handleEditCatSubmit}>
-                            <Label>名前</Label>
+                          <form className="" onSubmit={handleNewItemSubmit}>
+                            <Label>団体名</Label>
                             <Input
                               id="itemName"
-                              placeholder="映画部門..."
-                              defaultValue={cat.name}
+                              placeholder="3-B ..."
                               style={{ marginBottom: "10px" }}
-                              onChange={handleEditCatNameChange}
+                              onChange={handleNewNameChange}
                             />
-                            {categories.length == 1 ? null : (
-                              <>
-                                <Label>位置</Label>
-                                <Label
-                                  className="text-xs text-gray-500"
-                                  style={{ marginLeft: "5px" }}
-                                >
-                                  どのカテゴリの前に移動しますか？
-                                </Label>
-                                <Select
-                                  onValueChange={setEditCatPlaceSelection}
-                                  defaultValue={
-                                    cat.orderNo == categories.length - 1
-                                      ? "firstPlace"
-                                      : categories.find(
-                                          (eachCat: IndivCat) =>
-                                            eachCat.orderNo == cat.orderNo + 1
-                                        )?.ID
-                                  }
-                                >
-                                  <SelectTrigger
-                                    className="w-[180px]"
+                            <Label>デコ名</Label>
+                            <Input
+                              id="itemDesc"
+                              placeholder="Mission Possible ..."
+                              style={{ marginBottom: "10px" }}
+                              onChange={handleNewDescChange}
+                            />
+
+                            <Label>カテゴリ</Label>
+                            <Select
+                              onValueChange={setNewItemCatSelection}
+                              defaultValue={"createNew"}
+                            >
+                              <SelectTrigger
+                                className="w-[180px]"
+                                style={{ marginBottom: "10px" }}
+                              >
+                                <SelectValue placeholder="選択..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectItem value="createNew" key="createNew">
+                                    新規作成
+                                  </SelectItem>
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                            <div>
+                              {newItemCatSelection == "createNew" ||
+                              !newItemCatSelection ? (
+                                <>
+                                  <Label>作成カテゴリ名</Label>
+                                  <Input
+                                    id="itemNewCatName"
+                                    placeholder="映画部門..."
                                     style={{ marginBottom: "10px" }}
-                                  >
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectGroup>
-                                      {categories.map((categoryItem: any) =>
-                                        categoryItem.ID != cat.ID ? (
-                                          <SelectItem
-                                            value={categoryItem.ID}
-                                            key={categoryItem.ID}
-                                          >
-                                            {categoryItem.name}
-                                          </SelectItem>
-                                        ) : null
-                                      )}
-                                      <SelectItem
-                                        value="firstPlace"
-                                        key="firstPlace"
-                                      >
-                                        末尾
-                                      </SelectItem>
-                                    </SelectGroup>
-                                  </SelectContent>
-                                </Select>
-                              </>
-                            )}
+                                    onChange={handleNewNewCatChange}
+                                  />
+
+                                  {/*<Label>カテゴリ票数上限</Label>
+                                  <Input
+                                    id="itemNewCatMaxVotes"
+                                    type="number"
+                                    min={1}
+                                    style={{ marginBottom: "10px" }}
+                                    onChange={handleNewNewCatMaxVotesChange}
+                                  />*/}
+                                </>
+                              ) : null}
+                            </div>
                             <div className="flex justify-end items-center">
                               {newItemError ? (
                                 <Label
@@ -822,51 +1098,57 @@ export function Settings(props: {
                                   {newItemError}
                                 </Label>
                               ) : null}
-                              <Button>更新</Button>
+                              <Button>作成</Button>
                             </div>
                           </form>
                         </DialogContent>
                       </Dialog>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {options.map((option) =>
-                        option.catID == cat.ID ? (
-                          <AdminOption
-                            id={option.ID}
-                            catid={option.catID}
-                            name={option.name}
-                            desc={option.description}
-                            order={option.orderNo}
-                            theOptions={options}
-                            theCats={categories}
-                            optionSetter={setOptions}
-                            catSetter={setCategories}
-                            key={option.ID}
-                          />
-                        ) : null
-                      )}
-                      <label className="flex grid justify-center items-center bg-[#DDDDDD] dark:bg-[#222222] rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow w-full">
+                    </label>
+                  )}
+                  {categories.map((cat) => (
+                    <section
+                      className="container px-4 md:px-6 lg:px-8 py-2 md:py-3 lg:py-4"
+                      key={cat.ID}
+                    >
+                      <div>
+                        <Label className="text-xl font-bold">{cat.name}</Label>
                         <Dialog
                           onOpenChange={(e) => {
-                            resetNewItem(cat.ID);
-                            setNewItemOpenOne(
-                              newItemOpenOne ? undefined : cat.ID
+                            const initialCatPlace =
+                              cat.orderNo == categories.length - 1
+                                ? "firstPlace"
+                                : categories.find(
+                                    (eachCat: IndivCat) =>
+                                      eachCat.orderNo == cat.orderNo + 1
+                                  )?.ID;
+                            resetEditCat(
+                              cat.name,
+                              initialCatPlace
+                              /*cat.maxvotes*/
+                            );
+                            setEditCatOpenOne(
+                              editCatOpenOne ? undefined : cat.ID
                             );
                           }}
-                          open={newItemOpenOne == cat.ID}
+                          open={editCatOpenOne == cat.ID}
                         >
                           <DialogTrigger
-                            onClick={() => setNewItemOpenOne(cat.ID)}
+                            onClick={() => setEditCatOpenOne(cat.ID)}
                             className="focus:outline-none"
                           >
-                            <div className="p-3 flex flex-col items-center justify-center space-y-2" />
-                            <BsFillPlusCircleFill
-                              size={40}
-                              className="float-center"
-                            />
-                            <h3 className="text-sm font-semibold invisible">
-                              lol
-                            </h3>
+                            <Button
+                              variant={"ghost"}
+                              type={"button"}
+                              size={"icon"}
+                            >
+                              <BsSliders
+                                size={18}
+                                style={{
+                                  marginLeft: "5px",
+                                  marginRight: "5px",
+                                }}
+                              />
+                            </Button>
                           </DialogTrigger>
                           <DialogContent
                             onInteractOutside={(e) => {
@@ -874,88 +1156,38 @@ export function Settings(props: {
                             }}
                           >
                             <DialogHeader className="">
-                              <DialogTitle>選択肢を作成</DialogTitle>
-                              <DialogDescription>
-                                内容は随時変更可能です。
-                              </DialogDescription>
+                              <DialogTitle>カテゴリを編集</DialogTitle>
+                              <DialogDescription></DialogDescription>
                             </DialogHeader>
                             <Separator />
-                            <form className="" onSubmit={handleNewItemSubmit}>
+                            <form className="" onSubmit={handleEditCatSubmit}>
                               <Label>名前</Label>
                               <Input
                                 id="itemName"
-                                placeholder="3-B「Mission Possible」..."
+                                placeholder="映画部門..."
+                                defaultValue={cat.name}
                                 style={{ marginBottom: "10px" }}
-                                onChange={handleNewNameChange}
+                                onChange={handleEditCatNameChange}
                               />
-                              <Label>説明</Label>
-                              <Input
-                                id="itemDesc"
-                                placeholder="筑駒を舞台にしたスパイコメディ..."
-                                style={{ marginBottom: "10px" }}
-                                onChange={handleNewDescChange}
-                              />
-                              <Label>カテゴリ</Label>
-                              <Select
-                                onValueChange={setNewItemCatSelection}
-                                defaultValue={cat.ID || "createNew"}
-                              >
-                                <SelectTrigger
-                                  className="w-[180px]"
-                                  style={{ marginBottom: "10px" }}
-                                >
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectGroup>
-                                    <SelectItem
-                                      value="createNew"
-                                      key="createNew"
-                                    >
-                                      新規作成
-                                    </SelectItem>
-                                    {categories.map((catItem) => (
-                                      <SelectItem
-                                        value={catItem.ID}
-                                        key={catItem.ID}
-                                      >
-                                        {catItem.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectGroup>
-                                </SelectContent>
-                              </Select>
-                              <div>
-                                {newItemCatSelection == "createNew" ||
-                                !newItemCatSelection ? (
-                                  <>
-                                    <Label>作成カテゴリ名</Label>
-                                    <Input
-                                      id="itemNewCatName"
-                                      placeholder="映画部門..."
-                                      style={{ marginBottom: "10px" }}
-                                      onChange={handleNewNewCatChange}
-                                    />
-                                  </>
-                                ) : null}
-                              </div>
-                              {options.indexOf(
-                                options.find(
-                                  (eachOption) =>
-                                    eachOption.catID == newItemCatSelection
-                                ) || new IndivOption("", "", "", "", 0)
-                              ) == -1 ? null : (
+                              {categories.length == 1 ? null : (
                                 <>
-                                  <Label>カテゴリ内位置</Label>
+                                  <Label>位置</Label>
                                   <Label
                                     className="text-xs text-gray-500"
                                     style={{ marginLeft: "5px" }}
                                   >
-                                    どの選択肢の前に挿入しますか？
+                                    どのカテゴリの前に移動しますか？
                                   </Label>
                                   <Select
-                                    onValueChange={setNewItemPlaceSelection}
-                                    defaultValue={"firstPlace"}
+                                    onValueChange={setEditCatPlaceSelection}
+                                    defaultValue={
+                                      cat.orderNo == categories.length - 1
+                                        ? "firstPlace"
+                                        : categories.find(
+                                            (eachCat: IndivCat) =>
+                                              eachCat.orderNo == cat.orderNo + 1
+                                          )?.ID
+                                    }
                                   >
                                     <SelectTrigger
                                       className="w-[180px]"
@@ -965,14 +1197,13 @@ export function Settings(props: {
                                     </SelectTrigger>
                                     <SelectContent>
                                       <SelectGroup>
-                                        {options.map((optionItem: any) =>
-                                          optionItem.catID ==
-                                          newItemCatSelection ? (
+                                        {categories.map((categoryItem: any) =>
+                                          categoryItem.ID != cat.ID ? (
                                             <SelectItem
-                                              value={optionItem.ID}
-                                              key={optionItem.ID}
+                                              value={categoryItem.ID}
+                                              key={categoryItem.ID}
                                             >
-                                              {optionItem.name}
+                                              {categoryItem.name}
                                             </SelectItem>
                                           ) : null
                                         )}
@@ -987,29 +1218,228 @@ export function Settings(props: {
                                   </Select>
                                 </>
                               )}
+                              {/*<div>
+                                <Label>票数上限</Label>
+                                <Input
+                                  id="itemEditCatMaxVotes"
+                                  type="number"
+                                  defaultValue={cat.maxvotes}
+                                  min={1}
+                                  style={{ marginBottom: "10px" }}
+                                  onChange={handleEditCatMaxVotesChange}
+                                />
+                              </div>*/}
                               <div className="flex justify-end items-center">
-                                {newItemError ? (
+                                {editCatError ? (
                                   <Label
                                     className="text-[#EE3333] dark:text-[#DD6666]"
                                     style={{ marginRight: "10px" }}
                                   >
-                                    {newItemError}
+                                    {editCatError}
                                   </Label>
                                 ) : null}
-                                <Button>作成</Button>
+                                <Button>完了</Button>
                               </div>
                             </form>
                           </DialogContent>
                         </Dialog>
-                      </label>
-                    </div>
-                  </section>
-                ))}
-              </ScrollArea>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-        <AdminConfirm
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {options.map((option) =>
+                          option.catID == cat.ID ? (
+                            <AdminOption
+                              id={option.ID}
+                              catid={option.catID}
+                              name={option.name}
+                              desc={option.description}
+                              order={option.orderNo}
+                              theOptions={options}
+                              theCats={categories}
+                              optionSetter={setOptions}
+                              catSetter={setCategories}
+                              key={option.ID}
+                            />
+                          ) : null
+                        )}
+                        <label className="flex grid justify-center items-center bg-[#DDDDDD] dark:bg-[#222222] rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow w-full">
+                          <Dialog
+                            onOpenChange={(e) => {
+                              resetNewItem(cat.ID);
+                              setNewItemOpenOne(
+                                newItemOpenOne ? undefined : cat.ID
+                              );
+                            }}
+                            open={newItemOpenOne == cat.ID}
+                          >
+                            <DialogTrigger
+                              onClick={() => setNewItemOpenOne(cat.ID)}
+                              // className="focus:outline-none"
+                            >
+                              <div className="p-3 flex flex-col items-center justify-center space-y-2" />
+                              <BsFillPlusCircleFill
+                                size={40}
+                                className="float-center"
+                              />
+                              <h3 className="text-sm font-semibold invisible">
+                                lol
+                              </h3>
+                            </DialogTrigger>
+                            <DialogContent
+                              onInteractOutside={(e) => {
+                                e.preventDefault();
+                              }}
+                            >
+                              <DialogHeader className="">
+                                <DialogTitle>選択肢を作成</DialogTitle>
+                                <DialogDescription>
+                                  内容は随時変更可能です。
+                                </DialogDescription>
+                              </DialogHeader>
+                              <Separator />
+                              <form className="" onSubmit={handleNewItemSubmit}>
+                                <Label>団体名</Label>
+                                <Input
+                                  id="itemName"
+                                  placeholder="3-B ..."
+                                  style={{ marginBottom: "10px" }}
+                                  onChange={handleNewNameChange}
+                                />
+                                <Label>デコ名</Label>
+                                <Input
+                                  id="itemDesc"
+                                  placeholder="Mission Possible ..."
+                                  style={{ marginBottom: "10px" }}
+                                  onChange={handleNewDescChange}
+                                />
+                                <Label>カテゴリ</Label>
+                                <Select
+                                  onValueChange={setNewItemCatSelection}
+                                  defaultValue={cat.ID || "createNew"}
+                                >
+                                  <SelectTrigger
+                                    className="w-[180px]"
+                                    style={{ marginBottom: "10px" }}
+                                  >
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectGroup>
+                                      <SelectItem
+                                        value="createNew"
+                                        key="createNew"
+                                      >
+                                        新規作成
+                                      </SelectItem>
+                                      {categories.map((catItem) => (
+                                        <SelectItem
+                                          value={catItem.ID}
+                                          key={catItem.ID}
+                                        >
+                                          {catItem.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                                <div>
+                                  {newItemCatSelection == "createNew" ||
+                                  !newItemCatSelection ? (
+                                    <>
+                                      <Label>作成カテゴリ名</Label>
+                                      <Input
+                                        id="itemNewCatName"
+                                        placeholder="映画部門..."
+                                        style={{ marginBottom: "10px" }}
+                                        onChange={handleNewNewCatChange}
+                                      />
+                                      {/*
+                                      <Label>カテゴリ票数上限</Label>
+                                      <Input
+                                        id="itemNewCatMaxVotes"
+                                        type="number"
+                                        min={1}
+                                        style={{ marginBottom: "10px" }}
+                                        onChange={handleNewNewCatMaxVotesChange}
+                                      />*/}
+                                    </>
+                                  ) : null}
+                                </div>
+                                {options.indexOf(
+                                  options.find(
+                                    (eachOption) =>
+                                      eachOption.catID == newItemCatSelection
+                                  ) || new IndivOption("", "", "", "", 0)
+                                ) == -1 ? null : (
+                                  <>
+                                    <Label>カテゴリ内位置</Label>
+                                    <Label
+                                      className="text-xs text-gray-500"
+                                      style={{ marginLeft: "5px" }}
+                                    >
+                                      どの選択肢の前に挿入しますか？
+                                    </Label>
+                                    <Select
+                                      onValueChange={setNewItemPlaceSelection}
+                                      defaultValue={"firstPlace"}
+                                    >
+                                      <SelectTrigger
+                                        className="w-[180px]"
+                                        style={{ marginBottom: "10px" }}
+                                      >
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectGroup>
+                                          {options.map((optionItem: any) =>
+                                            optionItem.catID ==
+                                            newItemCatSelection ? (
+                                              <SelectItem
+                                                value={optionItem.ID}
+                                                key={optionItem.ID}
+                                              >
+                                                {optionItem.name}
+                                              </SelectItem>
+                                            ) : null
+                                          )}
+                                          <SelectItem
+                                            value="firstPlace"
+                                            key="firstPlace"
+                                          >
+                                            末尾
+                                          </SelectItem>
+                                        </SelectGroup>
+                                      </SelectContent>
+                                    </Select>
+                                  </>
+                                )}
+                                <div className="flex justify-end items-center">
+                                  {newItemError ? (
+                                    <Label
+                                      className="text-[#EE3333] dark:text-[#DD6666]"
+                                      style={{ marginRight: "10px" }}
+                                    >
+                                      {newItemError}
+                                    </Label>
+                                  ) : null}
+                                  <Button>作成</Button>
+                                </div>
+                              </form>
+                            </DialogContent>
+                          </Dialog>
+                        </label>
+                      </div>
+                    </section>
+                  ))}
+                </ScrollArea>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+          <Label className="text-[#EE3333] dark:text-[#DD6666] text-xs">
+            {optionsError}
+          </Label>
+
+          {/*<AdminConfirm
           votingSet={votingSet}
           votingDateS={votingDateS}
           votingDateE={votingDateE}
@@ -1017,8 +1447,31 @@ export function Settings(props: {
           votingDescription={votingDescription}
           options={options}
           categories={categories}
-        />
-      </div>
-    </form>
+              />*/}
+        </div>
+
+        <section className="px-4 md:px-6 py-8 pb-12 md:pb-16 lg:pb-20">
+          <div className="flex justify-center">
+            <Button
+              disabled={props.loadingState == 1}
+              className="px-6 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-[#F18643] to-[#F64C6B] text-white dark:text-white hover:from-[#F64C6B] hover:to-[#F18643] transition-colors"
+              variant="default"
+              type="button"
+              onClick={requestSubmit}
+            >
+              {props.loadingState == 1 ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              適用
+            </Button>
+          </div>{" "}
+          <div className="flex justify-center">
+            {submitText ? (
+              <Label style={{ marginTop: "10px" }}>{submitText}</Label>
+            ) : null}
+          </div>
+        </section>
+      </form>
+    </>
   );
 }

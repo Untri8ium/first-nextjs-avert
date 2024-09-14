@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 
-const { blackA } = require('@radix-ui/colors');
+const { blackA } = require("@radix-ui/colors");
 
 /* @type {import('tailwindcss').Config} 
 module.exports = {
@@ -44,6 +44,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 };
 export default config;

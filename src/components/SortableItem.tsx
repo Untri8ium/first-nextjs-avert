@@ -100,7 +100,7 @@ export function SortableItem(props: { id: any }) {
                 <AlertDialogHeader>
                   <AlertDialogTitle>危険！</AlertDialogTitle>
                   <AlertDialogDescription>
-                    この選択肢の全データが削除されます。
+                    適用ボタンを押してからは、この選択肢は投票画面からも、統計画面からも永久に削除されます。
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

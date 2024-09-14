@@ -8,23 +8,11 @@
   --background-end-rgb: 255, 255, 255;
 }
 
-.option-tile input[type="checkbox"]:checked + div {
-  background-color: #b4ddaa;
-  border-radius: 0.5rem;
-  border: 1px solid #55aa55;
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
-  }
-
-  .option-tile input[type="checkbox"]:checked + div {
-    background-color: #395530;
-    border-radius: 0.5rem;
-    border: 1px solid #55aa55;
   }
 }
 
@@ -44,8 +32,132 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+@keyframes glow-red {
+  0% {
+    box-shadow: 0 0 15px rgba(200, 50, 40, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(200, 50, 40, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(200, 50, 40, 0.5);
+  }
+}
+
+@keyframes glow-green {
+  0% {
+    box-shadow: 0 0 15px rgba(80, 200, 70, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(80, 200, 70, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(80, 200, 70, 0.5);
+  }
+}
+
+@keyframes flash-green {
+  0%,
+  100% {
+    background-color: inherit; /* Default background color */
+  }
+  50% {
+    background-color: #84e095; /* Flash color */
+  }
+}
+
+@keyframes flash-red {
+  0%,
+  100% {
+    background-color: inherit; /* Default background color */
+  }
+  50% {
+    background-color: #eea494; /* Flash color */
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  @keyframes flash-green {
+    0%,
+    100% {
+      background-color: inherit; /* Default background color */
+    }
+    50% {
+      background-color: #449955; /* Flash color */
+    }
+  }
+
+  @keyframes flash-red {
+    0%,
+    100% {
+      background-color: inherit; /* Default background color */
+    }
+    50% {
+      background-color: #aa4440; /* Flash color */
+    }
+  }
+}
+
+.flash-up {
+  animation: flash-green 0.5s steps(1, end) 3; /* 1.5s = 0.5s * 3 repeats */
+}
+
+.flash-down {
+  animation: flash-red 0.5s steps(1, end) 3; /* 1.5s = 0.5s * 3 repeats */
+}
+
+@layer base {
+  :root {
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .border-glow-red {
+    @apply border-2 border-[#e04030];
+    border-radius: 0.5rem; /* Adjust as needed */
+    animation: glow-red 1.5s infinite linear;
+    padding: 1rem; /* Adjust padding as needed */
+  }
+
+  .border-dead {
+    @apply border-2 border-[#888888];
+    border-radius: 0.5rem; /* Adjust as needed */
+    /* animation: glow-red 1.5s infinite linear; */
+    padding: 1rem; /* Adjust padding as needed */
+  }
+
+  .border-glow-red-pn {
+    @apply border-2 border-[#e04030];
+    border-radius: 0.5rem; /* Adjust as needed */
+    animation: glow-red 1.5s infinite linear;
+  }
+
+  .border-dead-pn {
+    @apply border-2 border-[#888888];
+    border-radius: 0.5rem; /* Adjust as needed */
+    /* animation: glow-red 1.5s infinite linear; */
+  }
+
+  .border-glow-green {
+    @apply border-2 border-[#77dd60];
+    border-radius: 0.5rem; /* Adjust as needed */
+    animation: glow-green 1.5s infinite linear;
   }
 }

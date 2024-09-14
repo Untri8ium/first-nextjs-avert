@@ -1,14 +1,183 @@
 import Image from "next/image";
-import { VotingCore, Tile } from "@/components/component/voting-core";
+// import { VotingCore, Tile } from "@/components/component/voting-core";
 import { TopArea } from "@/components/component/top-area";
 import { headers } from "next/headers";
 import { sql } from "@vercel/postgres";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+import dynamic from "next/dynamic";
+const VotingCore = dynamic(() => import("@/components/component/voting-core"), {
+  ssr: false,
+});
+
+export default async function Home() {
   const header = headers();
   const ip = (header.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];
 
-  const tileList: Tile[] = [
+  async function loadVGI() {
+    try {
+      var result = await sql`
+        CREATE TABLE IF NOT EXISTS votinggeneralinfo (votingset boolean, votingstart text, 
+            votingend text, maxvotes smallint, name text, description text, daystarttime text, dayendtime text, existence boolean UNIQUE
+        );`;
+      await sql`
+        INSERT INTO votinggeneralinfo VALUES (false, null, null, null, null, null, null, null, true) ON CONFLICT ON CONSTRAINT votinggeneralinfo_existence_key DO NOTHING;`;
+
+      const { rows } = await sql`
+        SELECT * FROM votinggeneralinfo;`;
+
+      console.log("<<<");
+      console.log(rows);
+
+      return rows;
+
+      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
+      // in the option reorder menu, list all the items flatly but color each of them with its category theme color
+    } catch (error) {
+      console.log("Uh oh! loadVGI failed!");
+      console.log(error);
+    }
+  }
+
+  async function loadOPTS() {
+    try {
+      var result =
+        await sql`CREATE TABLE IF NOT EXISTS votingoptions (id text, categoryid text, name text, 
+            description text, orderno smallint
+        );`;
+
+      const { rows } = await sql`
+        SELECT * FROM votingoptions;`;
+
+      return rows;
+
+      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
+      // in the option reorder menu, list all the items flatly but color each of them with its category theme color
+    } catch (error) {
+      console.log("Uh oh! loadOPTS failed!");
+      //console.log(error);
+    }
+  }
+
+  async function loadCATS() {
+    try {
+      var result =
+        await sql`CREATE TABLE IF NOT EXISTS categories (id text, name text, orderno smallint);`;
+
+      const { rows } = await sql`
+        SELECT * FROM categories;`;
+
+      return rows;
+
+      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
+      // in the option reorder menu, list all the items flatly but color each of them with its category theme color
+    } catch (error) {
+      console.log("Uh oh! loadCATS failed!");
+      //console.log(error);
+    }
+  }
+
+  async function loadVOTS() {
+    try {
+      var result =
+        await sql`CREATE TABLE IF NOT EXISTS votes (id text, votetime text, voteoption text, entrycount smallint, ip text);`;
+
+      const { rows } = await sql`
+        SELECT * FROM votes;`;
+
+      return rows;
+
+      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
+      // in the option reorder menu, list all the items flatly but color each of them with its category theme color
+    } catch (error) {
+      console.log("Uh oh! loadVOTS failed!");
+      //console.log(error);
+    }
+  }
+
+  async function loadVOTX() {
+    try {
+      var result =
+        await sql`CREATE TABLE IF NOT EXISTS votesextra (id text, votetime text, qid text, qanswer varchar(65535), entrycount smallint, ip text);`; // what
+
+      const { rows } = await sql`
+        SELECT * FROM votes;`;
+
+      return rows;
+
+      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
+      // in the option reorder menu, list all the items flatly but color each of them with its category theme color
+    } catch (error) {
+      console.log("Uh oh! loadVOTX failed!");
+      //console.log(error);
+    }
+  }
+
+  async function loadEXQS() {
+    try {
+      var result =
+        await sql`CREATE TABLE IF NOT EXISTS extraquestions (id text, name text, maxvotes smallint, orderno smallint);`;
+
+      const { rows } = await sql`
+        SELECT * FROM extraquestions;`;
+
+      console.log("rows" + rows + "rowsEND");
+      return rows;
+
+      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
+      // in the option reorder menu, list all the items flatly but color each of them with its category theme color
+    } catch (error) {
+      console.log("Uh oh! EXQS failed!");
+      //console.log(error);
+    }
+  }
+
+  async function loadEXOP() {
+    try {
+      var result =
+        await sql`CREATE TABLE IF NOT EXISTS extraoptions (id text, qid text, name text, orderno smallint);`;
+
+      const { rows } = await sql`
+        SELECT * FROM extraoptions;`;
+
+      return rows;
+
+      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
+      // in the option reorder menu, list all the items flatly but color each of them with its category theme color
+    } catch (error) {
+      console.log("Uh oh! EXOP failed!");
+      //console.log(error);
+    }
+  }
+
+  const loadV = loadVGI();
+  const vgiAns = await loadV;
+
+  const loadO = loadOPTS();
+  const optsAns = await loadO;
+
+  const loadC = loadCATS();
+  const catsAns = await loadC;
+
+  const loadVO = loadVOTS();
+  const votsAns = await loadVO;
+
+  const loadVX = loadVOTX();
+  const votxAns = await loadVX;
+
+  const loadXQ = loadEXQS();
+  const exqsAns = await loadXQ;
+
+  const loadXO = loadEXOP();
+  const exopAns = await loadXO;
+
+  var chkAns = undefined;
+
+  if (!vgiAns![0].votingset) {
+    redirect("/error-vote?e=cl");
+  }
+
+  /*const tileList: Tile[] = [
     {
       id: "firstone",
       name: ip,
@@ -19,17 +188,67 @@ export default function Home() {
       name: "あいうえお「かきくけこ」さしすせそ！たちつてと",
       description: "あいうえおかきくけこさしすせそたちつてと",
     },
-  ];
+  ];*/
+
+  // console.log("<<<" + vgiAns![0] + ">>>");
+
+  // async function handleCheckTop() {
+  // "use server";
+
+  // async function checkIfStillVotable() {
+  //   try {
+  //     await sql`SELECT * FROM votinggeneralinfo;`;
+  //     const { rows } = await sql`
+  //   SELECT * FROM votinggeneralinfo;`;
+  //     return rows;
+  //   } catch (error) {
+  //     console.log("Uh oh! checkIfStillVotable failed!");
+  //     console.log(error);
+  //     return null;
+  //   }
+  // }
+
+  // const loadCH = checkIfStillVotable();
+
+  // chkAns = await loadCH;
+  // }
+
+  /*async function handleVoteSubmitTop(
+    votingSet: boolean,
+    votingName: string,
+    votingDescription: string,
+    votingDateS: string,
+    votingDateE: string,
+    options: any,
+    categories: any
+  ) {
+    "use server";
+  }*/
 
   return (
     <main>
-      <TopArea
-        title="鯛獲るタイトル"
-        description="学生の本文は勉強なり。"
-        colorFrom="from-[#6386F1]"
-        colorTo="to-[#A05CF6]"
-      />
-      <VotingCore list={tileList} />
+      {vgiAns![0].votingset ? (
+        <>
+          <TopArea
+            title={vgiAns![0].name}
+            description={vgiAns![0].description}
+            colorFrom="from-[#6386F1]"
+            colorTo="to-[#A05CF6]"
+          />
+          <VotingCore
+            receivedVGI={vgiAns}
+            receivedOPTS={optsAns}
+            receivedCATS={catsAns}
+            receivedVOTX={votxAns}
+            receivedEXQS={exqsAns}
+            receivedEXOP={exopAns}
+            //receivedVOTS={votsAns}
+            // checkCalledByChild={handleCheckTop}
+            //submitCalledByChild={handleVoteSubmitTop}
+            // checkAns={chkAns}
+          />
+        </>
+      ) : null}
     </main>
   );
 }

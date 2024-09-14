@@ -2,11 +2,9 @@ import { headers } from "next/headers";
 import { QueryResult, QueryResultRow, sql } from "@vercel/postgres";
 
 import Image from "next/image";
-// import VotingCore from "@/components/component/voting-core";
+// import { VotingCore, Tile } from "@/components/component/voting-core";
 import { TopArea } from "@/components/component/top-area";
 import { Settings } from "@/components/component/settings";
-
-import { Skeleton } from "@/components/ui/skeleton";
 
 import React, {
   createContext,
@@ -14,11 +12,191 @@ import React, {
   useState,
   FC,
   ReactNode,
-  Suspense,
 } from "react";
+import { Stats } from "@/components/component/stats";
+
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import { Label } from "@/components/ui/label";
+
+export const experimental_ppr = true;
 
 export default async function Home() {
-  var loading = 0;
+  class IndivOption {
+    ID: string;
+    catID: string;
+    name: string;
+    description: string;
+    orderNo: number;
+
+    constructor(
+      ID: string,
+      catID: string,
+      name: string,
+      description: string,
+      orderNo: number
+    ) {
+      this.ID = ID;
+      this.catID = catID;
+      this.name = name;
+      this.description = description;
+      this.orderNo = orderNo;
+    }
+  }
+
+  class IndivCat {
+    ID: string;
+    name: string;
+    maxvotes: number;
+    orderNo: number;
+
+    constructor(ID: string, name: string, maxvotes: number, orderNo: number) {
+      this.ID = ID;
+      this.name = name;
+      this.maxvotes = maxvotes;
+      this.orderNo = orderNo;
+    }
+  }
+
+  class IndivExtraQuestion {
+    ID: string;
+    name: string;
+    maxVotes: number;
+    orderNo: number;
+
+    constructor(ID: string, name: string, maxVotes: number, orderNo: number) {
+      this.ID = ID;
+      this.name = name;
+      this.maxVotes = maxVotes;
+      this.orderNo = orderNo;
+    }
+  }
+
+  class IndivExtraOption {
+    ID: string;
+    QID: string;
+    name: string;
+    orderNo: number;
+
+    constructor(ID: string, QID: string, name: string, orderNo: number) {
+      this.ID = ID;
+      this.QID = QID;
+      this.name = name;
+      this.orderNo = orderNo;
+    }
+  }
+
+  function sortOptionsCore(a: IndivOption, b: IndivOption) {
+    return a.orderNo - b.orderNo;
+  }
+  function sortOptions(optionArray: IndivOption[]): IndivOption[] {
+    optionArray
+      .sort(sortOptionsCore)
+      .forEach((option, index) => (option.orderNo = index));
+    return optionArray;
+  }
+
+  function sortCatsCore(a: IndivCat, b: IndivCat) {
+    return a.orderNo - b.orderNo;
+  }
+  function sortCats(catArray: IndivCat[]): IndivCat[] {
+    catArray.sort(sortCatsCore).forEach((cat, index) => (cat.orderNo = index));
+    return catArray;
+  }
+
+  function renumberOptions(optionArray: IndivOption[]): IndivOption[] {
+    let arrayToReturn: IndivOption[] = [];
+    optionArray.map((option, index) =>
+      arrayToReturn.push(
+        new IndivOption(
+          option.ID,
+          option.catID,
+          option.name,
+          option.description,
+          index
+        )
+      )
+    );
+    return arrayToReturn;
+  }
+
+  function renumberCats(catArray: IndivCat[]): IndivCat[] {
+    let arrayToReturn: IndivCat[] = [];
+    catArray.map((cat, index) =>
+      arrayToReturn.push(new IndivCat(cat.ID, cat.name, cat.maxvotes, index))
+    );
+    return arrayToReturn;
+  }
+
+  const transformPlainObjectToOptions = (obj: QueryResultRow[]) => {
+    var listToReturn: IndivOption[] = [];
+    obj.forEach((element) => {
+      listToReturn.push(
+        new IndivOption(
+          element.id,
+          element.categoryid,
+          element.name,
+          element.description,
+          element.orderno
+        )
+      );
+    });
+    return listToReturn;
+  };
+
+  const transformPlainObjectToCategories = (obj: QueryResultRow[]) => {
+    var listToReturn: IndivCat[] = [];
+    obj.forEach((element) => {
+      listToReturn.push(
+        new IndivCat(
+          element.id,
+          element.name,
+          element.maxvotes,
+          element.orderno
+        )
+      );
+    });
+    return listToReturn;
+  };
+
+  const transformPlainObjectToExtraQuestions = (obj: QueryResultRow[]) => {
+    var listToReturn: IndivExtraQuestion[] = [];
+    obj.forEach((element) => {
+      listToReturn.push(
+        new IndivExtraQuestion(
+          element.id,
+          element.name,
+          element.maxvotes,
+          element.orderno
+        )
+      );
+    });
+    return listToReturn;
+  };
+
+  const transformPlainObjectToExtraOptions = (obj: QueryResultRow[]) => {
+    var listToReturn: IndivExtraOption[] = [];
+    obj.forEach((element) => {
+      listToReturn.push(
+        new IndivExtraOption(
+          element.id,
+          element.qid,
+          element.name,
+          //element.maxvotes,
+          element.orderno
+        )
+      );
+    });
+    return listToReturn;
+  };
 
   const header = headers();
   const ip = (header.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];
@@ -34,9 +212,6 @@ export default async function Home() {
 
       const { rows } = await sql`
         SELECT * FROM votinggeneralinfo;`;
-
-      console.log("///");
-      console.log(rows);
 
       return rows;
 
@@ -179,75 +354,47 @@ export default async function Home() {
   const loadXO = loadEXOP();
   const exopAns = await loadXO;
 
+  // console.log(votsAns);
+
   console.log(vgiAns && vgiAns[0]?.votingset);
   //console.log(optsAns && optsAns[0]?.aaa);
   //console.log(catsAns && catsAns[0]?.bbb);
 
-  async function handleSubmitTop(
-    votingSet: boolean,
-    maxvotes: number,
-    votingName: string,
-    votingDescription: string,
-    votingDateS: string,
-    votingDateE: string,
-    options: any,
-    categories: any,
-    dayStartTime: string,
-    dayEndTime: string
-    // extraquestions: any
-  ) {
-    "use server";
+  const handleActionTop = (arg: any) => {
+    console.log(`Got a weird one: ${arg}`);
+  };
 
-    //loading = 1;
+  var data = "INIT";
 
-    async function actuallySubmit() {
-      try {
-        await sql`INSERT INTO votinggeneralinfo VALUES (${votingSet}, ${votingDateS}, ${votingDateE}, 
-          ${maxvotes}, ${votingName}, ${votingDescription}, ${dayStartTime}, ${dayEndTime}, true) 
-          ON CONFLICT ON CONSTRAINT votinggeneralinfo_existence_key DO UPDATE SET "votingset" = ${votingSet}, 
-          "votingstart" = ${votingDateS}, "votingend" = ${votingDateE}, "maxvotes" = ${maxvotes}, 
-          "name" = ${votingName}, "description" = ${votingDescription}, "daystarttime" = ${dayStartTime}, "dayendtime" = ${dayEndTime}, "existence" = true;`;
-        await sql`DELETE FROM votingoptions;`;
-        await sql`DELETE FROM categories;`;
-        for (const option of options) {
-          await sql`INSERT INTO votingoptions VALUES (${option.ID}, ${option.catID}, ${option.name}, 
-            ${option.description}, ${option.orderNo});`;
-        }
-        for (const category of categories) {
-          await sql`INSERT INTO categories VALUES (${category.ID}, ${category.name},
-            ${category.orderNo});`;
-        }
-        return 0;
-      } catch (error) {
-        console.log("Uh oh! actuallySubmit failed!");
-        console.log(error);
-        return 2;
-      }
-    }
+  // const upTest = () => {
+  //   data = Date.now().toString();
+  //   // console.log(data);
+  // };
 
-    const loadACTS = actuallySubmit();
-    //loading = await loadACTS;
-  }
+  // setInterval(upTest, 1000);
 
   return (
     <main>
-      <TopArea
-        title="管理者パネル"
-        description="「適用」を押すまで確定されません。"
-        colorFrom="from-[#F18643]"
-        colorTo="to-[#F64C6B]"
-      />
-      <Suspense>
-        <Settings
-          receivedVGI={vgiAns}
-          receivedOPTS={optsAns}
-          receivedCATS={catsAns}
-          receivedVOTS={votsAns}
-          receivedEXQS={exqsAns}
-          submitCalledByChild={handleSubmitTop}
-          loadingState={0}
-        />
-      </Suspense>
+      {vgiAns && vgiAns[0]?.votingset ? (
+        <>
+          <TopArea
+            title="集計パネル"
+            description="自動で更新されます。"
+            colorFrom="from-[#F1A335]"
+            colorTo="to-[#F35928]"
+          />
+          <Stats
+            receivedVGI={vgiAns}
+            receivedOPTS={optsAns}
+            receivedCATS={catsAns}
+            receivedVOTS={votsAns}
+            receivedVOTX={votxAns}
+            receivedEXQS={exqsAns}
+            receivedEXOP={exopAns}
+            dateData={data}
+          />
+        </>
+      ) : null}
     </main>
   );
 }

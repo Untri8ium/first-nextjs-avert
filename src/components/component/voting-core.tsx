@@ -25,9 +25,44 @@ To read more about using these font, please visit the Next.js documentation:
 **/
 "use client";
 import { Button } from "@/components/ui/button";
-import { JSX, SVGProps, useState } from "react";
-import { Toaster } from "@/components/ui/sonner";
-import { toast } from "sonner";
+import { JSX, SVGProps, useState, useMemo, useEffect } from "react";
+
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
+
+import { Label } from "@/components/ui/label";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+import { QueryResult, QueryResultRow, sql } from "@vercel/postgres";
+
+import { useRouter } from "next/navigation";
+
+import { Checkbox } from "@/components/ui/checkbox";
+
+import Image from "next/image";
+import { Check } from "lucide-react";
+
+import { ClientJS } from "clientjs";
+// import getBrowserFingerprint from "get-browser-fingerprint";
+import { getEnabledCategories } from "trace_events";
+
+import { detectIncognito } from "detectincognitojs";
+
+import ReactMarkdown from "react-markdown";
+
+import MarkdownRenderer from "./markdown-renderer";
+import styles from "../styles/MarkdownContainer.module.css";
+
 /*import { makeIPInspector } from 'next-fortress/ip'
 
 export const middleware = makeIPInspector('125.103.20.82', {
@@ -35,28 +70,203 @@ export const middleware = makeIPInspector('125.103.20.82', {
   destination: '/this-page-probably-does-not-exist'
 })*/
 
-export type Tile = {
-  id: string;
-  name: string;
-  description: string;
-};
+// export type Tile = {
+//   id: string;
+//   name: string;
+//   description: string;
+// };
 
-type Props = {
-  list: Tile[];
-};
+export default function VotingCore(props: {
+  receivedVGI: any;
+  receivedOPTS: any;
+  receivedCATS: any;
+  receivedVOTX: any;
+  receivedEXQS: any;
+  receivedEXOP: any;
+  //receivedVOTS: any;
+  //list: Tile[];
+  // checkCalledByChild: any;
+  //submitCalledByChild: any;
+  // checkAns: any;
+}) {
+  class IndivExtraQuestion {
+    ID: string;
+    name: string;
+    maxVotes: number;
+    orderNo: number;
 
-export function VotingCore(props: Props) {
+    constructor(ID: string, name: string, maxVotes: number, orderNo: number) {
+      this.ID = ID;
+      this.name = name;
+      this.maxVotes = maxVotes;
+      this.orderNo = orderNo;
+    }
+  }
+
+  class IndivExtraOption {
+    ID: string;
+    QID: string;
+    name: string;
+    orderNo: number;
+
+    constructor(ID: string, QID: string, name: string, orderNo: number) {
+      this.ID = ID;
+      this.QID = QID;
+      this.name = name;
+      this.orderNo = orderNo;
+    }
+  }
+
+  class IndivOption {
+    ID: string;
+    catID: string;
+    name: string;
+    description: string;
+    orderNo: number;
+
+    constructor(
+      ID: string,
+      catID: string,
+      name: string,
+      description: string,
+      orderNo: number
+    ) {
+      this.ID = ID;
+      this.catID = catID;
+      this.name = name;
+      this.description = description;
+      this.orderNo = orderNo;
+    }
+  }
+
+  class IndivCat {
+    ID: string;
+    name: string;
+    //maxvotes: number;
+    orderNo: number;
+
+    constructor(
+      ID: string,
+      name: string,
+      /*maxvotes: number,*/ orderNo: number
+    ) {
+      this.ID = ID;
+      this.name = name;
+      //this.maxvotes = maxvotes;
+      this.orderNo = orderNo;
+    }
+  }
+
+  async function digestMessage(message: string) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    const hash = await crypto.subtle.digest("SHA-256", data);
+    return hash;
+  }
+
+  // var rtcFPbase = "";
+  // rtcFPbase.toString();
+  // rtcFPbase += DetectRTC.hasWebcam.toString();
+  // rtcFPbase += DetectRTC.hasMicrophone.toString(); // (has webcam device!)
+  // rtcFPbase += DetectRTC.hasSpeakers.toString(); // (has microphone device!)
+  // rtcFPbase += DetectRTC.isScreenCapturingSupported.toString(); // (has speakers!)
+  // rtcFPbase += DetectRTC.isSctpDataChannelsSupported.toString(); // Chrome, Firefox, Opera, Edge and Android
+  // rtcFPbase += DetectRTC.isRtpDataChannelsSupported.toString();
+  // rtcFPbase += DetectRTC.isAudioContextSupported.toString();
+  // rtcFPbase += DetectRTC.isWebRTCSupported.toString();
+  // rtcFPbase += DetectRTC.isDesktopCapturingSupported.toString();
+  // rtcFPbase += DetectRTC.isMobileDevice.toString();
+  // rtcFPbase += DetectRTC.isWebSocketsSupported.toString();
+  // rtcFPbase += DetectRTC.isWebSocketsBlocked.toString();
+  // rtcFPbase +=
+  //   // DetectRTC.checkWebSocketsSupport(callback).toString(); rtcFPbase +=
+
+  //   DetectRTC.isWebsiteHasWebcamPermissions.toString();
+  // rtcFPbase += DetectRTC.isWebsiteHasMicrophonePermissions.toString(); // getUserMedia allowed for HTTPs domain in Chrome?
+  // rtcFPbase += DetectRTC.audioInputDevices.toString(); // getUserMedia allowed for HTTPs domain in Chrome?
+  // rtcFPbase += DetectRTC.audioOutputDevices.toString(); // microphones
+  // rtcFPbase += DetectRTC.videoInputDevices.toString(); // speakers
+  // rtcFPbase += DetectRTC.osName.toString(); // cameras
+  // rtcFPbase += DetectRTC.osVersion.toString();
+  // rtcFPbase +=
+  //   DetectRTC.browser.name.toString();
+  // rtcFPbase += DetectRTC.browser.version.toString();
+  // rtcFPbase += DetectRTC.browser.isChrome.toString();
+  // rtcFPbase += DetectRTC.browser.isFirefox.toString();
+  // rtcFPbase += DetectRTC.browser.isOpera.toString();
+  // rtcFPbase += DetectRTC.browser.isIE.toString();
+  // rtcFPbase += DetectRTC.browser.isSafari.toString();
+  // rtcFPbase += DetectRTC.browser.isEdge.toString();
+  // rtcFPbase +=
+  //   // DetectRTC.browser.isPrivateBrowsing .toString(); rtcFPbase +=  // incognito or private modes
+  //   DetectRTC.isCanvasSupportsStreamCapturing.toString();
+  // rtcFPbase += DetectRTC.isVideoSupportsStreamCapturing.toString();
+  // console.log(JSON.stringify(DetectRTC));
+
+  // console.log(
+  //   (
+  //     DetectRTC.hasWebcam + // (has webcam device!)
+  //       DetectRTC.hasMicrophone + // (has microphone device!)
+  //       DetectRTC.hasSpeakers + // (has speakers!)
+  //       DetectRTC.isScreenCapturingSupported + // Chrome, Firefox, Opera, Edge and Android
+  //       DetectRTC.isSctpDataChannelsSupported +
+  //       DetectRTC.isRtpDataChannelsSupported +
+  //       DetectRTC.isAudioContextSupported +
+  //       DetectRTC.isWebRTCSupported +
+  //       DetectRTC.isDesktopCapturingSupported +
+  //       DetectRTC.isMobileDevice +
+  //       DetectRTC.isWebSocketsSupported +
+  //       DetectRTC.isWebSocketsBlocked +
+  //       // DetectRTC.checkWebSocketsSupport(callback)+
+
+  //       DetectRTC.isWebsiteHasWebcamPermissions + // getUserMedia allowed for HTTPs domain in Chrome?
+  //       DetectRTC.isWebsiteHasMicrophonePermissions + // getUserMedia allowed for HTTPs domain in Chrome?
+  //       DetectRTC.audioInputDevices + // microphones
+  //       DetectRTC.audioOutputDevices + // speakers
+  //       DetectRTC.videoInputDevices + // cameras
+  //       DetectRTC.osName +
+  //       DetectRTC.osVersion +
+  //       DetectRTC.browser.name ===
+  //       "Edge" ||
+  //     "Chrome" ||
+  //     "Firefox" +
+  //       DetectRTC.browser.version +
+  //       DetectRTC.browser.isChrome +
+  //       DetectRTC.browser.isFirefox +
+  //       DetectRTC.browser.isOpera +
+  //       DetectRTC.browser.isIE +
+  //       DetectRTC.browser.isSafari +
+  //       DetectRTC.browser.isEdge +
+  //       // DetectRTC.browser.isPrivateBrowsing + // incognito or private modes
+  //       DetectRTC.isCanvasSupportsStreamCapturing +
+  //       DetectRTC.isVideoSupportsStreamCapturing
+  //   ).toString()
+  // );
+
+  // const fingerprint = getBrowserFingerprint();
+  // console.log(fingerprint);
+
+  // const handleFetch = async () => {
+  //   const response = await fetch("/api/generatefp", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ client.ge }),
+  //   });
+  //   const result = await response.json();
+  //   console.log(result.data);
+  // };
+
+  // handleFetch();
+  // const fingerprint = client.getFingerprint();
+  // console.log(fingerprint, client.isCookie());
+
+  const { toast } = useToast();
+
   const [checkboxes, setCheckboxes] = useState({});
-  const dataToShow = props.list;
 
-  // Initialize the checkboxes state based on the checkboxData
-  useState(() => {
-    const initialCheckboxes: { [key: string]: boolean } = {};
-    dataToShow.forEach((tile) => {
-      initialCheckboxes[tile.id] = false;
-    });
-    setCheckboxes(initialCheckboxes);
-  });
+  const [extraCheckboxes, setExtraCheckboxes] = useState({});
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = event.target;
@@ -66,66 +276,739 @@ export function VotingCore(props: Props) {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log(checkboxes);
+  const handleExtraCheckboxChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, checked } = event.target;
+    setExtraCheckboxes((prevState) => ({
+      ...(prevState as { [key: string]: boolean }),
+      [name]: checked,
+    }));
   };
 
-  return (
-    // [ + IGNORE THE FOLLOWING: ] the value.id being number may be problematic as it is converted to string and yet it must be considered the same as its original form internally; should there be any code that implement it with ===, we are doomed
-    <form onSubmit={handleSubmit}>
-      <Toaster />
-      <div
-        key="1"
-        className="flex flex-col items-center justify-center w-full h-full"
-      >
-        <section className="container px-4 md:px-6 py-12 md:py-16 lg:py-20">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {dataToShow.map((value) => (
-              <label
-                key={value.id}
-                //className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
-                className={
-                  checkboxes[value.id as keyof typeof checkboxes]
-                    ? "bg-[#b4ddaa] border-[#55aa55] dark:bg-[#395530] dark:border-[#55aa55] rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
-                    : "bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
-                }
-              >
-                <input
-                  className="peer sr-only"
-                  name={value.id}
-                  type="checkbox"
-                  checked={
-                    checkboxes[value.id as keyof typeof checkboxes] || false
-                  }
-                  onChange={handleCheckboxChange}
-                />
-                <div className="p-3 flex flex-col items-center justify-center space-y-2">
-                  <h3 className="text-sm font-semibold text-center">
-                    {value.name}
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-center text-xs">
-                    {value.description}
-                  </p>
-                </div>
-              </label>
-            ))}
-          </div>
-        </section>
+  const router = useRouter();
+  const jumpVoting = () => {
+    for (const checkbox in checkboxesKeys) {
+      console.log(checkbox + "HOLY MOLY THERE IS A CHECKBOX");
+    }
+    var optParams = "";
+    for (const property in checkboxes) {
+      optParams += "opt" + "=" + property + "&";
+    }
+    var votoptParams = "";
+    checkboxesKeys
+      .reduce((objAcc: any, key: string) => {
+        if (checkboxes[key as keyof typeof checkboxes]) {
+          objAcc.push(key);
+        }
+        return objAcc;
+      }, [])
+      .forEach((property: string) => {
+        console.log(property);
+        votoptParams += "votopt" + "=" + property + "&";
+      });
 
-        <section className="container px-4 md:px-6 pb-12 md:pb-16 lg:pb-20">
+    var extraOptParams = "";
+    for (const property in extraCheckboxes) {
+      extraOptParams += "extraopt" + "=" + property + "&";
+    }
+    var votExtraOptParams = "";
+    extraCheckboxesKeys
+      .reduce((objAcc: any, key: string) => {
+        if (extraCheckboxes[key as keyof typeof extraCheckboxes]) {
+          objAcc.push(key);
+        }
+        return objAcc;
+      }, [])
+      .forEach((property: string) => {
+        console.log(property);
+        votExtraOptParams += "votextraopt" + "=" + property + "&";
+      });
+
+    const client = new ClientJS();
+    const cjsfp = client.getFingerprint();
+    console.log(cjsfp);
+
+    router.replace(
+      "/validation?" +
+        optParams +
+        votoptParams +
+        extraOptParams +
+        votExtraOptParams +
+        "fp=" +
+        cjsfp
+    );
+  };
+
+  // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = () => {
+    // event.preventDefault();
+
+    var checkedItemCount = 0;
+    for (const [key, value] of Object.entries(checkboxes)) {
+      if (value) checkedItemCount++;
+    }
+
+    var checkedExtraItemCount = 0;
+    for (const [key, value] of Object.entries(extraCheckboxes)) {
+      if (value) checkedExtraItemCount++;
+    }
+
+    var maxVotesTest = checkedItemCount <= maxVotes;
+    var zeroVotesTest = checkedItemCount > 0;
+
+    var maxExtraVotesTest = extraQuestions.reduce(
+      (objAcc: boolean, key: IndivExtraQuestion) => {
+        return (
+          objAcc &&
+          extraCheckboxesKeys.filter(
+            (eachExtraCheckboxKey) =>
+              extraOptions.find(
+                (eachExtraOption) => eachExtraOption.ID == eachExtraCheckboxKey
+              )?.QID == key.ID &&
+              extraCheckboxes[
+                eachExtraCheckboxKey as keyof typeof extraCheckboxes
+              ]
+          ).length <= (key?.maxVotes ?? 99999)
+        );
+      },
+      true
+    );
+
+    console.log(maxVotesTest + ", " + zeroVotesTest + ", " + maxExtraVotesTest);
+
+    if (!maxVotesTest) {
+      toast({
+        title: maxVotes + "票が上限です！",
+        description: "不具合のおそれがあります。再読み込みしてください。",
+        variant: "destructive",
+      });
+
+      setIsDialogOpen(false);
+    } else if (!zeroVotesTest) {
+      toast({
+        title: "白票は入れられません！",
+        description: "1候補以上選択してください。",
+        variant: "destructive",
+      });
+
+      setIsDialogOpen(false);
+    } else if (!maxExtraVotesTest) {
+      toast({
+        title: "アンケートの票数が過多です！",
+        description: "不具合のおそれがあります。再読み込みしてください。",
+        variant: "destructive",
+      });
+
+      setIsDialogOpen(false);
+    } else {
+      jumpVoting();
+      console.log(
+        checkboxesKeys.reduce((objAcc: any, key: string) => {
+          if (checkboxes[key as keyof typeof checkboxes]) {
+            objAcc.push(key);
+          }
+          return objAcc;
+        }, [])
+      );
+    }
+  };
+
+  const [votingSet, setVotingSet] = useState<boolean>(
+    props.receivedVGI[0].votingset
+  );
+  const [votingDateS, setVotingDateS] = useState<string>(
+    props.receivedVGI[0].votingstart
+  );
+  const [votingDateE, setVotingDateE] = useState<string>(
+    props.receivedVGI[0].votingend
+  );
+  const [maxVotes, setMaxVotes] = useState<number>(
+    props.receivedVGI[0].maxvotes
+  );
+  const [votingName, setVotingName] = useState<string>(
+    props.receivedVGI[0].name
+  );
+  const [votingDescription, setVotingDescription] = useState<string>(
+    props.receivedVGI[0].description
+  );
+  const dayStartTime = props.receivedVGI[0].daystarttime;
+  const dayEndTime = props.receivedVGI[0].dayendtime;
+
+  const transformPlainObjectToOptions = (obj: QueryResultRow[]) => {
+    var listToReturn: IndivOption[] = [];
+    obj.forEach((element) => {
+      listToReturn.push(
+        new IndivOption(
+          element.id,
+          element.categoryid,
+          element.name,
+          element.description,
+          element.orderno
+        )
+      );
+    });
+    return listToReturn;
+  };
+
+  const transformPlainObjectToCategories = (obj: QueryResultRow[]) => {
+    var listToReturn: IndivCat[] = [];
+    obj.forEach((element) => {
+      listToReturn.push(
+        new IndivCat(
+          element.id,
+          element.name,
+          //element.maxvotes,
+          element.orderno
+        )
+      );
+    });
+    return listToReturn;
+  };
+
+  const transformPlainObjectToExtraQuestions = (obj: QueryResultRow[]) => {
+    var listToReturn: IndivExtraQuestion[] = [];
+    obj.forEach((element) => {
+      listToReturn.push(
+        new IndivExtraQuestion(
+          element.id,
+          element.name,
+          element.maxvotes,
+          element.orderno
+        )
+      );
+    });
+    return listToReturn;
+  };
+
+  const transformPlainObjectToExtraOptions = (obj: QueryResultRow[]) => {
+    var listToReturn: IndivExtraOption[] = [];
+    obj.forEach((element) => {
+      listToReturn.push(
+        new IndivExtraOption(
+          element.id,
+          element.qid,
+          element.name,
+          //element.maxvotes,
+          element.orderno
+        )
+      );
+    });
+    return listToReturn;
+  };
+
+  const [options, setOptions] = useState<IndivOption[]>(
+    transformPlainObjectToOptions(props.receivedOPTS)
+  );
+  const [categories, setCategories] = useState<IndivCat[]>(
+    transformPlainObjectToCategories(props.receivedCATS)
+  );
+
+  const [extraQuestions, setExtraQuestions] = useState<IndivExtraQuestion[]>(
+    transformPlainObjectToExtraQuestions(props.receivedEXQS)
+  );
+
+  const [extraOptions, setExtraOptions] = useState<IndivExtraOption[]>(
+    transformPlainObjectToExtraOptions(props.receivedEXOP)
+  );
+
+  // Initialize the checkboxes state based on the checkboxData
+  useState(() => {
+    const initialCheckboxes: { [key: string]: boolean } = {};
+    options.forEach((option) => {
+      initialCheckboxes[option.ID] = false;
+    });
+    setCheckboxes(initialCheckboxes);
+  });
+
+  useState(() => {
+    const initialExtraCheckboxes: { [key: string]: boolean } = {};
+    extraOptions.forEach((extraOption) => {
+      initialExtraCheckboxes[extraOption.ID] = false;
+    });
+    setExtraCheckboxes(initialExtraCheckboxes);
+  });
+
+  const checkboxesKeys = Object.keys(checkboxes);
+  const extraCheckboxesKeys = Object.keys(extraCheckboxes);
+
+  // let isPriv: boolean | undefined = undefined;
+
+  useEffect(() => {
+    if (
+      new Date() < new Date(votingDateS) ||
+      new Date() >= new Date(votingDateE) ||
+      new Date(new Date().setFullYear(1970, 0, 1)) < new Date(dayStartTime) ||
+      new Date(new Date().setFullYear(1970, 0, 1)) >= new Date(dayEndTime)
+    ) {
+      router.replace("/error-vote?e=op");
+    }
+
+    const client = new ClientJS();
+    const cjsfp = client.getFingerprint();
+    console.log(cjsfp);
+    const compareDimensions = (dim: string) =>
+      dim.includes("x") ? +dim.split("x")[0] > +dim.split("x")[1] : undefined;
+
+    detectIncognito().then(async (result) => {
+      if (result.isPrivate) {
+        router.replace("/error-incognito");
+      } else {
+        const checkIPinDatabase = async () => {
+          try {
+            const response = await fetch("/api/checkifvoted", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ cjsfp }),
+            });
+
+            if (!response.ok) {
+              throw new Error(`Server error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.warn(data.found);
+            return data.found;
+          } catch (err: any) {
+            console.error("Error fetching from API:", err);
+          }
+        };
+
+        if (await checkIPinDatabase()) {
+          router.replace("/error-vote?e=ed");
+        } else {
+          if (!client.isMobile()) {
+            router.replace("/error-vote?e=mb");
+          } else if (compareDimensions(client.getCurrentResolution())) {
+            router.replace("/error-vote?e=pr");
+          }
+        }
+      }
+    });
+  }, []);
+
+  const [isPolicyChecked, setIsPolicyChecked] = useState<any>(false);
+  const [isEligibilityChecked, setIsEligibilityChecked] = useState<any>(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const hashCode = (s: string) =>
+    s
+      .split("")
+      .reduce(
+        (a: number, b: string) => ((a << 5) - a + b.charCodeAt(0)) | 0,
+        0
+      );
+
+  // const handleClose = () => {
+  //   handleSubmit();
+  // };
+
+  return (
+    <>
+      <div className="px-[30px] py-[20px] flex items-center bg-gradient-to-r from-[#e0e0e0] to-[#d0d0d0] dark:bg-gradient-to-r dark:from-[#181818] dark:to-[#282828]">
+        {/*<Image
+          src="/votehand-new.png"
+          alt="x"
+          width={80}
+          height={80}
+          //layout="fill"
+          //objectFit="cover"
+  ></Image>*/}
+        <Label className="font-medium text-4xl pr-[3px]">{maxVotes}</Label>
+        <Label className="font-normal text-md">{"票まで投票できます"}</Label>
+      </div>
+      {/* [ + IGNORE THE FOLLOWING: ] the value.id being number may be
+      problematic as it is converted to string and yet it must be considered the
+      same as its original form internally; should there be any code that
+  implements it with ===, we are doomed*/}
+      <form>
+        {/* <p>{props.checkAns}</p> */}
+        <Toaster />
+        <div
+          key="1"
+          className="flex p-[30px] pt-[15px] space-y-3 flex-col w-full h-full"
+        >
+          {categories.map((category) => (
+            <div key={category.ID} className="space-y-2">
+              <div className="space-x-2">
+                <Label className="text-2xl font-bold">{category.name}</Label>
+                {/*<Label className="text-md text-[#666666] dark:text-[#999999]">
+                {category.maxvotes + "票まで"}
+              </Label>*/}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {options
+                  .filter((eachOption) => eachOption.catID == category.ID)
+                  .map((option) => (
+                    <label
+                      key={option.ID}
+                      //className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
+                      className={
+                        checkboxes[option.ID as keyof typeof checkboxes]
+                          ? "bg-[#d0f0c0] dark:bg-[#204028] rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border-glow-green"
+                          : /*checkboxesKeys.reduce((objAcc: any, key: string) => {
+                            if (
+                              options.find((eachOption) => eachOption.ID == key)
+                                ?.catID == category.ID &&
+                              checkboxes[key as keyof typeof checkboxes]
+                            ) {
+                              objAcc.push(key);
+                            }
+                            return objAcc;
+                          }, [])*/ checkboxesKeys.reduce(
+                              (objAcc: any, key: string) => {
+                                if (
+                                  checkboxes[key as keyof typeof checkboxes]
+                                ) {
+                                  objAcc.push(key);
+                                }
+                                return objAcc;
+                              },
+                              []
+                            ).length == maxVotes
+                          ? "bg-white dark:bg-gray-800 rounded-lg transition-shadow cursor-not-allowed w-full border-2 border-gray-200 dark:border-gray-700"
+                          : "bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border-2 border-gray-200 dark:border-gray-700"
+                      }
+                    >
+                      <div className="p-2 flex flex-col items-center justify-center space-y-1">
+                        <p
+                          className={
+                            /*checkboxesKeys.reduce((objAcc: any, key: string) => {
+                            if (
+                              options.find((eachOption) => eachOption.ID == key)
+                                ?.catID == category.ID &&
+                              checkboxes[key as keyof typeof checkboxes]
+                            ) {
+                              objAcc.push(key);
+                            }
+                            return objAcc;
+                          }, [])*/ checkboxesKeys.reduce(
+                              (objAcc: any, key: string) => {
+                                if (
+                                  checkboxes[key as keyof typeof checkboxes]
+                                ) {
+                                  objAcc.push(key);
+                                }
+                                return objAcc;
+                              },
+                              []
+                            ).length == maxVotes &&
+                            !checkboxes[option.ID as keyof typeof checkboxes]
+                              ? "text-md md:text-sm font-semibold text-center text-gray-400 dark:text-gray-500"
+                              : "text-md md:text-sm font-semibold text-center"
+                          }
+                        >
+                          {option.name.replace("「", "\u200B「")}
+                        </p>
+                        <p
+                          className={
+                            /*checkboxesKeys.reduce((objAcc: any, key: string) => {
+                            if (
+                              options.find((eachOption) => eachOption.ID == key)
+                                ?.catID == category.ID &&
+                              checkboxes[key as keyof typeof checkboxes]
+                            ) {
+                              objAcc.push(key);
+                            }
+                            return objAcc;
+                          }, [])*/ checkboxesKeys.reduce(
+                              (objAcc: any, key: string) => {
+                                if (
+                                  checkboxes[key as keyof typeof checkboxes]
+                                ) {
+                                  objAcc.push(key);
+                                }
+                                return objAcc;
+                              },
+                              []
+                            ).length == maxVotes &&
+                            !checkboxes[option.ID as keyof typeof checkboxes]
+                              ? "text-sm text-center text-gray-200 dark:text-gray-600"
+                              : "text-sm text-center text-gray-500 dark:text-gray-400"
+                          }
+                        >
+                          {option.description}
+                        </p>
+                      </div>
+
+                      <input
+                        className=" sr-only"
+                        name={option.ID}
+                        type="checkbox"
+                        checked={
+                          checkboxes[option.ID as keyof typeof checkboxes] ||
+                          false
+                        }
+                        onChange={handleCheckboxChange}
+                        disabled={
+                          /*checkboxesKeys.reduce((objAcc: any, key: string) => {
+                            if (
+                              options.find((eachOption) => eachOption.ID == key)
+                                ?.catID == category.ID &&
+                              checkboxes[key as keyof typeof checkboxes]
+                            ) {
+                              objAcc.push(key);
+                            }
+                            return objAcc;
+                          }, [])*/ checkboxesKeys.reduce(
+                            (objAcc: any, key: string) => {
+                              if (checkboxes[key as keyof typeof checkboxes]) {
+                                objAcc.push(key);
+                              }
+                              return objAcc;
+                            },
+                            []
+                          ).length == maxVotes &&
+                          !checkboxes[option.ID as keyof typeof checkboxes]
+                        }
+                      />
+                    </label>
+                  ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="px-[30px] py-[20px] block items-center bg-gradient-to-r from-[#e0e0e0] to-[#d0d0d0] dark:bg-gradient-to-r dark:from-[#181818] dark:to-[#282828]">
+          <Label className="w-full font-medium text-md">
+            {"投票は以上です"}
+            <br />
+            {"最後にご質問がございます"}
+          </Label>
+          <br />
+          <Label className="w-full font-normal text-sm text-[#555555] dark:text-[#999999]">
+            {"(該当選択肢のない質問は飛ばして結構です)"}
+          </Label>
+        </div>
+
+        {/*<>
+        <div className="flex p-[30px] pt-[10px] space-y-3 flex-col w-full h-full">
+          <Label className="text-2xl font-bold">{"Hey"}</Label>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <Checkbox />
+          </div>
+        </div>
+        </>*/}
+
+        {extraQuestions.map((extraQuestion) => (
+          <div key={extraQuestion.ID}>
+            <div className="flex p-[30px] pt-[15px] pb-0 flex-col w-full h-full">
+              <Label className="text-2xl font-bold">{extraQuestion.name}</Label>
+              {
+                <Label className="text-md text-[#666666] dark:text-[#999999]">
+                  {extraQuestion.maxVotes
+                    ? "" + extraQuestion.maxVotes + "票まで"
+                    : "票数上限なし"}
+                </Label>
+              }
+
+              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {extraOptions
+                  .filter(
+                    (eachExtraOption) => eachExtraOption.QID == extraQuestion.ID
+                  )
+                  .map((extraOption) => (
+                    <label
+                      key={extraOption.ID}
+                      className={
+                        extraCheckboxes[
+                          extraOption.ID as keyof typeof extraCheckboxes
+                        ]
+                          ? "bg-[#d0f0c0] dark:bg-[#204028] rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border-glow-green"
+                          : extraCheckboxesKeys.reduce(
+                              (objAcc: any, key: string) => {
+                                if (
+                                  extraOptions.find(
+                                    (eachExtraOption) =>
+                                      eachExtraOption.ID == key
+                                  )?.QID == extraQuestion.ID &&
+                                  extraCheckboxes[
+                                    key as keyof typeof extraCheckboxes
+                                  ]
+                                ) {
+                                  objAcc.push(key);
+                                }
+                                return objAcc;
+                              },
+                              []
+                            ).length == extraQuestion.maxVotes
+                          ? "bg-white dark:bg-gray-800 rounded-lg transition-shadow cursor-not-allowed w-full border-2 border-gray-200 dark:border-gray-700"
+                          : "bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border-2 border-gray-200 dark:border-gray-700"
+                      }
+                    >
+                      <div className="p-2 flex flex-col items-center justify-center space-y-2">
+                        <p
+                          className={
+                            extraCheckboxesKeys.reduce(
+                              (objAcc: any, key: string) => {
+                                if (
+                                  extraOptions.find(
+                                    (eachExtraOption) =>
+                                      eachExtraOption.ID == key
+                                  )?.QID == extraQuestion.ID &&
+                                  extraCheckboxes[
+                                    key as keyof typeof extraCheckboxes
+                                  ]
+                                ) {
+                                  objAcc.push(key);
+                                }
+                                return objAcc;
+                              },
+                              []
+                            ).length == extraQuestion.maxVotes &&
+                            !extraCheckboxes[
+                              extraOption.ID as keyof typeof extraCheckboxes
+                            ]
+                              ? "text-md md:text-sm font-semibold text-center text-gray-400 dark:text-gray-500"
+                              : "text-md md:text-sm font-semibold text-center"
+                          }
+                        >
+                          {extraOption.name}
+                        </p>
+                        <p
+                          className={
+                            extraCheckboxesKeys.reduce(
+                              (objAcc: any, key: string) => {
+                                if (
+                                  extraOptions.find(
+                                    (eachExtraOption) =>
+                                      eachExtraOption.ID == key
+                                  )?.QID == extraQuestion.ID &&
+                                  extraCheckboxes[
+                                    key as keyof typeof extraCheckboxes
+                                  ]
+                                ) {
+                                  objAcc.push(key);
+                                }
+                                return objAcc;
+                              },
+                              []
+                            ).length == extraQuestion.maxVotes &&
+                            !extraCheckboxes[
+                              extraOption.ID as keyof typeof extraCheckboxes
+                            ]
+                              ? "text-xs text-center text-gray-200 dark:text-gray-600"
+                              : "text-xs text-center text-gray-500 dark:text-gray-400"
+                          }
+                        ></p>
+                      </div>
+
+                      <input
+                        className=" sr-only"
+                        name={extraOption.ID}
+                        type="checkbox"
+                        checked={
+                          extraCheckboxes[
+                            extraOption.ID as keyof typeof extraCheckboxes
+                          ] || false
+                        }
+                        onChange={handleExtraCheckboxChange}
+                        disabled={
+                          extraCheckboxesKeys.reduce(
+                            (objAcc: any, key: string) => {
+                              if (
+                                extraOptions.find(
+                                  (eachExtraOption) => eachExtraOption.ID == key
+                                )?.QID == extraQuestion.ID &&
+                                extraCheckboxes[
+                                  key as keyof typeof extraCheckboxes
+                                ]
+                              ) {
+                                objAcc.push(key);
+                              }
+                              return objAcc;
+                            },
+                            []
+                          ).length == extraQuestion.maxVotes &&
+                          !extraCheckboxes[
+                            extraOption.ID as keyof typeof extraCheckboxes
+                          ]
+                        }
+                      />
+                    </label>
+                  ))}
+              </div>
+            </div>
+          </div>
+        ))}
+        <section className="m-6 mb-8">
           <div className="flex justify-center">
-            <Button
+            {/* <Button
               className="px-6 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white dark:text-white hover:from-[#8B5CF6] hover:to-[#6366F1] transition-colors"
               variant="default"
-              //onClick=
             >
               投票を確定
-            </Button>
+            </Button> */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  className="px-6 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white dark:text-white hover:from-[#8B5CF6] hover:to-[#6366F1] transition-colors"
+                  // type="submit"
+                >
+                  投票する
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Terms & Conditions</DialogTitle>
+                  <DialogDescription>
+                    Please read and accept our terms and conditions.
+                  </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+                  <div className="text-sm prose dark:prose-invert">
+                    <ReactMarkdown>{`
+## Markdown
+
+Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
+`}</ReactMarkdown>
+                  </div>
+                </ScrollArea>
+                <div className="space-y-4 pt-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="terms"
+                      checked={isPolicyChecked}
+                      onCheckedChange={setIsPolicyChecked}
+                    />
+                    <Label
+                      htmlFor="terms"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      I accept the terms and conditions
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="privacy"
+                      checked={isEligibilityChecked}
+                      onCheckedChange={setIsEligibilityChecked}
+                    />
+                    <Label
+                      htmlFor="privacy"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      I accept the privacy policy
+                    </Label>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    disabled={!isPolicyChecked || !isEligibilityChecked}
+                    onClick={handleSubmit}
+                  >
+                    Accept & Continue
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </section>
-      </div>
-    </form>
+      </form>
+    </>
   );
 }
 
