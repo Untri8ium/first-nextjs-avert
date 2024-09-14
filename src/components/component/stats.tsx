@@ -2060,7 +2060,7 @@ export function Stats(props: {
                           eachFetchedCategory.ID
                       )
                       .map((optionAndCount, index) => (
-                        <TableRow>
+                        <TableRow key={optionAndCount.option.ID}>
                           <TableCell
                             className={
                               (optionAndCount.rank <= 3
@@ -2427,7 +2427,7 @@ export function Stats(props: {
         )}`} */}
         <div className="px-[20px] md:px-[30px] py-[20px] grid grid-cols-1 gap-4">
           {fetchedStuffToRead.categories.map((eachCategory) => (
-            <div className="mb-8">
+            <div className="mb-8" key={eachCategory.ID}>
               <div className="mb-4">
                 <Label className="text-3xl font-bold">
                   {eachCategory.name}
@@ -2443,6 +2443,7 @@ export function Stats(props: {
                         ? "border-glow-red-pn"
                         : "border-dead-pn")
                     }
+                    key={eachOption.ID}
                   >
                     <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
                       <div className="flex flex-1 flex-col justify-center gap-1 p-5 md:p-6">
