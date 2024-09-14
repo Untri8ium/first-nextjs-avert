@@ -27,8 +27,6 @@ import {
 
 import { Label } from "@/components/ui/label";
 
-export const experimental_ppr = true;
-
 export default async function Home() {
   class IndivOption {
     ID: string;
