@@ -75,7 +75,8 @@ export default function ErrorVote(props: { receivedVGI: any }) {
     case "ed":
       headline = "既に投票済";
       subline = "です";
-      desc = "誤検知の場合は\u200B窓口までお問合せください。";
+      desc =
+        "誤検知の場合、\u200Bこの画面を見せて\u200B窓口までお問合せください。";
       ecode = "BE-ED";
       checkIfReallyVoted();
       break;
@@ -83,7 +84,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       headline = "エラー";
       subline = "が発生しました";
       desc =
-        "データが不整合でした。\u200Bお手数ですが再投票をお願いします。\u200B再発の場合は窓口まで\u200Bお問合せください。";
+        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B窓口までお問合せください。";
       ecode = "BE-V-MC";
       showButton = true;
       break;
@@ -91,7 +92,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       headline = "エラーが";
       subline = "発生しました";
       desc =
-        "データ不整合の可能性があります。\u200Bお手数ですが再投票をお願いします。\u200B再発の場合は窓口まで\u200Bお問合せください。";
+        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B窓口までお問合せください。";
       ecode = "BE-V-MV";
       showButton = true;
       break;
@@ -99,7 +100,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       headline = "エラーが";
       subline = "発生しました";
       desc =
-        "データ不整合の可能性があります。\u200Bお手数ですが再投票をお願いします。\u200B再発の場合は窓口まで\u200Bお問合せください。";
+        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B窓口までお問合せください。";
       ecode = "BE-V-0V";
       showButton = true;
       break;
@@ -107,7 +108,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       headline = "エラーが";
       subline = "発生しました";
       desc =
-        "データ不整合の可能性があります。\u200Bお手数ですが再投票をお願いします。\u200B再発の場合は窓口まで\u200Bお問合せください。";
+        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B窓口までお問合せください。";
       ecode = "BE-V-IC";
       showButton = true;
       break;
@@ -147,15 +148,17 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       break;
     case "pr":
       headline = "縦画面";
-      subline = "に切替えてください";
-      desc = "誤検知の場合は\u200B窓口までお問合せください。";
+      subline = "をお使いください";
+      desc =
+        "誤検知の場合、\u200Bこの画面を見せて\u200B窓口までお問合せください。";
       ecode = "BE-PR";
       showButton = true;
       break;
     case "mb":
       headline = "モバイル端末";
-      subline = "に切替えてください";
-      desc = "誤検知の場合は\u200B窓口までお問合せください。";
+      subline = "をお使いください";
+      desc =
+        "誤検知の場合、\u200Bこの画面を見せて\u200B窓口までお問合せください。";
       ecode = "BE-MB";
       showButton = true;
       break;
@@ -230,9 +233,16 @@ export default function ErrorVote(props: { receivedVGI: any }) {
             ) : null}
           </div>
           <div className="bg-gray-200 px-8 py-4 flex justify-between items-center">
-            <span className="text-sm text-gray-500">{ecode}</span>
+            <span className="text-sm text-gray-600">{ecode}</span>
             {e == "ed" ? (
-              <span className="text-sm text-gray-500">{cjsfp}</span>
+              <div className="w-min-content">
+                <span className="text-lg font-medium text-gray-800">
+                  {(cjsfp as string).toString().substring(0, 2)}
+                </span>
+                <span className="text-sm text-gray-600">
+                  {(cjsfp as string).toString().substring(2)}
+                </span>
+              </div>
             ) : null}
           </div>
         </motion.div>

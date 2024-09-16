@@ -63,6 +63,8 @@ import ReactMarkdown from "react-markdown";
 import MarkdownRenderer from "./markdown-renderer";
 import styles from "../styles/MarkdownContainer.module.css";
 
+import { animFont } from "@/app/fonts";
+
 /*import { makeIPInspector } from 'next-fortress/ip'
 
 export const middleware = makeIPInspector('125.103.20.82', {
@@ -80,7 +82,7 @@ export default function VotingCore(props: {
   receivedVGI: any;
   receivedOPTS: any;
   receivedCATS: any;
-  receivedVOTX: any;
+  // receivedVOTX: any;
   receivedEXQS: any;
   receivedEXOP: any;
   //receivedVOTS: any;
@@ -325,10 +327,6 @@ export default function VotingCore(props: {
         votExtraOptParams += "votextraopt" + "=" + property + "&";
       });
 
-    const client = new ClientJS();
-    const cjsfp = client.getFingerprint();
-    console.log(cjsfp);
-
     router.replace(
       "/validation?" +
         optParams +
@@ -533,6 +531,9 @@ export default function VotingCore(props: {
   const extraCheckboxesKeys = Object.keys(extraCheckboxes);
 
   // let isPriv: boolean | undefined = undefined;
+  const client = new ClientJS();
+  const cjsfp = client.getFingerprint();
+  console.log(cjsfp);
 
   useEffect(() => {
     if (
@@ -544,9 +545,6 @@ export default function VotingCore(props: {
       router.replace("/error-vote?e=op");
     }
 
-    const client = new ClientJS();
-    const cjsfp = client.getFingerprint();
-    console.log(cjsfp);
     const compareDimensions = (dim: string) =>
       dim.includes("x") ? +dim.split("x")[0] > +dim.split("x")[1] : undefined;
 
@@ -581,7 +579,7 @@ export default function VotingCore(props: {
         } else {
           if (!client.isMobile()) {
             router.replace("/error-vote?e=mb");
-          } else if (compareDimensions(client.getCurrentResolution())) {
+          } else if (compareDimensions(client.getAvailableResolution())) {
             router.replace("/error-vote?e=pr");
           }
         }
@@ -591,6 +589,8 @@ export default function VotingCore(props: {
 
   const [isPolicyChecked, setIsPolicyChecked] = useState<any>(false);
   const [isEligibilityChecked, setIsEligibilityChecked] = useState<any>(false);
+  const [isSecondEligibilityChecked, setIsSecondEligibilityChecked] =
+    useState<any>(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const hashCode = (s: string) =>
@@ -607,7 +607,7 @@ export default function VotingCore(props: {
 
   return (
     <>
-      <div className="px-[30px] py-[20px] flex items-center bg-gradient-to-r from-[#e0e0e0] to-[#d0d0d0] dark:bg-gradient-to-r dark:from-[#181818] dark:to-[#282828]">
+      <div className="px-[30px] py-[20px] flex items-center bg-gradient-to-r from-[#d0d0d0] to-[#c0c0c0] dark:bg-gradient-to-r dark:from-[#181818] dark:to-[#282828]">
         {/*<Image
           src="/votehand-new.png"
           alt="x"
@@ -700,7 +700,7 @@ export default function VotingCore(props: {
                               : "text-md md:text-sm font-semibold text-center"
                           }
                         >
-                          {option.name.replace("「", "\u200B「")}
+                          {option.name}
                         </p>
                         <p
                           className={
@@ -771,7 +771,7 @@ export default function VotingCore(props: {
           ))}
         </div>
 
-        <div className="px-[30px] py-[20px] block items-center bg-gradient-to-r from-[#e0e0e0] to-[#d0d0d0] dark:bg-gradient-to-r dark:from-[#181818] dark:to-[#282828]">
+        <div className="px-[30px] py-[20px] block items-center bg-gradient-to-r from-[#d0d0d0] to-[#c0c0c0] dark:bg-gradient-to-r dark:from-[#181818] dark:to-[#282828]">
           <Label className="w-full font-medium text-md">
             {"投票は以上です"}
             <br />
@@ -796,7 +796,9 @@ export default function VotingCore(props: {
         {extraQuestions.map((extraQuestion) => (
           <div key={extraQuestion.ID}>
             <div className="flex p-[30px] pt-[15px] pb-0 flex-col w-full h-full">
-              <Label className="text-2xl font-bold">{extraQuestion.name}</Label>
+              <Label className="text-2xl font-bold break-keep">
+                {extraQuestion.name.replaceAll("を", "を\u200B")}
+              </Label>
               {
                 <Label className="text-md text-[#666666] dark:text-[#999999]">
                   {extraQuestion.maxVotes
@@ -862,11 +864,11 @@ export default function VotingCore(props: {
                             !extraCheckboxes[
                               extraOption.ID as keyof typeof extraCheckboxes
                             ]
-                              ? "text-md md:text-sm font-semibold text-center text-gray-400 dark:text-gray-500"
-                              : "text-md md:text-sm font-semibold text-center"
+                              ? "text-md md:text-sm font-semibold text-center text-gray-400 dark:text-gray-500 break-keep"
+                              : "text-md md:text-sm font-semibold text-center break-keep"
                           }
                         >
-                          {extraOption.name}
+                          {extraOption.name.replaceAll("・", "・\u200B")}
                         </p>
                         <p
                           className={
@@ -953,12 +955,12 @@ export default function VotingCore(props: {
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>Terms & Conditions</DialogTitle>
-                  <DialogDescription>
-                    Please read and accept our terms and conditions.
-                  </DialogDescription>
+                  <DialogTitle>ご確認ください</DialogTitle>
+                  {/* <DialogDescription>
+                    
+                  </DialogDescription> */}
                 </DialogHeader>
-                <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+                <ScrollArea className="h-[250px] w-full rounded-md border p-4">
                   <div className="text-sm prose dark:prose-invert">
                     <ReactMarkdown>{`
 ## Markdown
@@ -970,37 +972,55 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                 <div className="space-y-4 pt-4">
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      id="terms"
-                      checked={isPolicyChecked}
-                      onCheckedChange={setIsPolicyChecked}
-                    />
-                    <Label
-                      htmlFor="terms"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      I accept the terms and conditions
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="privacy"
+                      id="eligibility"
                       checked={isEligibilityChecked}
                       onCheckedChange={setIsEligibilityChecked}
                     />
                     <Label
-                      htmlFor="privacy"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      htmlFor="eligibility"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
-                      I accept the privacy policy
+                      本校生徒ではありません
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="secondEligibility"
+                      checked={isSecondEligibilityChecked}
+                      onCheckedChange={setIsSecondEligibilityChecked}
+                    />
+                    <Label
+                      htmlFor="secondEligibility"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
+                    >
+                      初めての投票です
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="policy"
+                      checked={isPolicyChecked}
+                      onCheckedChange={setIsPolicyChecked}
+                    />
+                    <Label
+                      htmlFor="policy"
+                      className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
+                    >
+                      {`その他の投票条件・
+                      データの取扱いに同意します`}
                     </Label>
                   </div>
                 </div>
                 <DialogFooter>
                   <Button
-                    disabled={!isPolicyChecked || !isEligibilityChecked}
+                    disabled={
+                      !isPolicyChecked ||
+                      !isEligibilityChecked ||
+                      !isSecondEligibilityChecked
+                    }
                     onClick={handleSubmit}
                   >
-                    Accept & Continue
+                    投票を確定
                   </Button>
                 </DialogFooter>
               </DialogContent>

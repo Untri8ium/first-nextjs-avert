@@ -22,6 +22,7 @@ export function TimePickerDemo({ date, setDate }: TimePickerDemoProps) {
       Hours
     </Label> */}
         <TimePickerInput
+          aria-label="時"
           picker="hours"
           date={date}
           setDate={setDate}
@@ -35,6 +36,7 @@ export function TimePickerDemo({ date, setDate }: TimePickerDemoProps) {
       Minutes
     </Label> */}
         <TimePickerInput
+          aria-label="分"
           picker="minutes"
           date={date}
           setDate={setDate}
@@ -49,6 +51,7 @@ export function TimePickerDemo({ date, setDate }: TimePickerDemoProps) {
       Seconds
     </Label> */}
         <TimePickerInput
+          aria-label="秒"
           picker="seconds"
           date={date}
           setDate={setDate}

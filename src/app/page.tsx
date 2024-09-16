@@ -77,41 +77,41 @@ export default async function Home() {
     }
   }
 
-  async function loadVOTS() {
-    try {
-      var result =
-        await sql`CREATE TABLE IF NOT EXISTS votes (id text, votetime text, voteoption text, entrycount smallint, ip text);`;
+  // async function loadVOTS() {
+  //   try {
+  //     var result =
+  //       await sql`CREATE TABLE IF NOT EXISTS votes (id text, votetime text, voteoption text, entrycount smallint, ip text);`;
 
-      const { rows } = await sql`
-        SELECT * FROM votes;`;
+  //     const { rows } = await sql`
+  //       SELECT * FROM votes;`;
 
-      return rows;
+  //     return rows;
 
-      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
-      // in the option reorder menu, list all the items flatly but color each of them with its category theme color
-    } catch (error) {
-      console.log("Uh oh! loadVOTS failed!");
-      //console.log(error);
-    }
-  }
+  //     // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
+  //     // in the option reorder menu, list all the items flatly but color each of them with its category theme color
+  //   } catch (error) {
+  //     console.log("Uh oh! loadVOTS failed!");
+  //     //console.log(error);
+  //   }
+  // }
 
-  async function loadVOTX() {
-    try {
-      var result =
-        await sql`CREATE TABLE IF NOT EXISTS votesextra (id text, votetime text, qid text, qanswer varchar(65535), entrycount smallint, ip text);`; // what
+  // async function loadVOTX() {
+  //   try {
+  //     var result =
+  //       await sql`CREATE TABLE IF NOT EXISTS votesextra (id text, votetime text, qid text, qanswer varchar(65535), entrycount smallint, ip text);`; // what
 
-      const { rows } = await sql`
-        SELECT * FROM votes;`;
+  //     const { rows } = await sql`
+  //       SELECT * FROM votes;`;
 
-      return rows;
+  //     return rows;
 
-      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
-      // in the option reorder menu, list all the items flatly but color each of them with its category theme color
-    } catch (error) {
-      console.log("Uh oh! loadVOTX failed!");
-      //console.log(error);
-    }
-  }
+  //     // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
+  //     // in the option reorder menu, list all the items flatly but color each of them with its category theme color
+  //   } catch (error) {
+  //     console.log("Uh oh! loadVOTX failed!");
+  //     //console.log(error);
+  //   }
+  // }
 
   async function loadEXQS() {
     try {
@@ -159,11 +159,11 @@ export default async function Home() {
   const loadC = loadCATS();
   const catsAns = await loadC;
 
-  const loadVO = loadVOTS();
-  const votsAns = await loadVO;
+  // const loadVO = loadVOTS();
+  // const votsAns = await loadVO;
 
-  const loadVX = loadVOTX();
-  const votxAns = await loadVX;
+  // const loadVX = loadVOTX();
+  // const votxAns = await loadVX;
 
   const loadXQ = loadEXQS();
   const exqsAns = await loadXQ;
@@ -239,7 +239,7 @@ export default async function Home() {
             receivedVGI={vgiAns}
             receivedOPTS={optsAns}
             receivedCATS={catsAns}
-            receivedVOTX={votxAns}
+            // receivedVOTX={votxAns}
             receivedEXQS={exqsAns}
             receivedEXOP={exopAns}
             //receivedVOTS={votsAns}

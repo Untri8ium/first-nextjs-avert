@@ -1,6 +1,7 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+/* @import url("https://fonts.googleapis.com/css2?family=Lexend+Tera&display=swap"); */
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -159,5 +160,44 @@ body {
     @apply border-2 border-[#77dd60];
     border-radius: 0.5rem; /* Adjust as needed */
     animation: glow-green 1.5s infinite linear;
+  }
+}
+
+svg.animtext {
+  /* font-family: "Lexend Tera", sans-serif; */
+  width: 100%;
+}
+svg.animtext text {
+  animation: stroke 4s alternate;
+  stroke-width: 1;
+  stroke: #ffffff;
+  /* font-size: 100px; */
+  animation-fill-mode: forwards;
+  white-space: normal;
+}
+
+@keyframes stroke {
+  0% {
+    fill: rgba(255, 255, 255, 0);
+    stroke: rgba(255, 255, 255, 1);
+    stroke-dashoffset: 25%;
+    stroke-dasharray: 0 50%;
+    stroke-width: 1;
+  }
+  70% {
+    fill: rgba(255, 255, 255, 0);
+    stroke: rgba(255, 255, 255, 1);
+  }
+  80% {
+    fill: rgba(255, 255, 255, 0);
+    stroke: rgba(255, 255, 255, 1);
+    stroke-width: 1;
+  }
+  100% {
+    fill: rgba(255, 255, 255, 1);
+    stroke: rgba(255, 255, 255, 0);
+    stroke-dashoffset: -25%;
+    stroke-dasharray: 50% 0;
+    stroke-width: 0;
   }
 }

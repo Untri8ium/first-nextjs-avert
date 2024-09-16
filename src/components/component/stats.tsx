@@ -204,9 +204,9 @@ import { BsSliders, BsTrash3, BsFillPlusCircleFill } from "react-icons/bs";
 import { AdminOption } from "./admin-option";
 import { eventNames } from "process";
 import { Description } from "@radix-ui/react-dialog";
-import { AdminConfirm } from "./admin-confirm";
-import { NewAdminConfirm } from "./new-admin-confirm";
-import { StatsHeader } from "./stats-header";
+// import { AdminConfirm } from "./admin-confirm";
+// import { NewAdminConfirm } from "./new-admin-confirm";
+// import { StatsHeader } from "./stats-header";
 
 import { QueryResultRow } from "@vercel/postgres";
 
@@ -630,47 +630,55 @@ export function Stats(props: {
     setIsFetching(true);
 
     try {
-      const [
-        categoriesResponse,
-        optionsResponse,
-        votesResponse,
-        extraQuestionsResponse,
-        extraOptionsResponse,
-        votesExtraResponse,
-        vgiResponse,
-      ] = await Promise.all([
-        fetch("/api/getcategories").then((res) => res.json()),
-        fetch("/api/getvotingoptions").then((res) => res.json()),
-        fetch("/api/getvotes").then((res) => res.json()),
-        fetch("/api/getextraquestions").then((res) => res.json()),
-        fetch("/api/getextraoptions").then((res) => res.json()),
-        fetch("/api/getvotesextra").then((res) => res.json()),
-        fetch("/api/getvgi").then((res) => res.json()),
-      ]);
+      const initialFetch = await fetch("/api/getvotes").then((res) =>
+        res.json()
+      );
+      // fetch("/api/getextraquestions").then((res) => res.json()),
+      // fetch("/api/getextraoptions").then((res) => res.json()),
+      // fetch("/api/getvotesextra").then((res) => res.json()),
+      // fetch("/api/getvgi").then((res) => res.json()),
+
+      console.log(initialFetch);
+
+      // const [
+      //   categoriesResponse,
+      //   optionsResponse,
+      //   votesResponse,
+      //   extraQuestionsResponse,
+      //   extraOptionsResponse,
+      //   votesExtraResponse,
+      //   vgiResponse,
+      // ] = [
+      //   initialFetch.categories.rows,
+      //   initialFetch.votingoptions.rows,
+      //   initialFetch.votes.rows,
+      //   initialFetch.extraquestions.rows,
+      //   initialFetch.extraoptions.rows,
+      //   initialFetch.votesextra.rows,
+      //   initialFetch.vgi.rows,
+      // ];
 
       const newFetchedStuff = {
         err: [],
         categories: transformPlainObjectToCategories(
-          categoriesResponse.categories.rows
+          initialFetch.categories.rows
         ),
-        options: transformPlainObjectToOptions(
-          optionsResponse.votingoptions.rows
-        ),
-        votes: transformPlainObjectToVotes(votesResponse.votes.rows),
+        options: transformPlainObjectToOptions(initialFetch.votingoptions.rows),
+        votes: transformPlainObjectToVotes(initialFetch.votes.rows),
         extraQuestions: transformPlainObjectToExtraQuestions(
-          extraQuestionsResponse.extraquestions.rows
+          initialFetch.extraquestions.rows
         ),
         extraOptions: transformPlainObjectToExtraOptions(
-          extraOptionsResponse.extraoptions.rows
+          initialFetch.extraoptions.rows
         ),
         votesExtra: transformPlainObjectToVotesExtra(
-          votesExtraResponse.votesextra.rows
+          initialFetch.votesextra.rows
         ),
-        vgi: vgiResponse.vgi.rows,
+        vgi: initialFetch.vgi.rows,
         time: new Date(),
       };
 
-      console.log(votesExtraResponse.votesextra.rows);
+      console.log(initialFetch.votesextra.rows);
       console.log(newFetchedStuff.votesExtra);
       setFetchedStuff(newFetchedStuff);
     } catch (error) {
@@ -687,6 +695,7 @@ export function Stats(props: {
     const intervalId = setInterval(() => {
       if (!isFetching) {
         fetchAll();
+        console.clear();
       }
     }, 5000);
 
@@ -1232,7 +1241,7 @@ export function Stats(props: {
     },
   } satisfies ChartConfig;
 
-  const CustomizedAxisTick = ({
+  const customizedAxisTick = ({
     x,
     y,
     dx = 6,
@@ -1314,6 +1323,44 @@ export function Stats(props: {
               : null
           }
         </text>
+      </g>
+    );
+  };
+
+  const customizedRadarAxisTick = ({
+    x,
+    y,
+    dx,
+    payload,
+  }: {
+    x?: number;
+    y?: number;
+    dx?: number;
+    payload?: any;
+  }) => {
+    // const isLargeOrWider = window.matchMedia("(min-width: 1024px)").matches;
+    // const textAnchorValue = window.matchMedia("(min-width: 1280px)").matches
+    //   ? "start"
+    //   : "start";
+    return (
+      <g transform={`translate(${x},${y})`}>
+        {y && y > 100 && y < 160 ? (
+          <foreignObject x={-32} y={0} width={64} height={90} className="flex">
+            <span
+              className={`transform whitespace-normal overflow-visible text-[#666] justify-center text-center`}
+            >
+              {payload.value.replaceAll("・", "・\n")}
+            </span>
+          </foreignObject>
+        ) : (
+          <foreignObject x={-64} y={0} width={128} height={90} className="flex">
+            <span
+              className={`transform overflow-hidden text-[#666] justify-center text-center`}
+            >
+              {payload.value}
+            </span>
+          </foreignObject>
+        )}
       </g>
     );
   };
@@ -1668,7 +1715,7 @@ export function Stats(props: {
       //     const percentTotal =
       //       dayTotal > 0
       //         ? Math.round((originalTotal / dayTotal) * 10000) / 100
-      //         : -10000;
+      //         : 0;
 
       //     return {
       //       ...result,
@@ -1692,7 +1739,7 @@ export function Stats(props: {
         const percentTotal =
           dayTotal > 0
             ? Math.round((originalTotal / dayTotal) * 10000) / 100
-            : -10000;
+            : 0; // we just accidentally ruled that 0 divided by 0 is 0
 
         return { head, total: percentTotal };
       }, []);
@@ -1888,7 +1935,7 @@ export function Stats(props: {
       //     const percentTotal =
       //       dayTotal > 0
       //         ? Math.round((originalTotal / dayTotal) * 10000) / 100
-      //         : -10000;
+      //         : 0;
 
       //     return {
       //       ...result,
@@ -1912,7 +1959,7 @@ export function Stats(props: {
         const percentTotal =
           dayTotal > 0
             ? Math.round((originalTotal / dayTotal) * 10000) / 100
-            : -10000;
+            : 0;
 
         return { head, total: percentTotal };
       }, []);
@@ -1982,7 +2029,8 @@ export function Stats(props: {
               className="text-3xl font-bold"
               style={{ verticalAlign: "middle", marginBottom: "2px" }}
             >
-              {"全" + fetchedStuffToRead?.categories?.length + "カテゴリ"}
+              {/* {"全" + fetchedStuffToRead?.categories?.length + "カテゴリ"} */}
+              ランキング
             </Label>
             {/* <pre>{JSON.stringify(fetchedStuff)}</pre> */}
 
@@ -2107,10 +2155,7 @@ export function Stats(props: {
                                 : "")
                             }
                           >
-                            {optionAndCount.option.name.replace(
-                              "「",
-                              "\u200B「"
-                            )}
+                            {optionAndCount.option.name}
                           </TableCell>
                           <TableCell className="text-right font-medium text-md pt-1 pb-1">
                             {optionAndCount.count}
@@ -2144,6 +2189,7 @@ export function Stats(props: {
                   <CardTitle className="tracking-normal">全体</CardTitle>
                   <CardDescription>全選択肢の合計です。</CardDescription>
                 </div>
+
                 <div className="flex">
                   {new Array(totalDays == 1 ? totalDays : totalDays + 1)
                     .fill(null)
@@ -2304,7 +2350,10 @@ export function Stats(props: {
                             labelFormatter={(value) => `${value} (%)`}
                           />
                           <PolarAngleAxis dataKey="head" />
-                          <PolarRadiusAxis angle={30} domain={[0, 30]} />
+                          <PolarRadiusAxis
+                            angle={90 - 360 / q1ExtraOptions.length}
+                            domain={[0, 30]}
+                          />
                           <PolarGrid />
                           {/* <Radar
                       dataKey="desktop"
@@ -2328,7 +2377,7 @@ export function Stats(props: {
                                   : `hsl(218 80% 40% / 0.8)`
                               }
                               // strokeWidth={2}
-                              dot={false}
+                              dot={true}
                             />
                           ) : (
                             <Radar
@@ -2340,7 +2389,7 @@ export function Stats(props: {
                                   : `hsl(0 80% 40% / 0.8)`
                               }
                               // strokeWidth={2}
-                              dot={false}
+                              dot={true}
                             />
                           )}
                         </RadarChart>
@@ -2371,8 +2420,13 @@ export function Stats(props: {
                             content={<ChartTooltipContent indicator="line" />}
                             labelFormatter={(value) => `${value} (%)`}
                           />
-                          <PolarAngleAxis dataKey="head" />
-                          <PolarRadiusAxis angle={45} />
+                          <PolarAngleAxis
+                            dataKey="head"
+                            // tick={customizedRadarAxisTick}
+                          />
+                          <PolarRadiusAxis
+                            angle={90 - 360 / q2ExtraOptions.length}
+                          />
                           <PolarGrid />
                           {/* <Radar
                       dataKey="desktop"
@@ -2396,7 +2450,7 @@ export function Stats(props: {
                                   : `hsl(218 80% 40% / 0.8)`
                               }
                               // strokeWidth={2}
-                              dot={false}
+                              dot={true}
                             />
                           ) : (
                             <Radar
@@ -2408,7 +2462,7 @@ export function Stats(props: {
                                   : `hsl(0 80% 40% / 0.8)`
                               }
                               // strokeWidth={2}
-                              dot={false}
+                              dot={true}
                             />
                           )}
                         </RadarChart>
@@ -2448,7 +2502,7 @@ export function Stats(props: {
                     <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
                       <div className="flex flex-1 flex-col justify-center gap-1 p-5 md:p-6">
                         <CardTitle className="tracking-normal">
-                          {eachOption.name.replace("「", "\u200B「")}
+                          {eachOption.name}
                         </CardTitle>
                         <CardDescription>
                           {eachOption.description}
@@ -2627,7 +2681,7 @@ export function Stats(props: {
                                 // tickMargin={0}
                                 tickFormatter={(value) => value}
                                 interval={0}
-                                tick={CustomizedAxisTick}
+                                tick={customizedAxisTick}
                               />
                               <YAxis width={20} allowDecimals={false} />
                               <ChartTooltip
@@ -2806,7 +2860,10 @@ export function Stats(props: {
                                 labelFormatter={(value) => `${value} (%)`}
                               />
                               <PolarAngleAxis dataKey="head" />
-                              <PolarRadiusAxis angle={30} domain={[0, 30]} />
+                              <PolarRadiusAxis
+                                angle={90 - 360 / q1ExtraOptions.length}
+                                domain={[0, 30]}
+                              />
                               <PolarGrid />
                               {/* <Radar
                       dataKey="desktop"

@@ -161,8 +161,8 @@ import { BsSliders, BsTrash3, BsFillPlusCircleFill } from "react-icons/bs";
 import { AdminOption } from "./admin-option";
 import { eventNames } from "process";
 import { Description } from "@radix-ui/react-dialog";
-import { AdminConfirm } from "./admin-confirm";
-import { NewAdminConfirm } from "./new-admin-confirm";
+// import { AdminConfirm } from "./admin-confirm";
+// import { NewAdminConfirm } from "./new-admin-confirm";
 import { QueryResultRow } from "@vercel/postgres";
 
 export function Settings(props: {
@@ -776,6 +776,7 @@ export function Settings(props: {
               className="data-[state=unchecked]:bg-gray-300"
               checked={votingSet}
               onCheckedChange={setVotingSet}
+              aria-label="有効トグル"
             />
             <Label
               htmlFor="votingSetButton"
@@ -796,8 +797,12 @@ export function Settings(props: {
         <div
           style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
         >
-          <Label style={{ marginRight: "15px" }} className="text-md">
-            投票のタイトル
+          <Label
+            style={{ marginRight: "15px" }}
+            className="text-md"
+            htmlFor="nameInput"
+          >
+            ヘッダー1行目
           </Label>
           <Label className="text-[#EE3333] dark:text-[#DD6666] text-xs">
             {nameError}
@@ -805,6 +810,7 @@ export function Settings(props: {
 
           <div>
             <Input
+              id="nameInput"
               defaultValue={votingName}
               onChange={handleVotingNameChange}
               className="dark:border dark:border-[#FFFFFF]"
@@ -815,12 +821,17 @@ export function Settings(props: {
         <div
           style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
         >
-          <Label style={{ marginRight: "15px" }} className="text-md">
-            投票の説明
+          <Label
+            style={{ marginRight: "15px" }}
+            className="text-md"
+            htmlFor="descInput"
+          >
+            ヘッダー2行目
           </Label>
 
           <div>
             <Input
+              id="descInput"
               defaultValue={votingDescription}
               onChange={handleVotingDescChange}
               className="dark:border dark:border-[#FFFFFF]"
@@ -831,7 +842,11 @@ export function Settings(props: {
         <div
           style={{ marginTop: "20px", marginLeft: "30px", marginRight: "30px" }}
         >
-          <Label style={{ marginRight: "15px" }} className="text-md">
+          <Label
+            style={{ marginRight: "15px" }}
+            className="text-md"
+            htmlFor="maxVotesInput"
+          >
             票数上限
           </Label>
           <Label className="text-[#EE3333] dark:text-[#DD6666] text-xs">
@@ -840,6 +855,7 @@ export function Settings(props: {
 
           <div>
             <Input
+              id="maxVotesInput"
               defaultValue={maxVotes}
               type={"number"}
               min={1}
@@ -863,7 +879,7 @@ export function Settings(props: {
             <DateTimePicker
               granularity="second"
               hourCycle={24}
-              label="開始日時"
+              label="投票解禁日時"
               onJsDateChange={(newValue) =>
                 setVotingDateS(newValue.toISOString())
               }
@@ -893,7 +909,7 @@ export function Settings(props: {
             <DateTimePicker
               granularity="second"
               hourCycle={24}
-              label="終了日時"
+              label="投票締切日時"
               onJsDateChange={(newValue) =>
                 setVotingDateE(newValue.toISOString())
               }

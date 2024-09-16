@@ -4,4 +4,10 @@ const myfont = Noto_Sans_JP({
   weight: "variable",
 });
 
-export { myfont };
+import { Lexend_Tera } from "next/font/google";
+const animFont = Lexend_Tera({
+  subsets: ["latin"],
+  weight: "variable",
+});
+
+export { myfont, animFont };
