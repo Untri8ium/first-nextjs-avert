@@ -58,8 +58,22 @@ export function middleware(req: NextRequest) {
       });
     }
 
-    return new Response("認証情報に誤りがあります。", { status: 401 });
+    return new Response("認証情報に誤りがあります。", {
+      status: 401,
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   } catch (e) {
-    return new Response("Invalid Authentication", { status: 400 });
+    return new Response("Invalid Authentication", {
+      status: 400,
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   }
 }
