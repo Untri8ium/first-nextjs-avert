@@ -978,7 +978,7 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                     />
                     <Label
                       htmlFor="eligibility"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
+                      className="text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
                       本校生徒ではありません
                     </Label>
@@ -991,7 +991,7 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                     />
                     <Label
                       htmlFor="secondEligibility"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
+                      className="text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
                       初めての投票です
                     </Label>
@@ -1004,7 +1004,7 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                     />
                     <Label
                       htmlFor="policy"
-                      className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
+                      className="text-md font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
                       {`その他の投票条件・
                       データの取扱いに同意します`}
@@ -1019,6 +1019,7 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                       !isSecondEligibilityChecked
                     }
                     onClick={handleSubmit}
+                    className="text-lg font-bold"
                   >
                     投票を確定
                   </Button>

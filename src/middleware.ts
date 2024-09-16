@@ -61,9 +61,7 @@ export function middleware(req: NextRequest) {
     return new Response("認証情報に誤りがあります。", {
       status: 401,
       headers: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
+        "WWW-Authenticate": 'Basic realm="Secure Area"',
       },
     });
   } catch (e) {
