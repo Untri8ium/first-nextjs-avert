@@ -99,7 +99,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
     const hit = await CheckIPinDatabase();
     console.log(hit);
     if (!hit) {
-      // router.replace("/");
+      router.replace("/");
     } else {
     }
   }
