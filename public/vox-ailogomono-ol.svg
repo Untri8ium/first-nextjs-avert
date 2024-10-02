@@ -3,11 +3,11 @@
 <defs>
 <style>
       .logogray {
-        fill: rgba(40, 40, 40, 1);
+        fill: rgba(100, 100, 100, 1);
       }
       @media (prefers-color-scheme: dark) {
         .logogray {
-          fill: rgba(180, 180, 180, 1);
+          fill: rgba(100, 100, 100, 1);
         }
       }</style></defs>
   <g id="_レイヤー_1-2" data-name="レイヤー_1">
