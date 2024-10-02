@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Thanks() {
   // const [mounted, setMounted] = useState(false);
@@ -14,7 +15,7 @@ export default function Thanks() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full">
+      <div className="max-w-2xl w-full z-50">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -38,7 +39,7 @@ export default function Thanks() {
               transition={{ delay: 0.4, duration: 0.5 }}
               className="text-lg text-gray-600 text-center mb-8 break-keep"
             >
-              ご投票ありがとうございました。
+              ご投票&#8203;ありがとうございました。
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -63,9 +64,21 @@ export default function Thanks() {
               Need Help?
             </a>
           </div> */}
+          <div className="bg-gray-200 px-8 py-4 flex justify-start items-center">
+            <span className="text-sm text-gray-600">THKS</span>
+
+            {/* {e == "ed" ? ( */}
+            {/* <Link
+              href="https://google.com"
+              className="text-sm text-gray-600 hover:text-gray-700 underline"
+            >
+              法的文書
+            </Link> */}
+            {/* ) : null} */}
+          </div>
         </motion.div>
       </div>
-      <svg
+      {/* <svg
         className="absolute inset-0 w-full h-full"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -94,7 +107,7 @@ export default function Thanks() {
           />
         </pattern>
         <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern)" />
-      </svg>
+      </svg> */}
     </div>
   );
 }

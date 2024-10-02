@@ -218,18 +218,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { curveCardinal, curveCatmullRom } from "d3-shape";
 
-export function Stats(props: {
-  receivedVGI: any;
-  receivedOPTS: any;
-  receivedCATS: any;
-  receivedVOTS: any;
-  receivedVOTX: any;
-  receivedEXQS: any;
-  receivedEXOP: any;
-  dateData: any;
-
-  //onAction: any;
-}) {
+export function Stats(props: {}) {
   const startHour = 8;
   const totalHalfHours = 24;
 

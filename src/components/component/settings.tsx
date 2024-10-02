@@ -802,7 +802,7 @@ export function Settings(props: {
             className="text-md"
             htmlFor="nameInput"
           >
-            ヘッダー1行目
+            タイトル
           </Label>
           <Label className="text-[#EE3333] dark:text-[#DD6666] text-xs">
             {nameError}
@@ -826,7 +826,7 @@ export function Settings(props: {
             className="text-md"
             htmlFor="descInput"
           >
-            ヘッダー2行目
+            サブタイトル
           </Label>
 
           <div>
@@ -1470,7 +1470,7 @@ export function Settings(props: {
           <div className="flex justify-center">
             <Button
               disabled={props.loadingState == 1}
-              className="px-6 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-[#F18643] to-[#F64C6B] text-white dark:text-white hover:from-[#F64C6B] hover:to-[#F18643] transition-colors"
+              className="px-6 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-[#F18643] to-[#F64C6B] text-white dark:text-white transition transform hover:scale-105 shadow-md shadow-[#F69C8B] dark:shadow-none"
               variant="default"
               type="button"
               onClick={requestSubmit}
@@ -1478,7 +1478,7 @@ export function Settings(props: {
               {props.loadingState == 1 ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
-              適用
+              変更を確定
             </Button>
           </div>{" "}
           <div className="flex justify-center">

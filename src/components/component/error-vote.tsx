@@ -11,6 +11,8 @@ import { userAgent } from "next/server";
 import { ClientJS } from "clientjs";
 
 import { useSearchParams } from "next/navigation";
+import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
+import Link from "next/link";
 
 export default function ErrorVote(props: { receivedVGI: any }) {
   // const [mounted, setMounted] = useState(false);
@@ -29,14 +31,50 @@ export default function ErrorVote(props: { receivedVGI: any }) {
   const router = useRouter();
 
   const client = new ClientJS();
-  const cjsfp = client.getFingerprint();
-  console.log(cjsfp);
+  // const cjsfp = client.getFingerprint();
 
   const sParams = useSearchParams();
   const e = sParams.get("e");
 
-  const checkIPinDatabase = async () => {
+  var needToGetFp = false;
+
+  // const [hitCjsfp, setHitCjsfp] = useState("");
+
+  // if(e == "ed"){
+
+  // const cjsfp = data ? data.visitorId : "NO DATA";
+  // console.log(cjsfp);}
+
+  // var headline = "エラーが";
+  // var subline = "発生しました";
+  // var desc =
+  //   "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B窓口までお問合せください。";
+  // var ecode = "BE-V-0V";
+  // var showButton = true;
+
+  // var cjsfp: string | undefined = "";
+
+  const { isLoading, error, data, getData } = useVisitorData(
+    { extendedResult: true },
+    { immediate: false }
+  );
+
+  useEffect(() => {
+    getData();
+    // console.log(data);
+  }, [needToGetFp]);
+
+  const CheckIPinDatabase = async () => {
     try {
+      // while (isLoading) {}
+      // cjsfp = (await getData()).visitorId;
+      needToGetFp = true;
+      if (!data?.visitorId) {
+        console.log(error);
+        return true;
+      }
+      const cjsfp = data.visitorId;
+      console.log(cjsfp);
       const response = await fetch("/api/checkifvoted", {
         method: "POST",
         headers: {
@@ -49,19 +87,20 @@ export default function ErrorVote(props: { receivedVGI: any }) {
         throw new Error(`Server error: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.warn(data.found);
-      return data.found;
+      const res = await response.json();
+      console.warn(res.found);
+      return res.found;
     } catch (err: any) {
       console.error("Error fetching from API:", err);
     }
   };
 
   async function checkIfReallyVoted() {
-    const hit = await checkIPinDatabase();
+    const hit = await CheckIPinDatabase();
     console.log(hit);
     if (!hit) {
-      router.replace("/");
+      // router.replace("/");
+    } else {
     }
   }
 
@@ -75,8 +114,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
     case "ed":
       headline = "既に投票済";
       subline = "です";
-      desc =
-        "誤検知の場合、\u200Bこの画面を見せて\u200B窓口までお問合せください。";
+      desc = `誤検知の場合、\u200Bこの画面を見せて\u200B窓口までお問合せください。`;
       ecode = "BE-ED";
       checkIfReallyVoted();
       break;
@@ -178,6 +216,8 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       break;
   }
 
+  // }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full z-50">
@@ -214,6 +254,16 @@ export default function ErrorVote(props: { receivedVGI: any }) {
             >
               {desc}
             </motion.p>
+            {e == "ed" ? (
+              <div className="w-full flex justify-center">
+                <span className="text-lg font-medium text-gray-800">
+                  {isLoading ? null : data?.visitorId.substring(0, 3)}
+                </span>
+                <span className="text-xs text-gray-600 pt-2">
+                  {isLoading ? null : data?.visitorId.substring(3)}
+                </span>
+              </div>
+            ) : null}
             {showButton ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -225,7 +275,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
                   onClick={() => {
                     router.replace("/");
                   }}
-                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                  className="bg-red-500 hover:bg-red-600 shadow-md shadow-red-300 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                 >
                   再試行
                 </button>
@@ -234,20 +284,18 @@ export default function ErrorVote(props: { receivedVGI: any }) {
           </div>
           <div className="bg-gray-200 px-8 py-4 flex justify-between items-center">
             <span className="text-sm text-gray-600">{ecode}</span>
-            {e == "ed" ? (
-              <div className="w-min-content">
-                <span className="text-lg font-medium text-gray-800">
-                  {(cjsfp as string).toString().substring(0, 2)}
-                </span>
-                <span className="text-sm text-gray-600">
-                  {(cjsfp as string).toString().substring(2)}
-                </span>
-              </div>
-            ) : null}
+            {/* {e == "ed" ? ( */}
+            {/* <Link
+              href="https://google.com"
+              className="text-sm text-gray-600 hover:text-gray-700 underline"
+            >
+              法的文書
+            </Link> */}
+            {/* ) : null} */}
           </div>
         </motion.div>
       </div>
-      <svg
+      {/* <svg
         className="absolute inset-0 w-full h-full"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -276,7 +324,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
           />
         </pattern>
         <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern)" />
-      </svg>
+      </svg> */}
     </div>
   );
 }

@@ -1,5 +1,11 @@
+import AnimatedBackground from "@/components/component/animated-background";
 import Thanks from "@/components/component/thanks";
 
 export default async function Home() {
-  return <Thanks />;
+  return (
+    <>
+      <AnimatedBackground />
+      <Thanks />
+    </>
+  );
 }

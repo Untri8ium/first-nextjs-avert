@@ -1,3 +1,5 @@
+import AnimatedBackground from "@/components/component/animated-background";
+import { FpjsProvider } from "@fingerprintjs/fingerprintjs-pro-react";
 import { sql } from "@vercel/postgres";
 import dynamic from "next/dynamic";
 const ErrorVote = dynamic(() => import("@/components/component/error-vote"), {
@@ -34,5 +36,17 @@ export default async function Home() {
   const loadV = loadVGI();
   const vgiAns = await loadV;
 
-  return <ErrorVote receivedVGI={vgiAns} />;
+  return (
+    <>
+      <AnimatedBackground />
+      <FpjsProvider
+        loadOptions={{
+          apiKey: process.env.FP_KEY ?? "NO ENV KEY AVAILABLE", // TODO: PUT IN ENV !!!!!!!!!!!!!!!!!!
+          region: "ap",
+        }}
+      >
+        <ErrorVote receivedVGI={vgiAns} />
+      </FpjsProvider>
+    </>
+  );
 }

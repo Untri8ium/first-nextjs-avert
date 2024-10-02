@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import { detectIncognito } from "detectincognitojs";
 import { userAgent } from "next/server";
+import Link from "next/link";
 
 export default function ErrorIncognito() {
   // const [mounted, setMounted] = useState(false);
@@ -28,7 +29,7 @@ export default function ErrorIncognito() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full">
+      <div className="max-w-2xl w-full z-50">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -60,7 +61,7 @@ export default function ErrorIncognito() {
               transition={{ delay: 0.4, duration: 0.5 }}
               className="text-lg text-gray-600 text-center mb-8 break-keep"
             >
-              重複投票防止のため、&#8203;通常モードにのみ対応しています。&#8203;お手数ですが切替をお願いします。
+              重複投票防止のため、&#8203;お手数ですが通常モードに&#8203;切替をお願いします。
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -79,15 +80,20 @@ export default function ErrorIncognito() {
               </button> */}
             </motion.div>
           </div>
-          <div className="bg-gray-200 px-8 py-4 flex justify-between items-center">
-            <span className="text-sm text-gray-500">BE-IN</span>
-            {/* <a href="#" className="text-sm text-red-500 hover:underline">
-              Need Help?
-            </a> */}
+          <div className="bg-gray-200 px-8 py-4 flex justify-start items-center">
+            {/* {e == "ed" ? ( */}
+            <span className="text-sm text-gray-600">BE-IN</span>
+            {/* <Link
+              href="https://google.com"
+              className="text-sm text-gray-600 hover:text-gray-700 underline"
+            >
+              法的文書
+            </Link> */}
+            {/* ) : null} */}
           </div>
         </motion.div>
       </div>
-      <svg
+      {/* <svg
         className="absolute inset-0 w-full h-full"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -116,7 +122,7 @@ export default function ErrorIncognito() {
           />
         </pattern>
         <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern)" />
-      </svg>
+      </svg> */}
     </div>
   );
 }

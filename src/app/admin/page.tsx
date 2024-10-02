@@ -16,6 +16,7 @@ import React, {
   ReactNode,
   Suspense,
 } from "react";
+import { BottomArea } from "@/components/component/bottom-area";
 
 export default async function Home() {
   var loading = 0;
@@ -230,12 +231,14 @@ export default async function Home() {
   }
 
   return (
-    <main>
+    <>
       <TopArea
         title="管理者パネル"
-        description="「適用」を押すまで確定されません。"
+        description="「確定」を押すまで適用されません。"
         colorFrom="from-[#F18643]"
         colorTo="to-[#F64C6B]"
+        envFrom=""
+        envTo=""
       />
       <Suspense>
         <Settings
@@ -248,6 +251,7 @@ export default async function Home() {
           loadingState={0}
         />
       </Suspense>
-    </main>
+      <BottomArea />
+    </>
   );
 }

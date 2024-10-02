@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 
 import { Label } from "@/components/ui/label";
+import { BottomArea } from "@/components/component/bottom-area";
 
 export default async function Home() {
   class IndivOption {
@@ -331,30 +332,30 @@ export default async function Home() {
     }
   }
 
-  const loadV = loadVGI();
-  const vgiAns = await loadV;
+  // const loadV = loadVGI();
+  // const vgiAns = await loadV;
 
-  const loadO = loadOPTS();
-  const optsAns = await loadO;
+  // const loadO = loadOPTS();
+  // const optsAns = await loadO;
 
-  const loadC = loadCATS();
-  const catsAns = await loadC;
+  // const loadC = loadCATS();
+  // const catsAns = await loadC;
 
-  const loadVO = loadVOTS();
-  const votsAns = await loadVO;
+  // const loadVO = loadVOTS();
+  // const votsAns = await loadVO;
 
-  const loadVX = loadVOTX();
-  const votxAns = await loadVX;
+  // const loadVX = loadVOTX();
+  // const votxAns = await loadVX;
 
-  const loadXQ = loadEXQS();
-  const exqsAns = await loadXQ;
+  // const loadXQ = loadEXQS();
+  // const exqsAns = await loadXQ;
 
-  const loadXO = loadEXOP();
-  const exopAns = await loadXO;
+  // const loadXO = loadEXOP();
+  // const exopAns = await loadXO;
 
   // console.log(votsAns);
 
-  console.log(vgiAns && vgiAns[0]?.votingset);
+  // console.log(vgiAns && vgiAns[0]?.votingset);
   //console.log(optsAns && optsAns[0]?.aaa);
   //console.log(catsAns && catsAns[0]?.bbb);
 
@@ -373,26 +374,18 @@ export default async function Home() {
 
   return (
     <main>
-      {vgiAns && vgiAns[0]?.votingset ? (
-        <>
-          <TopArea
-            title="集計パネル"
-            description="自動で更新されます。"
-            colorFrom="from-[#F1A335]"
-            colorTo="to-[#F35928]"
-          />
-          <Stats
-            receivedVGI={vgiAns}
-            receivedOPTS={optsAns}
-            receivedCATS={catsAns}
-            receivedVOTS={votsAns}
-            receivedVOTX={votxAns}
-            receivedEXQS={exqsAns}
-            receivedEXOP={exopAns}
-            dateData={data}
-          />
-        </>
-      ) : null}
+      <>
+        <TopArea
+          title="集計パネル"
+          description="自動で更新されます。"
+          colorFrom="from-[#F1A335]"
+          colorTo="to-[#F35928]"
+          envFrom=""
+          envTo=""
+        />
+        <Stats />
+        <BottomArea />
+      </>
     </main>
   );
 }

@@ -4,15 +4,23 @@ import { TopArea } from "@/components/component/top-area";
 import { headers } from "next/headers";
 import { sql } from "@vercel/postgres";
 import { redirect } from "next/navigation";
+import {
+  FpjsProvider,
+  // useVisitorData,
+} from "@fingerprintjs/fingerprintjs-pro-react";
 
 import dynamic from "next/dynamic";
+import { BottomArea } from "@/components/component/bottom-area";
+import { Suspense } from "react";
 const VotingCore = dynamic(() => import("@/components/component/voting-core"), {
   ssr: false,
 });
 
+export const revalidate = 0;
+
 export default async function Home() {
-  const header = headers();
-  const ip = (header.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];
+  // const header = headers();
+  // const ip = (header.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];
 
   async function loadVGI() {
     try {
@@ -225,6 +233,8 @@ export default async function Home() {
     "use server";
   }*/
 
+  // console.log(error ? error.message : JSON.stringify(data, null, 2));
+
   return (
     <main>
       {vgiAns![0].votingset ? (
@@ -232,21 +242,33 @@ export default async function Home() {
           <TopArea
             title={vgiAns![0].name}
             description={vgiAns![0].description}
-            colorFrom="from-[#6386F1]"
-            colorTo="to-[#A05CF6]"
+            colorFrom={""}
+            colorTo={""}
+            envFrom={process.env.NEXT_PUBLIC_COLOR_HEADER_1 ?? ""}
+            envTo={process.env.NEXT_PUBLIC_COLOR_HEADER_2 ?? ""}
           />
-          <VotingCore
-            receivedVGI={vgiAns}
-            receivedOPTS={optsAns}
-            receivedCATS={catsAns}
-            // receivedVOTX={votxAns}
-            receivedEXQS={exqsAns}
-            receivedEXOP={exopAns}
-            //receivedVOTS={votsAns}
-            // checkCalledByChild={handleCheckTop}
-            //submitCalledByChild={handleVoteSubmitTop}
-            // checkAns={chkAns}
-          />
+          {/* <Suspense fallback={<div>ローディング中</div>}> */}
+          <FpjsProvider
+            loadOptions={{
+              apiKey: process.env.FP_KEY ?? "NO ENV KEY AVAILABLE",
+              region: "ap",
+            }}
+          >
+            <VotingCore
+              receivedVGI={vgiAns}
+              receivedOPTS={optsAns}
+              receivedCATS={catsAns}
+              // receivedVOTX={votxAns}
+              receivedEXQS={exqsAns}
+              receivedEXOP={exopAns}
+              //receivedVOTS={votsAns}
+              // checkCalledByChild={handleCheckTop}
+              //submitCalledByChild={handleVoteSubmitTop}
+              // checkAns={chkAns}
+            />
+          </FpjsProvider>
+          {/* </Suspense> */}
+          <BottomArea />
         </>
       ) : null}
     </main>

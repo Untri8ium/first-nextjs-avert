@@ -1,0 +1,42 @@
+.background {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  /* background-color: #091b43; */
+  overflow: hidden;
+}
+
+.group {
+  position: absolute;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* Increased the number of columns */
+  gap: 3px; /* Smaller gap for smaller squares */
+  opacity: 0;
+  transition: opacity 2s ease-in-out, transform 2s ease-in-out; /* Fade in/out with transform */
+}
+
+.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hidden {
+  opacity: 0;
+  transform: scale(1);
+}
+
+.square {
+  width: 25px; /* Smaller square size */
+  height: 25px;
+  border: 1px solid white; /* Thinner edges */
+  transition: background-color 1s ease-in-out;
+}
+
+.filled {
+  background-color: white;
+}
+
+.unshown {
+  border: none;
+  background: none;
+}

@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   //   revalidatePath("/"); // INFINITELY IMPORTANT CODE
   try {
     const { cjsfp } = await req.json(); // assuming the input is a JSON body
-    // console.log(cjsfp);
+    // console.log(fp);
 
     // Use SELECT EXISTS for a more efficient query
     const query =

@@ -25,7 +25,14 @@ To read more about using these font, please visit the Next.js documentation:
 **/
 "use client";
 import { Button } from "@/components/ui/button";
-import { JSX, SVGProps, useState, useMemo, useEffect } from "react";
+import {
+  JSX,
+  SVGProps,
+  useState,
+  useMemo,
+  useEffect,
+  CSSProperties,
+} from "react";
 
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -64,6 +71,10 @@ import MarkdownRenderer from "./markdown-renderer";
 import styles from "../styles/MarkdownContainer.module.css";
 
 import { animFont } from "@/app/fonts";
+import { Loader2 } from "lucide-react";
+
+import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
+import { Skeleton } from "../ui/skeleton";
 
 /*import { makeIPInspector } from 'next-fortress/ip'
 
@@ -400,6 +411,15 @@ export default function VotingCore(props: {
 
       setIsDialogOpen(false);
     } else {
+      setIsLoadingStatus(true);
+      setTimeout(() => {
+        toast({
+          title: "少々お待ちください…",
+          description: "投票を試みています。",
+          variant: "default",
+        });
+      }, 5000);
+
       jumpVoting();
       console.log(
         checkboxesKeys.reduce((objAcc: any, key: string) => {
@@ -532,8 +552,19 @@ export default function VotingCore(props: {
 
   // let isPriv: boolean | undefined = undefined;
   const client = new ClientJS();
-  const cjsfp = client.getFingerprint();
-  console.log(cjsfp);
+  // const cjsfp = client.getFingerprint();
+  // console.log(cjsfp);
+
+  const { isLoading, error, data, getData } = useVisitorData(
+    { extendedResult: true },
+    { immediate: true }
+  );
+  const cjsfp = data?.visitorId;
+
+  console.log(error ? error.message : JSON.stringify(data, null, 2));
+
+  const compareDimensions = (dim: string) =>
+    dim.includes("x") ? +dim.split("x")[0] > +dim.split("x")[1] : undefined;
 
   useEffect(() => {
     if (
@@ -544,15 +575,17 @@ export default function VotingCore(props: {
     ) {
       router.replace("/error-vote?e=op");
     }
+  }, []);
 
-    const compareDimensions = (dim: string) =>
-      dim.includes("x") ? +dim.split("x")[0] > +dim.split("x")[1] : undefined;
-
+  useEffect(() => {
     detectIncognito().then(async (result) => {
       if (result.isPrivate) {
         router.replace("/error-incognito");
       } else {
         const checkIPinDatabase = async () => {
+          if (!cjsfp) {
+            return false;
+          }
           try {
             const response = await fetch("/api/checkifvoted", {
               method: "POST",
@@ -567,6 +600,7 @@ export default function VotingCore(props: {
             }
 
             const data = await response.json();
+            console.warn(cjsfp);
             console.warn(data.found);
             return data.found;
           } catch (err: any) {
@@ -580,18 +614,22 @@ export default function VotingCore(props: {
           if (!client.isMobile()) {
             router.replace("/error-vote?e=mb");
           } else if (compareDimensions(client.getAvailableResolution())) {
+            console.log(client.getAvailableResolution());
+            console.log(compareDimensions(client.getAvailableResolution()));
             router.replace("/error-vote?e=pr");
           }
         }
       }
     });
-  }, []);
+  }, [data]);
 
   const [isPolicyChecked, setIsPolicyChecked] = useState<any>(false);
   const [isEligibilityChecked, setIsEligibilityChecked] = useState<any>(false);
   const [isSecondEligibilityChecked, setIsSecondEligibilityChecked] =
     useState<any>(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const [isLoadingStatus, setIsLoadingStatus] = useState(false);
 
   const hashCode = (s: string) =>
     s
@@ -605,9 +643,127 @@ export default function VotingCore(props: {
   //   handleSubmit();
   // };
 
+  const buttonStyle: React.CSSProperties = {
+    padding: "1.25rem 2.5rem", // Equivalent to px-10 py-5
+    borderRadius: "9999px", // Equivalent to rounded-full
+    fontSize: "1.125rem", // Equivalent to text-lg
+    fontWeight: 600, // Equivalent to font-semibold
+    color: "white", // Equivalent to text-white
+    background: `linear-gradient(to right, ${process.env.NEXT_PUBLIC_COLOR_BUTTON_LIGHT_1}, ${process.env.NEXT_PUBLIC_COLOR_BUTTON_LIGHT_2})`,
+    transition: "transform 0.3s ease", // Equivalent to transition-colors
+    ...(process.env.NEXT_PUBLIC_COLOR_BUTTONBORDER_LIGHT
+      ? {
+          border:
+            "4px solid " + process.env.NEXT_PUBLIC_COLOR_BUTTONBORDER_LIGHT,
+        }
+      : {}),
+    ...(process.env.NEXT_PUBLIC_COLOR_BUTTONSHADOW_LIGHT
+      ? {
+          boxShadow:
+            "0 4px 6px " + process.env.NEXT_PUBLIC_COLOR_BUTTONSHADOW_LIGHT,
+        }
+      : {}),
+  };
+
+  const darkButtonStyle: React.CSSProperties = {
+    background: `linear-gradient(to right, ${process.env.NEXT_PUBLIC_COLOR_BUTTON_DARK_1}, ${process.env.NEXT_PUBLIC_COLOR_BUTTON_DARK_2})`,
+    ...(process.env.NEXT_PUBLIC_COLOR_BUTTONBORDER_DARK
+      ? {
+          border:
+            "4px solid " + process.env.NEXT_PUBLIC_COLOR_BUTTONBORDER_DARK,
+        }
+      : {}),
+    ...(process.env.NEXT_PUBLIC_COLOR_BUTTONSHADOW_DARK
+      ? {
+          boxShadow:
+            "0 4px 6px " + process.env.NEXT_PUBLIC_COLOR_BUTTONSHADOW_DARK,
+        }
+      : {}),
+  };
+
+  const keyframes = `
+  @keyframes glowSelected {
+    0% {
+      box-shadow: 0 0 15px ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDSHADOW_LIGHT};
+    }
+    50% {
+      box-shadow: 0 0 40px ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDSHADOW_LIGHT};
+    }
+    100% {
+      box-shadow: 0 0 15px ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDSHADOW_LIGHT};
+    }
+  }
+`;
+
+  const darkKeyframes = `
+    @keyframes glowSelectedDark {
+    0% {
+      box-shadow: 0 0 15px ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDSHADOW_DARK};
+    }
+    50% {
+      box-shadow: 0 0 40px ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDSHADOW_DARK};
+    }
+    100% {
+      box-shadow: 0 0 15px ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDSHADOW_DARK};
+    }
+  }`;
+
+  // Inject keyframes into the document head
+  const styleSheet = document.styleSheets[0];
+  styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
+  styleSheet.insertRule(darkKeyframes, styleSheet.cssRules.length);
+
+  const selectedButtonStyles = {
+    // "@keyframes glowSelected": {
+    //   "0%": {
+    //     boxShadow: `0 0 15px ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDSHADOW}`,
+    //   },
+    //   "50%": {
+    //     boxShadow: `0 0 45px ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDSHADOW}`,
+    //   },
+    //   "100%": {
+    //     boxShadow: `0 0 15px ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDSHADOW}`,
+    //   },
+    // },
+    borderGlowGreen: {
+      background: process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTED_LIGHT,
+      border: `2px solid ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDBORDER_LIGHT}`,
+      borderRadius: "0.5rem",
+      animation: "glowSelected 1.5s infinite linear",
+      animationTimingFunction: "ease-in-out",
+    } as CSSProperties,
+
+    darkModeBorderGlowGreen: {
+      background: process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTED_DARK,
+      border: `2px solid ${process.env.NEXT_PUBLIC_COLOR_OPTIONSELECTEDBORDER_DARK}`,
+      borderRadius: "0.5rem",
+      animation: "glowSelectedDark 1.5s infinite linear",
+      animationTimingFunction: "ease-in-out",
+    } as CSSProperties,
+  };
+
+  // Example dark mode logic
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Check user's preference or system preference
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+
+    // Set initial value
+    setIsDarkMode(mediaQuery.matches);
+
+    // Add event listener
+    mediaQuery.addEventListener("change", handleChange);
+
+    // Cleanup listener on unmount
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
   return (
     <>
-      <div className="px-[30px] py-[20px] flex items-center bg-gradient-to-r from-[#d0d0d0] to-[#c0c0c0] dark:bg-gradient-to-r dark:from-[#181818] dark:to-[#282828]">
+      {/* <pre>{process.env.NEXT_PUBLIC_COLOR_HEADER_1}</pre> */}
+      <div className="px-[30px] py-[20px] flex items-center bg-gradient-to-r from-gray-300 to-gray-400 dark:bg-gradient-to-r dark:from-neutral-900 dark:to-neutral-800">
         {/*<Image
           src="/votehand-new.png"
           alt="x"
@@ -644,10 +800,10 @@ export default function VotingCore(props: {
                   .map((option) => (
                     <label
                       key={option.ID}
-                      //className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
+                      //className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
                       className={
                         checkboxes[option.ID as keyof typeof checkboxes]
-                          ? "bg-[#d0f0c0] dark:bg-[#204028] rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border-glow-green"
+                          ? "rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full"
                           : /*checkboxesKeys.reduce((objAcc: any, key: string) => {
                             if (
                               options.find((eachOption) => eachOption.ID == key)
@@ -668,8 +824,15 @@ export default function VotingCore(props: {
                               },
                               []
                             ).length == maxVotes
-                          ? "bg-white dark:bg-gray-800 rounded-lg transition-shadow cursor-not-allowed w-full border-2 border-gray-200 dark:border-gray-700"
-                          : "bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border-2 border-gray-200 dark:border-gray-700"
+                          ? "bg-white dark:bg-gray-800 rounded-lg transition-shadow cursor-not-allowed w-full border-2 border-gray-300 dark:border-gray-700"
+                          : "bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full border-2 border-gray-300 dark:border-gray-700"
+                      }
+                      style={
+                        checkboxes[option.ID as keyof typeof checkboxes]
+                          ? isDarkMode
+                            ? selectedButtonStyles.darkModeBorderGlowGreen
+                            : selectedButtonStyles.borderGlowGreen
+                          : undefined
                       }
                     >
                       <div className="p-2 flex flex-col items-center justify-center space-y-1">
@@ -771,14 +934,14 @@ export default function VotingCore(props: {
           ))}
         </div>
 
-        <div className="px-[30px] py-[20px] block items-center bg-gradient-to-r from-[#d0d0d0] to-[#c0c0c0] dark:bg-gradient-to-r dark:from-[#181818] dark:to-[#282828]">
+        <div className="px-[30px] py-[20px] block items-center bg-gradient-to-r from-gray-300 to-gray-400 dark:bg-gradient-to-r dark:from-neutral-900 dark:to-neutral-800">
           <Label className="w-full font-medium text-md">
             {"投票は以上です"}
             <br />
             {"最後にご質問がございます"}
           </Label>
           <br />
-          <Label className="w-full font-normal text-sm text-[#555555] dark:text-[#999999]">
+          <Label className="w-full font-normal text-sm text-gray-700 dark:text-neutral-400">
             {"(該当選択肢のない質問は飛ばして結構です)"}
           </Label>
         </div>
@@ -800,7 +963,7 @@ export default function VotingCore(props: {
                 {extraQuestion.name.replaceAll("を", "を\u200B")}
               </Label>
               {
-                <Label className="text-md text-[#666666] dark:text-[#999999]">
+                <Label className="text-md text-gray-500 dark:text-neutral-400">
                   {extraQuestion.maxVotes
                     ? "" + extraQuestion.maxVotes + "票まで"
                     : "票数上限なし"}
@@ -819,7 +982,7 @@ export default function VotingCore(props: {
                         extraCheckboxes[
                           extraOption.ID as keyof typeof extraCheckboxes
                         ]
-                          ? "bg-[#d0f0c0] dark:bg-[#204028] rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border-glow-green"
+                          ? "rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full flex items-center justify-center"
                           : extraCheckboxesKeys.reduce(
                               (objAcc: any, key: string) => {
                                 if (
@@ -837,8 +1000,17 @@ export default function VotingCore(props: {
                               },
                               []
                             ).length == extraQuestion.maxVotes
-                          ? "bg-white dark:bg-gray-800 rounded-lg transition-shadow cursor-not-allowed w-full border-2 border-gray-200 dark:border-gray-700"
-                          : "bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border-2 border-gray-200 dark:border-gray-700"
+                          ? "bg-white dark:bg-gray-800 rounded-lg transition-shadow cursor-not-allowed w-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center"
+                          : "bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center"
+                      }
+                      style={
+                        extraCheckboxes[
+                          extraOption.ID as keyof typeof extraCheckboxes
+                        ]
+                          ? isDarkMode
+                            ? selectedButtonStyles.darkModeBorderGlowGreen
+                            : selectedButtonStyles.borderGlowGreen
+                          : undefined
                       }
                     >
                       <div className="p-2 flex flex-col items-center justify-center space-y-2">
@@ -870,32 +1042,6 @@ export default function VotingCore(props: {
                         >
                           {extraOption.name.replaceAll("・", "・\u200B")}
                         </p>
-                        <p
-                          className={
-                            extraCheckboxesKeys.reduce(
-                              (objAcc: any, key: string) => {
-                                if (
-                                  extraOptions.find(
-                                    (eachExtraOption) =>
-                                      eachExtraOption.ID == key
-                                  )?.QID == extraQuestion.ID &&
-                                  extraCheckboxes[
-                                    key as keyof typeof extraCheckboxes
-                                  ]
-                                ) {
-                                  objAcc.push(key);
-                                }
-                                return objAcc;
-                              },
-                              []
-                            ).length == extraQuestion.maxVotes &&
-                            !extraCheckboxes[
-                              extraOption.ID as keyof typeof extraCheckboxes
-                            ]
-                              ? "text-xs text-center text-gray-200 dark:text-gray-600"
-                              : "text-xs text-center text-gray-500 dark:text-gray-400"
-                          }
-                        ></p>
                       </div>
 
                       <input
@@ -936,7 +1082,7 @@ export default function VotingCore(props: {
             </div>
           </div>
         ))}
-        <section className="m-6 mb-8">
+        <section className="m-6 mb-12">
           <div className="flex justify-center">
             {/* <Button
               className="px-6 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white dark:text-white hover:from-[#8B5CF6] hover:to-[#6366F1] transition-colors"
@@ -947,7 +1093,28 @@ export default function VotingCore(props: {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button
-                  className="px-6 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white dark:text-white hover:from-[#8B5CF6] hover:to-[#6366F1] transition-colors"
+                  className={`px-10 py-5 rounded-full text-lg font-semibold bg-gradient-to-r text-white dark:text-white transition duration-300 ease-in-out transform hover:scale-105 ${
+                    process.env.NEXT_PUBLIC_COLOR_BUTTONBORDER_LIGHT
+                      ? "border-4"
+                      : ""
+                  } ${
+                    process.env.NEXT_PUBLIC_COLOR_BUTTONBORDER_DARK
+                      ? "dark:border-4"
+                      : ""
+                  } ${
+                    process.env.NEXT_PUBLIC_COLOR_BUTTONSHADOW_LIGHT
+                      ? "shadow-md"
+                      : ""
+                  } ${
+                    process.env.NEXT_PUBLIC_COLOR_BUTTONSHADOW_DARK
+                      ? "dark:shadow-md"
+                      : ""
+                  }`}
+                  style={
+                    isDarkMode
+                      ? { ...buttonStyle, ...darkButtonStyle }
+                      : buttonStyle
+                  }
                   // type="submit"
                 >
                   投票する
@@ -955,12 +1122,11 @@ export default function VotingCore(props: {
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>ご確認ください</DialogTitle>
+                  <DialogTitle>最後にご確認ください</DialogTitle>
                   {/* <DialogDescription>
-                    
                   </DialogDescription> */}
                 </DialogHeader>
-                <ScrollArea className="h-[250px] w-full rounded-md border p-4">
+                {/* <ScrollArea className="h-[250px] w-full rounded-md border p-4">
                   <div className="text-sm prose dark:prose-invert">
                     <ReactMarkdown>{`
 ## Markdown
@@ -968,7 +1134,7 @@ export default function VotingCore(props: {
 Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
 `}</ReactMarkdown>
                   </div>
-                </ScrollArea>
+                </ScrollArea> */}
                 <div className="space-y-4 pt-4">
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -978,7 +1144,7 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                     />
                     <Label
                       htmlFor="eligibility"
-                      className="text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
+                      className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
                       本校生徒ではありません
                     </Label>
@@ -991,12 +1157,12 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                     />
                     <Label
                       htmlFor="secondEligibility"
-                      className="text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
+                      className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
                       初めての投票です
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  {/* <div className="flex items-center space-x-2">
                     <Checkbox
                       id="policy"
                       checked={isPolicyChecked}
@@ -1004,23 +1170,27 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                     />
                     <Label
                       htmlFor="policy"
-                      className="text-md font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
+                      className="text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
                       {`その他の投票条件・
                       データの取扱いに同意します`}
                     </Label>
-                  </div>
+                  </div> */}
                 </div>
                 <DialogFooter>
                   <Button
                     disabled={
-                      !isPolicyChecked ||
+                      !true ||
                       !isEligibilityChecked ||
-                      !isSecondEligibilityChecked
+                      !isSecondEligibilityChecked ||
+                      isLoadingStatus
                     }
                     onClick={handleSubmit}
                     className="text-lg font-bold"
                   >
+                    {isLoadingStatus ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
                     投票を確定
                   </Button>
                 </DialogFooter>
