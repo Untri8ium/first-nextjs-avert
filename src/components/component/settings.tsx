@@ -482,7 +482,7 @@ export function Settings(props: {
 
   const handleEditCatSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!editCatName || !editCatMaxVotes) {
+    if (!editCatName /* || !editCatMaxVotes*/) {
       setEditCatError("空欄の項目があります！");
     } else {
       console.log(categories);

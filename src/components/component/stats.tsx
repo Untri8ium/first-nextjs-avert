@@ -686,7 +686,7 @@ export function Stats(props: {}) {
         fetchAll();
         console.clear();
       }
-    }, 5000);
+    }, 10000);
 
     return () => clearInterval(intervalId);
   }, [isFetching]);

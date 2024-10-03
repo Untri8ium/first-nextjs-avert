@@ -9,9 +9,6 @@ import { interFont, notoFont } from "./fonts";
 export const metadata: Metadata = {
   title: "VOX | 電子投票",
   description: "登録不要・超シンプルな、電子投票システム。",
-  icons: {
-    icon: "/icon.svg", // /public path
-  },
 };
 
 export default function RootLayout({
