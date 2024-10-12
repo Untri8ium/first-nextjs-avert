@@ -426,14 +426,14 @@ export default async function Home({
     return objAcc;
   }, []);
 
-  try {
-    if (!votingSet) {
-      redirect("/error-vote?e=cl");
-    }
+  // try {
+  if (!votingSet) {
+    redirect("/error-vote?e=cl");
+  }
 
-    var optMatchTest = opts.toString() == optionnames.toString(); // options matching test (only fails if option existence or order has changed)
+  var optMatchTest = opts.toString() == optionnames.toString(); // options matching test (only fails if option existence or order has changed)
 
-    /*var inCatVoteCountTest = categories.reduce((objAcc: boolean, category) => {
+  /*var inCatVoteCountTest = categories.reduce((objAcc: boolean, category) => {
       // Make this area TRY / CATCH later
       var inCategoryVotedCount = 0;
       options
@@ -450,121 +450,114 @@ export default async function Home({
       return objAcc;
     }, true);*/
 
-    // // Use SELECT EXISTS for a more efficient query
-    // const query =
-    //   await sql`SELECT EXISTS (SELECT 1 FROM votes WHERE ip = ${fp}) as exists`;
+  // // Use SELECT EXISTS for a more efficient query
+  // const query =
+  //   await sql`SELECT EXISTS (SELECT 1 FROM votes WHERE ip = ${fp}) as exists`;
 
-    // // Extract the boolean from the query result
-    // const found = query.rows[0].exists;
+  // // Extract the boolean from the query result
+  // const found = query.rows[0].exists;
 
-    var inCatVoteCountTest = votextraopts
-      ? extraQuestions.reduce((objAcc: boolean, extraQuestion) => {
-          // Make this area TRY / CATCH later
-          var inCategoryVotedCount = 0;
-          extraOptions
-            .filter(
-              (eachExtraOption) => eachExtraOption.QID == extraQuestion.ID
-            )
-            .forEach((extraOption) => {
-              if (votextraopts.includes(extraOption.ID)) {
-                inCategoryVotedCount++;
-              }
-            });
-          var inCategoryCount = 0;
-          extraOptions
-            .filter(
-              (eachExtraOption) => eachExtraOption.QID == extraQuestion.ID
-            )
-            .forEach((extraOption) => {
-              inCategoryCount++;
-            });
-          objAcc = extraQuestion.maxVotes
-            ? objAcc &&
-              inCategoryVotedCount <= extraQuestion.maxVotes &&
-              inCategoryVotedCount <= inCategoryCount
-            : objAcc && inCategoryVotedCount <= inCategoryCount; // incat vote count test (in category >=0)
-          return objAcc;
-        }, true)
-      : true;
-
-    var maxVotesTest =
-      categories.reduce((objAcc: number, category) => {
-        // we dont really need to use categories.reduce but its easier this way because I ctrl+v'd
-        options
-          .filter((eachOption) => eachOption.catID == category.ID)
-          .forEach((option) => {
-            if (votopts.includes(option.ID)) {
-              // vote count test (total <= maxvotes)
-              objAcc++;
+  var inCatVoteCountTest = votextraopts
+    ? extraQuestions.reduce((objAcc: boolean, extraQuestion) => {
+        // Make this area TRY / CATCH later
+        var inCategoryVotedCount = 0;
+        extraOptions
+          .filter((eachExtraOption) => eachExtraOption.QID == extraQuestion.ID)
+          .forEach((extraOption) => {
+            if (votextraopts.includes(extraOption.ID)) {
+              inCategoryVotedCount++;
             }
           });
-        return objAcc;
-      }, 0) <= maxVotes;
-
-    var zeroVotesTest =
-      categories.reduce((objAcc: number, category) => {
-        // we dont really need to use categories.reduce but its easier this way because I ctrl+v'd
-        options
-          .filter((eachOption) => eachOption.catID == category.ID)
-          .forEach((option) => {
-            if (votopts.includes(option.ID)) {
-              // vote count test (total <= maxvotes)
-              objAcc++;
-            }
+        var inCategoryCount = 0;
+        extraOptions
+          .filter((eachExtraOption) => eachExtraOption.QID == extraQuestion.ID)
+          .forEach((extraOption) => {
+            inCategoryCount++;
           });
+        objAcc = extraQuestion.maxVotes
+          ? objAcc &&
+            inCategoryVotedCount <= extraQuestion.maxVotes &&
+            inCategoryVotedCount <= inCategoryCount
+          : objAcc && inCategoryVotedCount <= inCategoryCount; // incat vote count test (in category >=0)
         return objAcc;
-      }, 0) > 0;
+      }, true)
+    : true;
 
-    var voteDupliTest = !votes.find((eachVote) => eachVote.IP == fp); // IP hit test
+  var maxVotesTest =
+    categories.reduce((objAcc: number, category) => {
+      // we dont really need to use categories.reduce but its easier this way because I ctrl+v'd
+      options
+        .filter((eachOption) => eachOption.catID == category.ID)
+        .forEach((option) => {
+          if (votopts.includes(option.ID)) {
+            // vote count test (total <= maxvotes)
+            objAcc++;
+          }
+        });
+      return objAcc;
+    }, 0) <= maxVotes;
 
-    var votingOpenTest =
-      votingSet &&
-      new Date(votingDateS) <= new Date() &&
-      new Date(votingDateE) > new Date() &&
-      new Date(new Date().setFullYear(1970, 0, 1)) >= new Date(dayStartTime) &&
-      new Date(new Date().setFullYear(1970, 0, 1)) < new Date(dayEndTime);
+  var zeroVotesTest =
+    categories.reduce((objAcc: number, category) => {
+      // we dont really need to use categories.reduce but its easier this way because I ctrl+v'd
+      options
+        .filter((eachOption) => eachOption.catID == category.ID)
+        .forEach((option) => {
+          if (votopts.includes(option.ID)) {
+            // vote count test (total <= maxvotes)
+            objAcc++;
+          }
+        });
+      return objAcc;
+    }, 0) > 0;
 
-    if (!optMatchTest) {
-      redirect("/error-vote?e=mc");
-      throw "optMatchTest";
-    }
-    if (!maxVotesTest) {
-      redirect("/error-vote?e=mv");
-      throw "maxVotesTest";
-    }
-    if (!zeroVotesTest) {
-      redirect("/error-vote?e=0v");
-      throw "zeroVotesTest";
-    }
-    // if (!maxVotesTest) {
-    //   redirect("/error-vote?e=mv")
-    //   throw "totalVoteCountTest";
-    // }
-    if (!inCatVoteCountTest) {
-      redirect("/error-vote?e=ic");
-      throw "inCatVoteCountTest";
-    }
-    if (!voteDupliTest) {
-      redirect("/error-vote?e=ed");
-      throw "voteDupliTest";
-    }
-    if (!votingOpenTest) {
-      redirect("/error-vote?e=op");
-      throw "votingOpenTest";
-    }
+  var voteDupliTest = !votes.find((eachVote) => eachVote.IP == fp); // IP hit test
 
-    // TEST PASSED BELOW
+  var votingOpenTest =
+    votingSet &&
+    new Date(votingDateS) <= new Date() &&
+    new Date(votingDateE) > new Date() &&
+    new Date(new Date().setFullYear(1970, 0, 1)) >= new Date(dayStartTime) &&
+    new Date(new Date().setFullYear(1970, 0, 1)) < new Date(dayEndTime);
 
-    votingPermission = true;
-
-    // TEST PASSED ABOVE
-  } catch (e) {
-    if (e instanceof Error) {
-      console.log("regular error" + e);
-    } else {
-      console.log(e);
-    }
+  if (!optMatchTest) {
+    redirect("/error-vote?e=mc");
+    // throw "optMatchTest";
+  } else if (!maxVotesTest) {
+    redirect("/error-vote?e=mv");
+    // throw "maxVotesTest";
+  } else if (!zeroVotesTest) {
+    redirect("/error-vote?e=0v");
+    // throw "zeroVotesTest";
   }
+  // if (!maxVotesTest) {
+  //   redirect("/error-vote?e=mv")
+  //   throw "totalVoteCountTest";
+  // }
+  else if (!inCatVoteCountTest) {
+    redirect("/error-vote?e=ic");
+    // throw "inCatVoteCountTest";
+  } else if (!voteDupliTest) {
+    redirect("/error-vote?e=ed");
+    // throw "voteDupliTest";
+  } else if (!votingOpenTest) {
+    redirect("/error-vote?e=op");
+    // throw "votingOpenTest";
+  }
+
+  // TEST PASSED BELOW
+  else {
+    votingPermission = true;
+  }
+
+  // TEST PASSED ABOVE
+  // } catch (e) {
+  // if (e instanceof Error) {
+  //   console.log("regular error" + e);
+  // } else {
+  //   console.log(e);
+  // }
+  // }
 
   if (votingPermission) {
     var redirectDest: string | null = null;

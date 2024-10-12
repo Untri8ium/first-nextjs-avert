@@ -708,6 +708,18 @@ export function Settings(props: {
         Date.parse(dayStartTime) < Date.parse(dayEndTime)
       ) {
         router.refresh();
+        console.log(
+          votingSet,
+          maxVotes,
+          votingName,
+          votingDescription,
+          votingDateS,
+          votingDateE,
+          transformOptionsToPlainObject(options),
+          transformCategoriesToPlainObject(categories),
+          dayStartTime,
+          dayEndTime
+        );
         props.submitCalledByChild(
           votingSet,
           maxVotes,
@@ -723,9 +735,9 @@ export function Settings(props: {
 
         toast({
           title: "適用完了…のはず",
-          description: "再読み込みしてご確認ください。",
+          description: "数回再読み込みしてご確認ください。",
         });
-        //setSubmitText("送信完了…のはずです。再読み込みしてご確認ください");
+        //setSubmitText("送信完了…のはずです。数回再読み込みしてご確認ください");
       }
     } else {
       setNameError(undefined);
@@ -752,11 +764,15 @@ export function Settings(props: {
       );
       toast({
         title: "適用完了…のはず",
-        description: "再読み込みしてご確認ください。",
+        description: "数回再読み込みしてご確認ください。",
       });
-      //setSubmitText("送信完了…のはずです。再読み込みしてご確認ください");
+      //setSubmitText("送信完了…のはずです。数回再読み込みしてご確認ください");
 
-      console.log(props.loadingState);
+      // console.log(props.loadingState);
+      console.log(
+        transformOptionsToPlainObject(options),
+        transformCategoriesToPlainObject(categories)
+      );
     }
   };
 

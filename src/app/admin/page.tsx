@@ -59,6 +59,8 @@ export default async function Home() {
       const { rows } = await sql`
         SELECT * FROM votingoptions;`;
 
+      console.log("SERVERFUNCLEVELopts: " + JSON.stringify(rows));
+
       return rows;
 
       // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
@@ -76,6 +78,8 @@ export default async function Home() {
 
       const { rows } = await sql`
         SELECT * FROM categories;`;
+
+      console.log("SERVERFUNCLEVELcats: " + JSON.stringify(rows));
 
       return rows;
 
@@ -181,7 +185,9 @@ export default async function Home() {
   const exopAns = await loadXO;
 
   console.log(vgiAns && vgiAns[0]?.votingset);
-  //console.log(optsAns && optsAns[0]?.aaa);
+
+  console.log("SERVERLEVELoptsAns: " + JSON.stringify(optsAns));
+  // console.log(optsAns && optsAns[0]?.aaa);
   //console.log(catsAns && catsAns[0]?.bbb);
 
   async function handleSubmitTop(
