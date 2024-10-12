@@ -541,6 +541,15 @@ export default async function Home({
     redirect("/error-vote?e=ed");
     // throw "voteDupliTest";
   } else if (!votingOpenTest) {
+    console.log(
+      votingSet,
+      new Date(votingDateS),
+      new Date(),
+      new Date(votingDateE),
+      new Date(new Date().setFullYear(1970, 0, 1)),
+      new Date(dayStartTime),
+      new Date(dayEndTime)
+    );
     redirect("/error-vote?e=op");
     // throw "votingOpenTest";
   }
