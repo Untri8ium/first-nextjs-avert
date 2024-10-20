@@ -48,7 +48,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
   // var headline = "エラーが";
   // var subline = "発生しました";
   // var desc =
-  //   "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B窓口までお問合せください。";
+  //   "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B投票所までお問合せください。";
   // var ecode = "BE-V-0V";
   // var showButton = true;
 
@@ -114,7 +114,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
     case "ed":
       headline = "既に投票済";
       subline = "です";
-      desc = `誤検知の場合、\u200Bこの画面を見せて\u200B窓口までお問合せください。`;
+      desc = `誤検知の場合、\u200Bこの画面を見せて\u200B投票所までお問合せください。`;
       ecode = "BE-ED";
       checkIfReallyVoted();
       break;
@@ -122,7 +122,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       headline = "エラー";
       subline = "が発生しました";
       desc =
-        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B窓口までお問合せください。";
+        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B投票所までお問合せください。";
       ecode = "BE-V-MC";
       showButton = true;
       break;
@@ -130,7 +130,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       headline = "エラーが";
       subline = "発生しました";
       desc =
-        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B窓口までお問合せください。";
+        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B投票所までお問合せください。";
       ecode = "BE-V-MV";
       showButton = true;
       break;
@@ -138,7 +138,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       headline = "エラーが";
       subline = "発生しました";
       desc =
-        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B窓口までお問合せください。";
+        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B投票所までお問合せください。";
       ecode = "BE-V-0V";
       showButton = true;
       break;
@@ -146,7 +146,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       headline = "エラーが";
       subline = "発生しました";
       desc =
-        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B窓口までお問合せください。";
+        "お手数ですが\u200B再投票をお願いします。\u200B再発の場合はこの画面を見せて\u200B投票所までお問合せください。";
       ecode = "BE-V-IC";
       showButton = true;
       break;
@@ -188,7 +188,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       headline = "縦画面";
       subline = "をお使いください";
       desc =
-        "誤検知の場合、\u200Bこの画面を見せて\u200B窓口までお問合せください。";
+        "誤検知の場合、\u200Bこの画面を見せて\u200B投票所までお問合せください。";
       ecode = "BE-PR";
       showButton = true;
       break;
@@ -196,7 +196,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
       headline = "モバイル端末";
       subline = "をお使いください";
       desc =
-        "誤検知の場合、\u200Bこの画面を見せて\u200B窓口までお問合せください。";
+        "誤検知の場合、\u200Bこの画面を見せて\u200B投票所までお問合せください。";
       ecode = "BE-MB";
       showButton = true;
       break;
@@ -250,7 +250,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-lg text-gray-600 text-center mb-3 break-keep"
+              className="text-lg text-gray-600 text-center break-keep"
             >
               {desc}
             </motion.p>
@@ -275,7 +275,7 @@ export default function ErrorVote(props: { receivedVGI: any }) {
                   onClick={() => {
                     router.replace("/");
                   }}
-                  className="bg-red-500 hover:bg-red-600 shadow-md shadow-red-300 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                  className="bg-red-600 hover:bg-red-700 shadow-md shadow-red-300 text-white font-bold py-3 px-6 mt-3 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                 >
                   再試行
                 </button>

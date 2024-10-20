@@ -8,20 +8,18 @@ import { parseDateTime } from "@internationalized/date";
 import { sq } from "date-fns/locale";
 
 import { redirect } from "next/navigation";
+import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: {
-    opt: string[];
-    votopt: string[];
-    extraopt: string[];
-    votextraopt: string[];
-    fp: string;
-  };
-}) {
-  const header = headers();
-  const ip = (header.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];
+export async function POST(request: Request) {
+  revalidatePath("/");
+
+  setTimeout(() => {
+    return NextResponse.json({ error: "timeout" }, { status: 504 });
+  }, 10000);
+
+  //   const header = headers();
+  //   const ip = (header.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];
 
   async function loadVGI() {
     try {
@@ -415,11 +413,14 @@ export default async function Home({
   const voteX = transformPlainObjectToVoteX(votxAns!);
   const extraQuestions = transformPlainObjectToExtraQuestions(exqsAns!);
   const extraOptions = transformPlainObjectToExtraOptions(exopAns!);
-  const opts = searchParams.opt;
-  const votopts = searchParams.votopt;
-  const extraopts = searchParams.extraopt;
-  const votextraopts = searchParams.votextraopt;
-  const fp = searchParams.fp;
+
+  const { opts, votopts, extraopts, votextraopts, fp } = await request.json();
+
+  //   const opts = searchParams.opt;
+  //   const votopts = searchParams.votopt;
+  //   const extraopts = searchParams.extraopt;
+  //   const votextraopts = searchParams.votextraopt;
+  //   const fp = searchParams.fp;
 
   const optionnames = options.reduce((objAcc: any, option) => {
     objAcc.push(option.ID);
@@ -554,10 +555,6 @@ export default async function Home({
       throw "ic";
       // redirect("/error-vote?e=ic");
       // throw "inCatVoteCountTest";
-    } else if (!voteDupliTest) {
-      throw "ed";
-      // redirect("/error-vote?e=ed");
-      // throw "voteDupliTest";
     } else if (!votingOpenTest) {
       console.log(
         votingSet,
@@ -571,6 +568,10 @@ export default async function Home({
       throw "op";
       // redirect("/error-vote?e=op");
       // throw "votingOpenTest";
+    } else if (!voteDupliTest) {
+      throw "ed";
+      // redirect("/error-vote?e=ed");
+      // throw "voteDupliTest";
     }
 
     // TEST PASSED BELOW
@@ -582,10 +583,12 @@ export default async function Home({
   } catch (e) {
     if (e instanceof Error) {
       console.log("regular error" + e.message);
-      return `[CE-VA] 致命的なエラーが発生しました。${e.message}`;
+      //   return `[CE-VA] 致命的なエラーが発生しました。${e.message}`;
+      return NextResponse.json({ error: e.message }, { status: 500 });
     } else {
       console.log(e);
-      redirect("/error-vote?e=" + e);
+      return NextResponse.json({ error: e }, { status: 400 });
+      //   redirect("/error-vote?e=" + e);
     }
   }
 
@@ -641,7 +644,8 @@ export default async function Home({
       console.log(error);
     } finally {
       if (redirectDest) {
-        redirect(redirectDest);
+        return NextResponse.json({ message: "ok" }, { status: 200 });
+        // redirect(redirectDest);
       }
       votingPermission = false;
     }
@@ -673,18 +677,5 @@ export default async function Home({
     }
   }*/
 
-  return (
-    <main>
-      <Validation
-        receivedVGI={vgiAns}
-        receivedOPTS={optsAns}
-        receivedCATS={catsAns}
-        receivedVOTS={votsAns}
-        receivedVOTX={votxAns}
-        receivedEXQS={exqsAns}
-        receivedEXOP={exopAns}
-        currentIP={ip}
-      />
-    </main>
-  );
+  //   return NextResponse.json({ message: "success" }, { status: 200 });
 }

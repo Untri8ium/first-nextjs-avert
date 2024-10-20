@@ -350,8 +350,10 @@ export function AdminOption(props: {
           className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-shadow w-full border border-gray-200 dark:border-gray-700"
         >
           <div className="p-2 flex flex-col items-center justify-center space-y-2">
-            <p className="text-md md:text-sm font-semibold">{props.name}</p>
             <p className="text-gray-500 dark:text-gray-400 text-center text-xs">
+              {props.name}
+            </p>
+            <p className="text-md md:text-sm font-semibold text-center">
               {props.desc}
             </p>
           </div>

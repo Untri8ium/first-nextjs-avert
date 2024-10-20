@@ -41,7 +41,7 @@ export default async function Home() {
       <AnimatedBackground />
       <FpjsProvider
         loadOptions={{
-          apiKey: process.env.FP_KEY ?? "NO ENV KEY AVAILABLE", // TODO: PUT IN ENV !!!!!!!!!!!!!!!!!!
+          apiKey: process.env.FP_KEY ?? "NO ENV KEY AVAILABLE",
           region: "ap",
         }}
       >

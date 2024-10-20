@@ -275,6 +275,8 @@ export default function VotingCore(props: {
   // const fingerprint = client.getFingerprint();
   // console.log(fingerprint, client.isCookie());
 
+  var hold5000Timeout: any, dead10000Timeout: any;
+
   const { toast } = useToast();
 
   const [checkboxes, setCheckboxes] = useState({});
@@ -300,13 +302,19 @@ export default function VotingCore(props: {
   };
 
   const router = useRouter();
-  const jumpVoting = () => {
-    for (const checkbox in checkboxesKeys) {
-      console.log(checkbox + "HOLY MOLY THERE IS A CHECKBOX");
-    }
+  const jumpVoting = async (inCjsfp: string) => {
+    var optsArray: string[] = [],
+      votoptsArray: string[] = [],
+      extraoptsArray: string[] = [],
+      votextraoptsArray: string[] = [];
+
+    // for (const checkbox in checkboxesKeys) {
+    //   console.log(checkbox + "HOLY MOLY THERE IS A CHECKBOX");
+    // }
     var optParams = "";
     for (const property in checkboxes) {
       optParams += "opt" + "=" + property + "&";
+      optsArray.push(property);
     }
     var votoptParams = "";
     checkboxesKeys
@@ -319,11 +327,13 @@ export default function VotingCore(props: {
       .forEach((property: string) => {
         console.log(property);
         votoptParams += "votopt" + "=" + property + "&";
+        votoptsArray.push(property);
       });
 
     var extraOptParams = "";
     for (const property in extraCheckboxes) {
       extraOptParams += "extraopt" + "=" + property + "&";
+      extraoptsArray.push(property);
     }
     var votExtraOptParams = "";
     extraCheckboxesKeys
@@ -336,17 +346,88 @@ export default function VotingCore(props: {
       .forEach((property: string) => {
         console.log(property);
         votExtraOptParams += "votextraopt" + "=" + property + "&";
+        votextraoptsArray.push(property);
       });
 
-    router.replace(
-      "/validation?" +
-        optParams +
-        votoptParams +
-        extraOptParams +
-        votExtraOptParams +
-        "fp=" +
-        cjsfp
-    );
+    try {
+      const response = await fetch("/api/validate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          opts: optsArray,
+          votopts: votoptsArray,
+          extraopts: extraoptsArray,
+          votextraopts: votextraoptsArray,
+          fp: inCjsfp || "cjsfp missing",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        router.replace("/thanks");
+      } else {
+        if (response.status == 400) {
+          router.replace("/error-vote?e=" + data.error);
+        } else if (response.status == 500) {
+          clearTimeout(hold5000Timeout);
+          clearTimeout(dead10000Timeout);
+          setIsLoadingStatus(false);
+          toast({
+            title: "[CE-V500] エラーが発生しました",
+            description:
+              "不具合のおそれがあります。再読み込みしてください。エラー情報：" +
+              data.message,
+            variant: "destructive",
+          });
+        } else if (response.status == 504) {
+          clearTimeout(hold5000Timeout);
+          clearTimeout(dead10000Timeout);
+
+          setIsLoadingStatus(false);
+          toast({
+            title: "[CE-V504] 投票できませんでした",
+            description: "不具合のおそれがあります。再読み込みしてください。",
+            variant: "destructive",
+          });
+        } else {
+          clearTimeout(hold5000Timeout);
+          clearTimeout(dead10000Timeout);
+
+          setIsLoadingStatus(false);
+          toast({
+            title: "[CE-VXX] 投票できませんでした",
+            description: "不具合のおそれがあります。再読み込みしてください。",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (err: any) {
+      if (err.name == "TypeError") {
+        clearTimeout(hold5000Timeout);
+        clearTimeout(dead10000Timeout);
+
+        setIsLoadingStatus(false);
+        toast({
+          title: "投票できませんでした",
+          description:
+            "インターネット接続を確認するか、再読み込みしてください。",
+          variant: "destructive",
+        });
+      }
+    }
+
+    // router.replace(
+    //   "/validation?" +
+    //     optParams +
+    //     votoptParams +
+    //     extraOptParams +
+    //     votExtraOptParams +
+    //     "fp=" +
+    //     cjsfp
+    // );
   };
 
   // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -412,15 +493,25 @@ export default function VotingCore(props: {
       setIsDialogOpen(false);
     } else {
       setIsLoadingStatus(true);
-      setTimeout(() => {
+      hold5000Timeout = setTimeout(() => {
         toast({
           title: "少々お待ちください…",
           description: "投票を試みています。",
           variant: "default",
         });
       }, 5000);
+      dead10000Timeout = setTimeout(() => {
+        clearTimeout(dead10000Timeout);
+        setIsLoadingStatus(false);
+        toast({
+          title: "投票できませんでした",
+          description:
+            "インターネット接続を確認するか、再読み込みしてください。",
+          variant: "destructive",
+        });
+      }, 10000);
 
-      jumpVoting();
+      jumpVoting(cjsfp);
       console.log(
         checkboxesKeys.reduce((objAcc: any, key: string) => {
           if (checkboxes[key as keyof typeof checkboxes]) {
@@ -559,7 +650,7 @@ export default function VotingCore(props: {
     { extendedResult: true },
     { immediate: true }
   );
-  const cjsfp = data?.visitorId;
+  const cjsfp = data?.visitorId || "fp not created as data.visitorId missing";
 
   console.log(error ? error.message : JSON.stringify(data, null, 2));
 
@@ -574,53 +665,51 @@ export default function VotingCore(props: {
       new Date(new Date().setFullYear(1970, 0, 1)) >= new Date(dayEndTime)
     ) {
       router.replace("/error-vote?e=op");
-    }
-  }, []);
-
-  useEffect(() => {
-    detectIncognito().then(async (result) => {
-      if (result.isPrivate) {
-        router.replace("/error-incognito");
-      } else {
-        const checkIPinDatabase = async () => {
-          if (!cjsfp) {
-            return false;
-          }
-          try {
-            const response = await fetch("/api/checkifvoted", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ cjsfp }),
-            });
-
-            if (!response.ok) {
-              throw new Error(`Server error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.warn(cjsfp);
-            console.warn(data.found);
-            return data.found;
-          } catch (err: any) {
-            console.error("Error fetching from API:", err);
-          }
-        };
-
-        if (await checkIPinDatabase()) {
-          router.replace("/error-vote?e=ed");
+    } else {
+      detectIncognito().then(async (result) => {
+        if (result.isPrivate) {
+          router.replace("/error-incognito");
         } else {
-          if (!client.isMobile()) {
-            router.replace("/error-vote?e=mb");
-          } else if (compareDimensions(client.getAvailableResolution())) {
-            console.log(client.getAvailableResolution());
-            console.log(compareDimensions(client.getAvailableResolution()));
-            router.replace("/error-vote?e=pr");
+          const checkIPinDatabase = async () => {
+            if (!cjsfp) {
+              return false;
+            }
+            try {
+              const response = await fetch("/api/checkifvoted", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ cjsfp }),
+              });
+
+              if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+              }
+
+              const data = await response.json();
+              console.warn(cjsfp);
+              console.warn(data.found);
+              return data.found;
+            } catch (err: any) {
+              console.error("Error fetching from API:", err);
+            }
+          };
+
+          if (await checkIPinDatabase()) {
+            router.replace("/error-vote?e=ed");
+          } else {
+            if (!client.isMobile()) {
+              router.replace("/error-vote?e=mb");
+            } else if (compareDimensions(client.getAvailableResolution())) {
+              console.log(client.getAvailableResolution());
+              console.log(compareDimensions(client.getAvailableResolution()));
+              router.replace("/error-vote?e=pr");
+            }
           }
         }
-      }
-    });
+      });
+    }
   }, [data]);
 
   const [isPolicyChecked, setIsPolicyChecked] = useState<any>(false);
@@ -859,8 +948,8 @@ export default function VotingCore(props: {
                               []
                             ).length == maxVotes &&
                             !checkboxes[option.ID as keyof typeof checkboxes]
-                              ? "text-md md:text-sm font-semibold text-center text-gray-400 dark:text-gray-500"
-                              : "text-md md:text-sm font-semibold text-center"
+                              ? "text-sm text-center text-gray-200 dark:text-gray-600"
+                              : "text-sm text-center text-gray-500 dark:text-gray-400"
                           }
                         >
                           {option.name}
@@ -888,8 +977,8 @@ export default function VotingCore(props: {
                               []
                             ).length == maxVotes &&
                             !checkboxes[option.ID as keyof typeof checkboxes]
-                              ? "text-sm text-center text-gray-200 dark:text-gray-600"
-                              : "text-sm text-center text-gray-500 dark:text-gray-400"
+                              ? "text-md md:text-sm font-semibold text-center text-gray-400 dark:text-gray-500"
+                              : "text-md md:text-sm font-semibold text-center"
                           }
                         >
                           {option.description}

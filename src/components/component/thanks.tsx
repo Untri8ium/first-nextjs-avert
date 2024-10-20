@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Thanks() {
   // const [mounted, setMounted] = useState(false);
@@ -12,6 +13,8 @@ export default function Thanks() {
   // }, []);
 
   // if (!mounted) return null;
+
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
@@ -37,7 +40,7 @@ export default function Thanks() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-lg text-gray-600 text-center mb-8 break-keep"
+              className="text-lg text-gray-600 text-center mb-3 break-keep"
             >
               ご投票&#8203;ありがとうございました。
             </motion.p>
@@ -47,15 +50,16 @@ export default function Thanks() {
               transition={{ delay: 0.5, duration: 0.5 }}
               className="flex justify-center"
             >
-              {/* <button
+              <button
                 onClick={() => {
-                  const router = useRouter();
-                  router.replace("/");
+                  // const router = useRouter();
+
+                  router.push("https://google.com");
                 }}
-                className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                className="bg-red-600 hover:bg-red-700 shadow-md shadow-red-300 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
               >
-                Exit Private Mode
-              </button> */}
+                アンケートのお願い
+              </button>
             </motion.div>
           </div>
           {/* <div className="bg-gray-100 px-8 py-4 flex justify-between items-center">
