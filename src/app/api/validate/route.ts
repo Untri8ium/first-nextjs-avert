@@ -10,6 +10,7 @@ import { sq } from "date-fns/locale";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { validateLocKey } from "@/validatelockey";
 
 export async function POST(request: Request) {
   revalidatePath("/");
@@ -17,6 +18,10 @@ export async function POST(request: Request) {
   setTimeout(() => {
     return NextResponse.json({ error: "timeout" }, { status: 504 });
   }, 10000);
+
+  if (!(await validateLocKey())) {
+    redirect("/location-request");
+  }
 
   //   const header = headers();
   //   const ip = (header.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];

@@ -22,6 +22,8 @@ export default function RootLayout({
         className={interFont.className}
         style={{
           fontFamily: `${interFont.style.fontFamily}, ${notoFont.style.fontFamily}`,
+          // fontFamily:
+          // "'__Inter_36bd41', '__Inter_Fallback_36bd41', '__Noto_Sans_JP_4ec2c1', '__Noto_Sans_JP_Fallback_4ec2c1'",
         }}
       >
         {children}

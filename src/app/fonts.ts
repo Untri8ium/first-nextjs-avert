@@ -21,3 +21,8 @@ const animFont = Lexend_Tera({
 });
 
 export { interFont, notoFont, animFont };
+
+// When fonts go blank and won’t appear,
+// Delete .next and persevere.
+// Clear the cache, then hard reload,
+// And watch your fonts return, bold and bold!

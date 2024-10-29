@@ -842,7 +842,7 @@ export function Settings(props: {
             className="text-md"
             htmlFor="descInput"
           >
-            サブタイトル
+            お知らせ
           </Label>
 
           <div>
@@ -1496,7 +1496,7 @@ export function Settings(props: {
               ) : null}
               変更を確定
             </Button>
-          </div>{" "}
+          </div>
           <div className="flex justify-center">
             {submitText ? (
               <Label style={{ marginTop: "10px" }}>{submitText}</Label>

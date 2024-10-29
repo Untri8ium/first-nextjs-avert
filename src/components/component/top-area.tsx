@@ -148,8 +148,10 @@ export function TopArea(props: Props) {
           {/* <h1 className="text-3xl font-bold text-white sm:text-4xl md:text-5xl">
             {props.title}
           </h1> */}
-          <p className="max-w-[600px] text-gray-200 text-md md:text-lg">
-            {props.description}
+          <p className="max-w-[600px] text-gray-200 whitespace-pre-wrap text-md md:text-lg">
+            {props.title == "管理者パネル" || props.title == "集計パネル"
+              ? props.description
+              : "大衆賞投票"}
           </p>
         </div>
       </div>

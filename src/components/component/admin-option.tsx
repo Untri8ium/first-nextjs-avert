@@ -175,8 +175,8 @@ export function AdminOption(props: {
   const [removeItemOpenOne, setRemoveItemOpenOne] = useState<string>();
 
   const resetNewItem = (defaultCatToSet?: string) => {
-    setNewItemName(undefined || props.name);
-    setNewItemDesc(undefined || props.desc);
+    setNewItemName(props.name);
+    setNewItemDesc(props.desc);
     setNewItemCatSelection(defaultCatToSet || "createNew");
     setNewItemNewCatName(undefined);
     /*setNewItemNewCatMaxVotes(

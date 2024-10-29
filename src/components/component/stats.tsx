@@ -217,6 +217,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // import Loading from "@/app/stats/loading";
 
 import { curveCardinal, curveCatmullRom } from "d3-shape";
+import { Checkbox } from "../ui/checkbox";
 
 export function Stats(props: {}) {
   const startHour = 8;
@@ -615,6 +616,8 @@ export function Stats(props: {}) {
 
   const [isFetching, setIsFetching] = useState(false);
 
+  const [studentType, setStudentType] = useState<any>("ns");
+
   const fetchAll = async () => {
     setIsFetching(true);
 
@@ -923,6 +926,35 @@ export function Stats(props: {}) {
 
   if (fetchedStuff.err.length != 0 && previousFetchedStuffRef.current)
     fetchedStuffToRead = previousFetchedStuffRef.current;
+
+  if (studentType == "all") {
+  } else if (studentType == "ns") {
+    fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter(
+      (eachVote) =>
+        !fetchedStuffToRead.votesExtra.find(
+          (eachVoteExtra) =>
+            eachVoteExtra.IP == eachVote.IP &&
+            eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
+        )
+    );
+  } else if (studentType == "s") {
+    fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter((eachVote) =>
+      fetchedStuffToRead.votesExtra.find(
+        (eachVoteExtra) =>
+          eachVoteExtra.IP == eachVote.IP &&
+          eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
+      )
+    );
+  } else {
+    fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter(
+      (eachVote) =>
+        fetchedStuffToRead.votesExtra.find(
+          (eachVoteExtra) =>
+            eachVoteExtra.IP == eachVote.IP &&
+            eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
+        ) == studentType
+    );
+  }
 
   const optionsAndCounts = fetchedStuffToRead?.options
     ? sortOptionsAndCounts(
@@ -2064,6 +2096,50 @@ export function Stats(props: {}) {
               </Label>
             )}
           </div>
+          <div className="">
+            <Label className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line">
+              票の種類
+            </Label>
+            <Select
+              onValueChange={setStudentType}
+              defaultValue={"ns"}
+              value={studentType}
+            >
+              <SelectTrigger
+                className="w-[180px]"
+                style={{ marginBottom: "10px" }}
+              >
+                <SelectValue placeholder="選択..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all" key="all">
+                    全て
+                  </SelectItem>
+                  <SelectItem value="ns" key="ns">
+                    非生徒
+                  </SelectItem>
+                  <SelectItem value="s" key="s">
+                    生徒
+                  </SelectItem>
+                  {fetchedStuffToRead.extraOptions
+                    .filter(
+                      (eachExtraOption) =>
+                        eachExtraOption.QID ==
+                        fetchedStuffToRead.extraQuestions[2].ID
+                    )
+                    .map((eachExtraOptionQ3: any) => (
+                      <SelectItem
+                        value={eachExtraOptionQ3.ID}
+                        key={eachExtraOptionQ3.ID}
+                      >
+                        {eachExtraOptionQ3.name}
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {fetchedStuffToRead?.categories?.map((eachFetchedCategory) => (
               <label
@@ -2146,7 +2222,11 @@ export function Stats(props: {}) {
                           >
                             {optionAndCount.option.name}
                           </TableCell>
-                          <TableCell className="text-right font-medium text-md pt-1 pb-1">
+                          <TableCell
+                            className={
+                              "text-right font-medium text-md pt-1 pb-1"
+                            }
+                          >
                             {optionAndCount.count}
                           </TableCell>
                         </TableRow>
@@ -2164,6 +2244,50 @@ export function Stats(props: {}) {
 
       <TabsContent value="overview">
         <div className="px-[20px] md:px-[30px] py-[20px] grid grid-cols-1 gap-4">
+          <div className="gap-0">
+            <Label className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line">
+              票の種類
+            </Label>
+            <Select
+              onValueChange={setStudentType}
+              defaultValue={"ns"}
+              value={studentType}
+            >
+              <SelectTrigger
+                className="w-[180px]"
+                style={{ marginBottom: "10px" }}
+              >
+                <SelectValue placeholder="選択..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all" key="all">
+                    全て
+                  </SelectItem>
+                  <SelectItem value="ns" key="ns">
+                    非生徒
+                  </SelectItem>
+                  <SelectItem value="s" key="s">
+                    生徒
+                  </SelectItem>
+                  {fetchedStuffToRead.extraOptions
+                    .filter(
+                      (eachExtraOption) =>
+                        eachExtraOption.QID ==
+                        fetchedStuffToRead.extraQuestions[2].ID
+                    )
+                    .map((eachExtraOptionQ3: any) => (
+                      <SelectItem
+                        value={eachExtraOptionQ3.ID}
+                        key={eachExtraOptionQ3.ID}
+                      >
+                        {eachExtraOptionQ3.name}
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
           {fetchedStuffToRead.options.length == 0 ? null : (
             <Card
               className={
@@ -2341,7 +2465,7 @@ export function Stats(props: {}) {
                           <PolarAngleAxis dataKey="head" />
                           <PolarRadiusAxis
                             angle={90 - 360 / q1ExtraOptions.length}
-                            domain={[0, 30]}
+                            domain={[0, 40]}
                           />
                           <PolarGrid />
                           {/* <Radar
@@ -2469,6 +2593,50 @@ export function Stats(props: {}) {
           activeLinesForEachOption[eachOption.ID]["votesChart"].toString()
         )}`} */}
         <div className="px-[20px] md:px-[30px] py-[20px] grid grid-cols-1 gap-4">
+          <div className="gap-0">
+            <Label className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line">
+              票の種類
+            </Label>
+            <Select
+              onValueChange={setStudentType}
+              defaultValue={"ns"}
+              value={studentType}
+            >
+              <SelectTrigger
+                className="w-[180px]"
+                style={{ marginBottom: "10px" }}
+              >
+                <SelectValue placeholder="選択..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all" key="all">
+                    全て
+                  </SelectItem>
+                  <SelectItem value="ns" key="ns">
+                    非生徒
+                  </SelectItem>
+                  <SelectItem value="s" key="s">
+                    生徒
+                  </SelectItem>
+                  {fetchedStuffToRead.extraOptions
+                    .filter(
+                      (eachExtraOption) =>
+                        eachExtraOption.QID ==
+                        fetchedStuffToRead.extraQuestions[2].ID
+                    )
+                    .map((eachExtraOptionQ3: any) => (
+                      <SelectItem
+                        value={eachExtraOptionQ3.ID}
+                        key={eachExtraOptionQ3.ID}
+                      >
+                        {eachExtraOptionQ3.name}
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
           {fetchedStuffToRead.categories.map((eachCategory) => (
             <div className="mb-8" key={eachCategory.ID}>
               <div className="mb-4">
@@ -2851,7 +3019,7 @@ export function Stats(props: {}) {
                               <PolarAngleAxis dataKey="head" />
                               <PolarRadiusAxis
                                 angle={90 - 360 / q1ExtraOptions.length}
-                                domain={[0, 30]}
+                                domain={[0, 40]}
                               />
                               <PolarGrid />
                               {/* <Radar

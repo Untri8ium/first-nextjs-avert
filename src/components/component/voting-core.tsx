@@ -96,6 +96,7 @@ export default function VotingCore(props: {
   // receivedVOTX: any;
   receivedEXQS: any;
   receivedEXOP: any;
+  news: any;
   //receivedVOTS: any;
   //list: Tile[];
   // checkCalledByChild: any;
@@ -485,7 +486,7 @@ export default function VotingCore(props: {
       setIsDialogOpen(false);
     } else if (!maxExtraVotesTest) {
       toast({
-        title: "アンケートの票数が過多です！",
+        title: "個人質問の票数が過多です！",
         description: "不具合のおそれがあります。再読み込みしてください。",
         variant: "destructive",
       });
@@ -833,6 +834,7 @@ export default function VotingCore(props: {
 
   // Example dark mode logic
   const [isDarkMode, setIsDarkMode] = useState(false);
+  // console.log(props.news);
 
   useEffect(() => {
     // Check user's preference or system preference
@@ -841,6 +843,17 @@ export default function VotingCore(props: {
 
     // Set initial value
     setIsDarkMode(mediaQuery.matches);
+
+    // console.log(props.news);
+    if (props.news)
+      setTimeout(() => {
+        toast({
+          title: "お知らせ",
+          description: props.news,
+          style: { whiteSpace: "pre-wrap" },
+          // duration: 5000,
+        });
+      }, 4000);
 
     // Add event listener
     mediaQuery.addEventListener("change", handleChange);
@@ -1235,7 +1248,7 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                       htmlFor="eligibility"
                       className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
-                      本校生徒ではありません
+                      これが初めての投票
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -1248,7 +1261,7 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                       htmlFor="secondEligibility"
                       className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
-                      初めての投票です
+                      プライバシーポリシーに同意する
                     </Label>
                   </div>
                   {/* <div className="flex items-center space-x-2">

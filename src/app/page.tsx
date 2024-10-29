@@ -12,6 +12,9 @@ import {
 import dynamic from "next/dynamic";
 import { BottomArea } from "@/components/component/bottom-area";
 import { Suspense } from "react";
+import { cookies } from "next/headers";
+import { validateLocKey } from "@/validatelockey";
+
 const VotingCore = dynamic(() => import("@/components/component/voting-core"), {
   ssr: false,
 });
@@ -19,8 +22,39 @@ const VotingCore = dynamic(() => import("@/components/component/voting-core"), {
 export const revalidate = 0;
 
 export default async function Home() {
+  // {
+  //   searchParams,
+  // }: {
+  //   searchParams: {
+  //     lk: string}
+  //   }
   // const header = headers();
   // const ip = (header.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];
+
+  // const res = await fetch(`http://localhost:3000/api/getvotes`);
+
+  // if (!res.ok) {
+  //   throw new Error("Failed to fetch votes");
+  // }
+
+  // const data = await res.json();
+
+  // console.log("API ANS INCOMING>>>>>>");
+  // console.log(JSON.stringify(data.votingoptions.rows));
+  // console.log("API ANS ENDING<<<<<<");
+
+  if (!(await validateLocKey())) {
+    redirect("/location-request");
+  }
+
+  // try{
+  //   if(Date.parse(searchParams.lk) + 1000 * 10 < Date.now()){
+  //     throw null;
+  //   }
+  // }
+  // catch{
+  //   router.replace("/loc");
+  // }
 
   async function loadVGI() {
     try {
@@ -34,8 +68,9 @@ export default async function Home() {
       const { rows } = await sql`
         SELECT * FROM votinggeneralinfo;`;
 
-      console.log("<<<");
+      console.log("VGI>>>");
       console.log(rows);
+      console.log("VGI<<<");
 
       return rows;
 
@@ -57,6 +92,10 @@ export default async function Home() {
       const { rows } = await sql`
         SELECT * FROM votingoptions;`;
 
+      console.log("OPTS>>>");
+      console.log(rows);
+      console.log("OPTS<<<");
+
       return rows;
 
       // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
@@ -74,6 +113,10 @@ export default async function Home() {
 
       const { rows } = await sql`
         SELECT * FROM categories;`;
+
+      console.log("CATS>>>");
+      console.log(rows);
+      console.log("CATS<<<");
 
       return rows;
 
@@ -235,6 +278,8 @@ export default async function Home() {
 
   // console.log(error ? error.message : JSON.stringify(data, null, 2));
 
+  console.log(process.env.FP_KEY + "<< FP_KEY");
+
   return (
     <main>
       {vgiAns![0].votingset ? (
@@ -250,8 +295,11 @@ export default async function Home() {
           {/* <Suspense fallback={<div>ローディング中</div>}> */}
           <FpjsProvider
             loadOptions={{
-              apiKey: process.env.FP_KEY ?? "NO ENV KEY AVAILABLE",
+              apiKey: process.env.FP_KEY ?? "NO FP KEY AVAILABLE", // REVERT THESE OR APPLY TO ERROR-VOTE
               region: "ap",
+              endpoint: "https://metrics.voxtk.mywire.org",
+              scriptUrlPattern:
+                "https://metrics.voxtk.mywire.org/web/v<version>/<apiKey>/loader_v<loaderVersion>.js",
             }}
           >
             <VotingCore
@@ -261,6 +309,7 @@ export default async function Home() {
               // receivedVOTX={votxAns}
               receivedEXQS={exqsAns}
               receivedEXOP={exopAns}
+              news={vgiAns![0].description}
               //receivedVOTS={votsAns}
               // checkCalledByChild={handleCheckTop}
               //submitCalledByChild={handleVoteSubmitTop}

@@ -1,0 +1,149 @@
+Date : 2024-10-26 12:57:07
+Directory : c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master
+Total : 86 files,  20794 codes, 2175 comments, 1406 blanks, all 24375 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| JSON               |          3 |     10,401 |          0 |          2 |     10,403 |
+| TypeScript JSX     |         51 |      8,772 |      2,013 |      1,118 |     11,903 |
+| TypeScript         |         18 |      1,003 |        148 |        180 |      1,331 |
+| CSS                |          2 |        468 |         12 |         85 |        565 |
+| XML                |          7 |         89 |          0 |          0 |         89 |
+| JSON with Comments |          2 |         30 |          0 |          3 |         33 |
+| Markdown           |          1 |         23 |          0 |         14 |         37 |
+| JavaScript         |          2 |          8 |          2 |          4 |         14 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                    | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                       |         86 |     20,794 |      2,175 |      1,406 |     24,375 |
+| . (Files)                                                                                                               |          9 |     10,496 |         14 |         27 |     10,537 |
+| public                                                                                                                  |          6 |         74 |          0 |          0 |         74 |
+| src                                                                                                                     |         71 |     10,224 |      2,161 |      1,379 |     13,764 |
+| src (Files)                                                                                                             |          1 |         68 |          2 |          8 |         78 |
+| src\app                                                                                                                 |         23 |      1,858 |        355 |        411 |      2,624 |
+| src\app (Files)                                                                                                         |          6 |        633 |        145 |        150 |        928 |
+| src\app\admin                                                                                                           |          1 |        200 |         40 |         57 |        297 |
+| src\app\api                                                                                                             |         10 |        647 |        121 |        120 |        888 |
+| src\app\api\checkifvoted                                                                                                |          1 |         17 |          4 |          5 |         26 |
+| src\app\api\getcategories                                                                                               |          1 |         13 |          0 |          4 |         17 |
+| src\app\api\getextraoptions                                                                                             |          1 |         13 |          0 |          3 |         16 |
+| src\app\api\getextraquestions                                                                                           |          1 |         13 |          0 |          2 |         15 |
+| src\app\api\getvgi                                                                                                      |          1 |         26 |          0 |          2 |         28 |
+| src\app\api\getvotes                                                                                                    |          1 |         49 |          0 |          4 |         53 |
+| src\app\api\getvotesextra                                                                                               |          1 |         13 |          1 |          3 |         17 |
+| src\app\api\getvotingoptions                                                                                            |          1 |         13 |          0 |          3 |         16 |
+| src\app\api\setlockey                                                                                                   |          1 |         15 |          0 |          3 |         18 |
+| src\app\api\validate                                                                                                    |          1 |        475 |        116 |         91 |        682 |
+| src\app\error-incognito                                                                                                 |          1 |         10 |          0 |          2 |         12 |
+| src\app\error-location-request                                                                                          |          1 |         16 |          1 |          4 |         21 |
+| src\app\error-vote                                                                                                      |          1 |         43 |          2 |          8 |         53 |
+| src\app\location-request                                                                                                |          1 |         16 |          1 |          4 |         21 |
+| src\app\stats                                                                                                           |          1 |        283 |         45 |         64 |        392 |
+| src\app\thanks                                                                                                          |          1 |         10 |          0 |          2 |         12 |
+| src\components                                                                                                          |         46 |      8,293 |      1,804 |        958 |     11,055 |
+| src\components (Files)                                                                                                  |          2 |        105 |          0 |         14 |        119 |
+| src\components\component                                                                                                |         18 |      6,078 |      1,792 |        667 |      8,537 |
+| src\components\ui                                                                                                       |         26 |      2,110 |         12 |        277 |      2,399 |
+| src\components\ui (Files)                                                                                               |         24 |      2,039 |         10 |        269 |      2,318 |
+| src\components\ui\button                                                                                                |          1 |         43 |          1 |          6 |         50 |
+| src\components\ui\range-calendar                                                                                        |          1 |         28 |          1 |          2 |         31 |
+| src\lib                                                                                                                 |          1 |          5 |          0 |          2 |          7 |
++-------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                                                                | language           | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\.eslintrc.json                                         | JSON with Comments |          3 |          0 |          1 |          4 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\README.md                                              | Markdown           |         23 |          0 |         14 |         37 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\components.json                                        | JSON               |         16 |          0 |          0 |         16 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\next.config.mjs                                        | JavaScript         |          2 |          1 |          2 |          5 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\package-lock.json                                      | JSON               |     10,307 |          0 |          1 |     10,308 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\package.json                                           | JSON               |         78 |          0 |          1 |         79 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\postcss.config.mjs                                     | JavaScript         |          6 |          1 |          2 |          9 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\public\next.svg                                        | XML                |          1 |          0 |          0 |          1 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\public\vercel.svg                                      | XML                |          1 |          0 |          0 |          1 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\public\vox-ailogo-cap-mono.svg                         | XML                |          6 |          0 |          0 |          6 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\public\vox-ailogo-cap.svg                              | XML                |         17 |          0 |          0 |         17 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\public\vox-ailogo-ol.svg                               | XML                |         29 |          0 |          0 |         29 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\public\vox-ailogomono-ol.svg                           | XML                |         20 |          0 |          0 |         20 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\admin\page.tsx                                 | TypeScript JSX     |        200 |         40 |         57 |        297 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\checkifvoted\route.ts                      | TypeScript         |         17 |          4 |          5 |         26 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\getcategories\route.ts                     | TypeScript         |         13 |          0 |          4 |         17 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\getextraoptions\route.ts                   | TypeScript         |         13 |          0 |          3 |         16 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\getextraquestions\route.ts                 | TypeScript         |         13 |          0 |          2 |         15 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\getvgi\route.ts                            | TypeScript         |         26 |          0 |          2 |         28 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\getvotes\route.ts                          | TypeScript         |         49 |          0 |          4 |         53 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\getvotesextra\route.ts                     | TypeScript         |         13 |          1 |          3 |         17 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\getvotingoptions\route.ts                  | TypeScript         |         13 |          0 |          3 |         16 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\setlockey\route.ts                         | TypeScript         |         15 |          0 |          3 |         18 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\validate\route.ts                          | TypeScript         |        475 |        116 |         91 |        682 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\error-incognito\page.tsx                       | TypeScript JSX     |         10 |          0 |          2 |         12 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\error-location-request\page.tsx                | TypeScript JSX     |         16 |          1 |          4 |         21 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\error-vote\page.tsx                            | TypeScript JSX     |         43 |          2 |          8 |         53 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\fonts.ts                                       | TypeScript         |         16 |          8 |          5 |         29 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\gbf.d.ts                                       | TypeScript         |          2 |          0 |          1 |          3 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\globals.css                                    | CSS                |        433 |         11 |         78 |        522 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\icon.svg                                       | XML                |         15 |          0 |          0 |         15 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\layout.tsx                                     | TypeScript JSX     |         25 |          4 |          5 |         34 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\location-request\page.tsx                      | TypeScript JSX     |         16 |          1 |          4 |         21 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\page.tsx                                       | TypeScript JSX     |        142 |        122 |         61 |        325 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\stats\page.tsx                                 | TypeScript JSX     |        283 |         45 |         64 |        392 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\thanks\page.tsx                                | TypeScript JSX     |         10 |          0 |          2 |         12 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\SortableItem.tsx                        | TypeScript JSX     |        105 |          0 |         13 |        118 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\SortableList.tsx                        | TypeScript JSX     |          0 |          0 |          1 |          1 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\AnimatedBackground.module.css | CSS                |         35 |          1 |          7 |         43 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\admin-option.tsx              | TypeScript JSX     |        537 |         26 |         46 |        609 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\animated-background.tsx       | TypeScript JSX     |         90 |          1 |         13 |        104 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\bottom-area.tsx               | TypeScript JSX     |         30 |         13 |          3 |         46 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\error-incognito.tsx           | TypeScript JSX     |         67 |         52 |         10 |        129 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\error-loc-request.tsx         | TypeScript JSX     |        172 |         32 |         10 |        214 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\error-vote.tsx                | TypeScript JSX     |        236 |         67 |         28 |        331 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\loc-request.tsx               | TypeScript JSX     |         87 |         17 |          9 |        113 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\markdown-renderer.tsx         | TypeScript JSX     |          9 |          1 |          4 |         14 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\settings.tsx                  | TypeScript JSX     |      1,226 |        159 |        125 |      1,510 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\stats.tsx                     | TypeScript JSX     |      2,080 |        704 |        206 |      2,990 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\thanks.tsx                    | TypeScript JSX     |         59 |         50 |          9 |        118 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\time-picker-demo.tsx          | TypeScript JSX     |         51 |         12 |          5 |         68 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\time-picker-input.tsx         | TypeScript JSX     |        110 |          8 |         14 |        132 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\time-picker-utils.tsx         | TypeScript JSX     |        160 |         19 |         25 |        204 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\top-area.tsx                  | TypeScript JSX     |        151 |         17 |          5 |        173 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\validation.tsx                | TypeScript JSX     |         27 |        341 |         44 |        412 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\voting-core.tsx               | TypeScript JSX     |        951 |        272 |        104 |      1,327 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\accordion.tsx                        | TypeScript JSX     |         50 |          0 |          9 |         59 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\alert-dialog.tsx                     | TypeScript JSX     |        127 |          0 |         15 |        142 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\button.tsx                           | TypeScript JSX     |         51 |          0 |          6 |         57 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\button\index.ts                      | TypeScript         |         43 |          1 |          6 |         50 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\calendar.tsx                         | TypeScript JSX     |         61 |          0 |          6 |         67 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\card.tsx                             | TypeScript JSX     |         71 |          0 |          9 |         80 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\chart.tsx                            | TypeScript JSX     |        327 |          2 |         37 |        366 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\checkbox.tsx                         | TypeScript JSX     |         26 |          0 |          5 |         31 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\datetime-picker.tsx                  | TypeScript JSX     |        386 |          5 |         36 |        427 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\dialog.tsx                           | TypeScript JSX     |        109 |          0 |         14 |        123 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\input.tsx                            | TypeScript JSX     |         21 |          0 |          5 |         26 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\label.tsx                            | TypeScript JSX     |         21 |          0 |          6 |         27 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\popover.tsx                          | TypeScript JSX     |         25 |          0 |          7 |         32 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\range-calendar\index.ts              | TypeScript         |         28 |          1 |          2 |         31 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\scroll-area.tsx                      | TypeScript JSX     |         43 |          0 |          6 |         49 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\select.tsx                           | TypeScript JSX     |        146 |          0 |         15 |        161 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\separator.tsx                        | TypeScript JSX     |         27 |          0 |          5 |         32 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\skeleton.tsx                         | TypeScript JSX     |         13 |          0 |          3 |         16 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\sonner.tsx                           | TypeScript JSX     |         26 |          0 |          6 |         32 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\switch.tsx                           | TypeScript JSX     |         25 |          0 |          5 |         30 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\table.tsx                            | TypeScript JSX     |        107 |          0 |         11 |        118 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\tabs.tsx                             | TypeScript JSX     |         48 |          0 |          8 |         56 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\textarea.tsx                         | TypeScript JSX     |         20 |          0 |          5 |         25 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\toast.tsx                            | TypeScript JSX     |        117 |          0 |         14 |        131 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\toaster.tsx                          | TypeScript JSX     |         32 |          0 |          4 |         36 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\ui\use-toast.ts                         | TypeScript         |        160 |          3 |         32 |        195 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\lib\utils.ts                                       | TypeScript         |          5 |          0 |          2 |          7 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\middleware.ts                                      | TypeScript         |         68 |          2 |          8 |         78 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\tailwind.config.ts                                     | TypeScript         |         34 |         12 |          4 |         50 |
+| c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\tsconfig.json                                          | JSON with Comments |         27 |          0 |          2 |         29 |
+| Total                                                                                                                   |                    |     20,794 |      2,175 |      1,406 |     24,375 |
++-------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
