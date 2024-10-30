@@ -54,7 +54,7 @@ export default function Thanks() {
                 onClick={() => {
                   // const router = useRouter();
 
-                  router.push("https://qr1.jp/voxtk");
+                  router.push("https://qr1.jp/rebootfb");
                 }}
                 className="bg-red-600 hover:bg-red-700 shadow-md shadow-red-300 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
               >

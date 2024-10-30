@@ -662,8 +662,9 @@ export default function VotingCore(props: {
     if (
       new Date() < new Date(votingDateS) ||
       new Date() >= new Date(votingDateE) ||
-      new Date(new Date().setFullYear(1970, 0, 1)) < new Date(dayStartTime) ||
-      new Date(new Date().setFullYear(1970, 0, 1)) >= new Date(dayEndTime)
+      (new Date(new Date().setUTCFullYear(1970, 0, 1)) <
+        new Date(dayStartTime) &&
+        new Date(new Date().setUTCFullYear(1970, 0, 1)) >= new Date(dayEndTime))
     ) {
       router.replace("/error-vote?e=op");
     } else {

@@ -956,7 +956,7 @@ export function Settings(props: {
               date={new Date(dayStartTime)}
               setDate={(date) => {
                 setDayStartTime(
-                  new Date(date?.setFullYear(1970, 0, 1) ?? 0).toISOString()
+                  new Date(date?.setUTCFullYear(1970, 0, 1) ?? 0).toISOString()
                 );
               }}
             />
@@ -994,7 +994,7 @@ export function Settings(props: {
               date={new Date(dayEndTime)}
               setDate={(date) => {
                 setDayEndTime(
-                  new Date(date?.setFullYear(1970, 0, 1) ?? 0).toISOString()
+                  new Date(date?.setUTCFullYear(1970, 0, 1) ?? 0).toISOString()
                 );
               }}
             />
