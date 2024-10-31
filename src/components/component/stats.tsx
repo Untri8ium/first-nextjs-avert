@@ -946,15 +946,27 @@ export function Stats(props: {}) {
       )
     );
   } else {
-    fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter(
-      (eachVote) =>
-        fetchedStuffToRead.votesExtra.find(
-          (eachVoteExtra) =>
-            eachVoteExtra.IP == eachVote.IP &&
-            eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
-        ) == studentType
+    fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter((eachVote) =>
+      fetchedStuffToRead.votesExtra.find(
+        (eachVoteExtra) =>
+          eachVoteExtra.IP == eachVote.IP &&
+          eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID &&
+          eachVoteExtra.Qanswer == studentType
+      )
     );
   }
+
+  var preliminaryAppearedVoteIP: string[] = [];
+  const voterCount = fetchedStuffToRead.votes.reduce(
+    (preliminaryVoterCount, eachVote) => {
+      if (!preliminaryAppearedVoteIP.includes(eachVote.IP)) {
+        preliminaryVoterCount++;
+        preliminaryAppearedVoteIP.push(eachVote.IP);
+      }
+      return preliminaryVoterCount;
+    },
+    0
+  );
 
   const optionsAndCounts = fetchedStuffToRead?.options
     ? sortOptionsAndCounts(
@@ -2436,7 +2448,17 @@ export function Stats(props: {}) {
                       </LineChart>
                     </ChartContainer>
                   </div>
+                  {/* <div> */}
+                  {/* </div> */}
                   <div className="lg:flex lg:justify-evenly">
+                    <div className="w-full my-4 lg:w-1/6 flex justify-center items-center">
+                      <Card className="">
+                        <CardHeader>投票者数</CardHeader>
+                        <CardContent className="text-3xl font-bold">
+                          {voterCount}
+                        </CardContent>
+                      </Card>
+                    </div>
                     <div className="w-full mt-4 lg:w-1/3">
                       <ChartContainer
                         config={chartConfig}

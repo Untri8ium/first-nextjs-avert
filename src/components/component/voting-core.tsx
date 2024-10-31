@@ -865,6 +865,15 @@ export default function VotingCore(props: {
         });
       }, 4000);
 
+    setTimeout(
+      () =>
+        toast({
+          title: "電子投票が難しいときは…",
+          description: "ご遠慮なく出口付近の投票所にお越しください。",
+        }),
+      10000
+    );
+
     // Add event listener
     mediaQuery.addEventListener("change", handleChange);
 
@@ -1009,7 +1018,7 @@ export default function VotingCore(props: {
                       </div>
 
                       <input
-                        className=" sr-only"
+                        className="sr-only"
                         name={option.ID}
                         type="checkbox"
                         checked={
@@ -1038,6 +1047,7 @@ export default function VotingCore(props: {
                           ).length == maxVotes &&
                           !checkboxes[option.ID as keyof typeof checkboxes]
                         }
+                        aria-hidden={true}
                       />
                     </label>
                   ))}
@@ -1157,7 +1167,7 @@ export default function VotingCore(props: {
                       </div>
 
                       <input
-                        className=" sr-only"
+                        className="sr-only"
                         name={extraOption.ID}
                         type="checkbox"
                         checked={
@@ -1187,6 +1197,7 @@ export default function VotingCore(props: {
                             extraOption.ID as keyof typeof extraCheckboxes
                           ]
                         }
+                        aria-hidden={true}
                       />
                     </label>
                   ))}

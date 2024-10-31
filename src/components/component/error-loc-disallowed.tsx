@@ -107,6 +107,17 @@ export default function ErrorLocRequest() {
     navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
   }
 
+  useEffect(() => {
+    setTimeout(
+      () =>
+        toast({
+          title: "電子投票が難しいときは…",
+          description: "ご遠慮なく出口付近の投票所にお越しください。",
+        }),
+      2000
+    );
+  }, []);
+
   return (
     <>
       <Toaster />

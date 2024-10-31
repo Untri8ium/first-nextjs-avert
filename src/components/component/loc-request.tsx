@@ -90,6 +90,17 @@ export default function LocRequest() {
     navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
   }
 
+  useEffect(() => {
+    setTimeout(
+      () =>
+        toast({
+          title: "電子投票が難しいときは…",
+          description: "ご遠慮なく出口付近の投票所にお越しください。",
+        }),
+      2000
+    );
+  }, []);
+
   return (
     <>
       <Toaster />
@@ -128,7 +139,8 @@ export default function LocRequest() {
                 transition={{ delay: 0.4, duration: 0.5 }}
                 className="text-lg text-gray-600 text-center break-keep"
               >
-                校外での投票を防止するため、&#8203;お手数ですが次の画面で&#8203;許可をお願いします。
+                校外投票防止のため、&#8203;今に限り&#8203;位置情報を取得します。&#8203;
+                <span className="font-bold">位置情報は端末外に出ません。</span>
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

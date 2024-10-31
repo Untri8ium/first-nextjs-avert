@@ -1,0 +1,21 @@
+"filename", "language", "TypeScript", "TypeScript JSX", "comment", "blank", "total"
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\admin\page.tsx", "TypeScript JSX", 0, 24, 0, 2, 26
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\api\validate\route.ts", "TypeScript", 10, 0, 0, 1, 11
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\error-location-disallowed\page.tsx", "TypeScript JSX", 0, 19, 1, 4, 24
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\error-location-request\page.tsx", "TypeScript JSX", 0, 3, 0, 0, 3
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\error-vote\page.tsx", "TypeScript JSX", 0, 3, 0, 0, 3
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\location-request\page.tsx", "TypeScript JSX", 0, 3, 0, 0, 3
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\app\page.tsx", "TypeScript JSX", 0, 2, -1, 0, 1
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\bottom-area.tsx", "TypeScript JSX", 0, 4, 0, 0, 4
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\error-incognito.tsx", "TypeScript JSX", 0, 6, -6, 0, 0
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\error-loc-disallowed.tsx", "TypeScript JSX", 0, 191, 13, 14, 218
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\error-loc-request.tsx", "TypeScript JSX", 0, 86, -6, 5, 85
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\error-vote.tsx", "TypeScript JSX", 0, 11, -4, 0, 7
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\loc-request.tsx", "TypeScript JSX", 0, 85, -3, 8, 90
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\stats.tsx", "TypeScript JSX", 0, 166, 0, 2, 168
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\thanks.tsx", "TypeScript JSX", 0, 6, -6, 0, 0
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\top-area.tsx", "TypeScript JSX", 0, 2, 0, 0, 2
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\components\component\voting-core.tsx", "TypeScript JSX", 0, 13, 0, 0, 13
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\twopointsdistance.ts", "TypeScript", 18, 0, 0, 1, 19
+"c:\Users\racc0\Downloads\first-nextjs-master\first-nextjs-master\src\validatelockey.ts", "TypeScript", 7, 0, 0, 3, 10
+"Total", "-", 35, 624, -12, 40, 687
