@@ -255,14 +255,21 @@ export default function ErrorVote(props: { receivedVGI: any }) {
               {desc}
             </motion.p>
             {e == "ed" ? (
-              <div className="w-full flex justify-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="w-full flex justify-center"
+              >
+                {/* <div className="w-full flex justify-center"> */}
                 <span className="text-lg font-medium text-gray-800">
                   {isLoading ? null : data?.visitorId.substring(0, 3)}
                 </span>
                 <span className="text-xs text-gray-600 pt-2">
                   {isLoading ? null : data?.visitorId.substring(3)}
                 </span>
-              </div>
+                {/* </div> */}
+              </motion.div>
             ) : null}
             {showButton ? (
               <motion.div
@@ -285,12 +292,12 @@ export default function ErrorVote(props: { receivedVGI: any }) {
           <div className="bg-gray-200 px-8 py-4 flex justify-between items-center">
             <span className="text-sm text-gray-600">{ecode}</span>
             {/* {e == "ed" ? ( */}
-            {/* <Link
-              href="https://google.com"
+            <Link
+              href="https://qr1.jp/voxpolicy"
               className="text-sm text-gray-600 hover:text-gray-700 underline"
             >
-              法的文書
-            </Link> */}
+              プライバシーポリシー
+            </Link>
             {/* ) : null} */}
           </div>
         </motion.div>

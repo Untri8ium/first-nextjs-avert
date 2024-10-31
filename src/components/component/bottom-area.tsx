@@ -22,6 +22,10 @@ export function BottomArea() {
             </div>
             <p className="text-gray-700 dark:text-neutral-400 text-sm md:text-md whitespace-pre-line">
               {`© 筑波大学附属駒場高等学校・\u200BUntrioctium`}
+              <br />
+              <a href="https://qr1.jp/voxpolicy" className="underline">
+                プライバシーポリシー
+              </a>
             </p>
           </div>
         </div>

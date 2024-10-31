@@ -172,7 +172,13 @@ export default function ErrorLocRequest() {
                           htmlFor="eligibility"
                           className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                         >
-                          プライバシーポリシーに同意する
+                          <a
+                            href="https://qr1.jp/voxpolicy"
+                            className="underline"
+                          >
+                            プライバシーポリシー
+                          </a>
+                          に同意する
                         </Label>
                       </div>
                     </div>
@@ -192,15 +198,15 @@ export default function ErrorLocRequest() {
                 </Dialog>
               </motion.div>
             </div>
-            <div className="bg-gray-200 px-8 py-4 flex justify-start items-center">
+            <div className="bg-gray-200 px-8 py-4 flex justify-between items-center">
               {/* {e == "ed" ? ( */}
               <span className="text-sm text-gray-600">BE-LO-D</span>
-              {/* <Link
-              href="https://google.com"
-              className="text-sm text-gray-600 hover:text-gray-700 underline"
-            >
-              法的文書
-            </Link> */}
+              <Link
+                href="https://qr1.jp/voxpolicy"
+                className="text-sm text-gray-600 hover:text-gray-700 underline"
+              >
+                プライバシーポリシー
+              </Link>
               {/* ) : null} */}
             </div>
           </motion.div>

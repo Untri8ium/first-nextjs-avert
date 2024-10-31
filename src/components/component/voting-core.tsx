@@ -660,11 +660,20 @@ export default function VotingCore(props: {
 
   useEffect(() => {
     if (
-      new Date() < new Date(votingDateS) ||
-      new Date() >= new Date(votingDateE) ||
-      (new Date(new Date().setUTCFullYear(1970, 0, 1)) <
-        new Date(dayStartTime) &&
-        new Date(new Date().setUTCFullYear(1970, 0, 1)) >= new Date(dayEndTime))
+      !(
+        votingSet &&
+        new Date(votingDateS) <= new Date() &&
+        new Date(votingDateE) > new Date() &&
+        (new Date(dayStartTime) < new Date(dayEndTime)
+          ? new Date(new Date().setUTCFullYear(1970, 0, 1)) >=
+              new Date(dayStartTime) &&
+            new Date(new Date().setUTCFullYear(1970, 0, 1)) <
+              new Date(dayEndTime)
+          : new Date(new Date().setUTCFullYear(1970, 0, 1)) >=
+              new Date(dayStartTime) ||
+            new Date(new Date().setUTCFullYear(1970, 0, 1)) <
+              new Date(dayEndTime))
+      )
     ) {
       router.replace("/error-vote?e=op");
     } else {
@@ -1262,7 +1271,10 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                       htmlFor="secondEligibility"
                       className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
-                      プライバシーポリシーに同意する
+                      <a href="https://qr1.jp/voxpolicy" className="underline">
+                        プライバシーポリシー
+                      </a>
+                      に同意する
                     </Label>
                   </div>
                   {/* <div className="flex items-center space-x-2">

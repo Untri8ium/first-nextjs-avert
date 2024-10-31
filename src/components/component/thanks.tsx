@@ -68,16 +68,16 @@ export default function Thanks() {
               Need Help?
             </a>
           </div> */}
-          <div className="bg-gray-200 px-8 py-4 flex justify-start items-center">
+          <div className="bg-gray-200 px-8 py-4 flex justify-between items-center">
             <span className="text-sm text-gray-600">THKS</span>
 
             {/* {e == "ed" ? ( */}
-            {/* <Link
-              href="https://google.com"
+            <Link
+              href="https://qr1.jp/voxpolicy"
               className="text-sm text-gray-600 hover:text-gray-700 underline"
             >
-              法的文書
-            </Link> */}
+              プライバシーポリシー
+            </Link>
             {/* ) : null} */}
           </div>
         </motion.div>
