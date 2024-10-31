@@ -692,7 +692,10 @@ export function Settings(props: {
       if (dayStartTime && dayEndTime) {
         if (Date.parse(dayStartTime) < Date.parse(dayEndTime))
           setDayEndTimeError(undefined);
-        else setDayEndTimeError("投票時間が0秒以下ですが…");
+        else {
+          // setDayEndTimeError("投票時間が0秒以下ですが…");
+          setDayEndTimeError(undefined);
+        }
       }
 
       if (
@@ -704,8 +707,8 @@ export function Settings(props: {
         options.length != 0 &&
         Date.parse(votingDateS) < Date.parse(votingDateE) &&
         dayStartTime &&
-        dayEndTime &&
-        Date.parse(dayStartTime) < Date.parse(dayEndTime)
+        dayEndTime
+        // Date.parse(dayStartTime) < Date.parse(dayEndTime)
       ) {
         router.refresh();
         console.log(

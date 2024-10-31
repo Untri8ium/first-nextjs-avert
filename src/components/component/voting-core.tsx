@@ -32,6 +32,7 @@ import {
   useMemo,
   useEffect,
   CSSProperties,
+  useRef,
 } from "react";
 
 import { useToast } from "@/components/ui/use-toast";
@@ -1047,7 +1048,7 @@ export default function VotingCore(props: {
                           ).length == maxVotes &&
                           !checkboxes[option.ID as keyof typeof checkboxes]
                         }
-                        aria-hidden={true}
+                        // aria-hidden={true}
                       />
                     </label>
                   ))}
@@ -1197,7 +1198,7 @@ export default function VotingCore(props: {
                             extraOption.ID as keyof typeof extraCheckboxes
                           ]
                         }
-                        aria-hidden={true}
+                        // aria-hidden={true}
                       />
                     </label>
                   ))}
