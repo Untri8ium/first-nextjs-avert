@@ -929,6 +929,16 @@ export function Stats(props: {}) {
 
   if (studentType == "all") {
   } else if (studentType == "ns") {
+    fetchedStuffToRead.votesExtra = fetchedStuffToRead.votesExtra.filter(
+      (voteExtra) =>
+        voteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID ||
+        !fetchedStuffToRead.votesExtra.find(
+          (eachVoteExtra) =>
+            eachVoteExtra.IP == voteExtra.IP &&
+            eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
+        )
+    );
+
     fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter(
       (eachVote) =>
         !fetchedStuffToRead.votesExtra.find(
@@ -938,6 +948,16 @@ export function Stats(props: {}) {
         )
     );
   } else if (studentType == "s") {
+    fetchedStuffToRead.votesExtra = fetchedStuffToRead.votesExtra.filter(
+      (voteExtra) =>
+        voteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID ||
+        fetchedStuffToRead.votesExtra.find(
+          (eachVoteExtra) =>
+            eachVoteExtra.IP == voteExtra.IP &&
+            eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
+        )
+    );
+
     fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter((eachVote) =>
       fetchedStuffToRead.votesExtra.find(
         (eachVoteExtra) =>
@@ -946,6 +966,17 @@ export function Stats(props: {}) {
       )
     );
   } else {
+    fetchedStuffToRead.votesExtra = fetchedStuffToRead.votesExtra.filter(
+      (voteExtra) =>
+        voteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID ||
+        fetchedStuffToRead.votesExtra.find(
+          (eachVoteExtra) =>
+            eachVoteExtra.IP == voteExtra.IP &&
+            eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID &&
+            eachVoteExtra.Qanswer == studentType
+        )
+    );
+
     fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter((eachVote) =>
       fetchedStuffToRead.votesExtra.find(
         (eachVoteExtra) =>
@@ -955,18 +986,6 @@ export function Stats(props: {}) {
       )
     );
   }
-
-  var preliminaryAppearedVoteIP: string[] = [];
-  const voterCount = fetchedStuffToRead.votes.reduce(
-    (preliminaryVoterCount, eachVote) => {
-      if (!preliminaryAppearedVoteIP.includes(eachVote.IP)) {
-        preliminaryVoterCount++;
-        preliminaryAppearedVoteIP.push(eachVote.IP);
-      }
-      return preliminaryVoterCount;
-    },
-    0
-  );
 
   const optionsAndCounts = fetchedStuffToRead?.options
     ? sortOptionsAndCounts(
@@ -1124,6 +1143,55 @@ export function Stats(props: {}) {
             )
               .fill(null)
               .reduce((dateVoteCounts, empty, index) => {
+                const tempFiltered = votesCopy.filter(
+                  (eachVote) =>
+                    // if (
+                    //   eachOption.ID == "07c8a9c5-15fe-4e79-8a9b-d8979655594d" &&
+                    //   eachVote.voteOption ==
+                    //     "07c8a9c5-15fe-4e79-8a9b-d8979655594d"
+                    // )
+                    //   console.log(
+                    //     `Checking option ID: ${eachOption.ID} against voteOption: ${eachVote.voteOption}`
+                    //   );
+
+                    // return (
+                    eachVote.voteOption == eachOption.ID &&
+                    new Date(eachVote.voteTime) >=
+                      new Date(
+                        new Date(
+                          new Date(
+                            fetchedStuffToRead.vgi[0].votingstart
+                          ).setDate(
+                            new Date(
+                              fetchedStuffToRead.vgi[0].votingstart
+                            ).getDate() + index
+                          )
+                        ).setHours(
+                          halfHoursElapsedFrom0800 / 2 + startHour,
+                          (halfHoursElapsedFrom0800 * 30) % 60,
+                          0,
+                          0
+                        )
+                      ) &&
+                    new Date(eachVote.voteTime) <
+                      new Date(
+                        new Date(
+                          new Date(
+                            fetchedStuffToRead.vgi[0].votingstart
+                          ).setDate(
+                            new Date(
+                              fetchedStuffToRead.vgi[0].votingstart
+                            ).getDate() + index
+                          )
+                        ).setHours(
+                          halfHoursElapsedFrom0800 / 2 + startHour + 1 / 2,
+                          (halfHoursElapsedFrom0800 * 30 + 30) % 60,
+                          0,
+                          0
+                        )
+                      )
+                  // );
+                );
                 dateVoteCounts[
                   new Date(
                     new Date(fetchedStuffToRead.vgi[0].votingstart).setDate(
@@ -1132,50 +1200,14 @@ export function Stats(props: {}) {
                       ).getDate() + index
                     )
                   ).setHours(0, 0, 0, 0)
-                ] = votesCopy
-                  .filter(
-                    (eachVote) =>
-                      eachVote.voteOption == eachOption.ID &&
-                      new Date(eachVote.voteTime) >=
-                        new Date(
-                          new Date(
-                            new Date(
-                              fetchedStuffToRead.vgi[0].votingstart
-                            ).setDate(
-                              new Date(
-                                fetchedStuffToRead.vgi[0].votingstart
-                              ).getDate() + index
-                            )
-                          ).setHours(
-                            halfHoursElapsedFrom0800 / 2 + startHour,
-                            (halfHoursElapsedFrom0800 * 30) % 60,
-                            0,
-                            0
-                          )
-                        ) &&
-                      new Date(eachVote.voteTime) <
-                        new Date(
-                          new Date(
-                            new Date(
-                              fetchedStuffToRead.vgi[0].votingstart
-                            ).setDate(
-                              new Date(
-                                fetchedStuffToRead.vgi[0].votingstart
-                              ).getDate() + index
-                            )
-                          ).setHours(
-                            halfHoursElapsedFrom0800 / 2 + startHour + 1 / 2,
-                            (halfHoursElapsedFrom0800 * 30 + 30) % 60,
-                            0,
-                            0
-                          )
-                        )
-                  )
-                  .reduce((hitVoteCount, eachHitVote) => {
-                    hitVoteCount++;
-                    votesCopy.splice(votesCopy.indexOf(eachHitVote), 1);
-                    return hitVoteCount;
-                  }, 0);
+                ] =
+                  tempFiltered.length >= 1
+                    ? tempFiltered.reduce((hitVoteCount, eachHitVote) => {
+                        hitVoteCount++;
+                        votesCopy.splice(votesCopy.indexOf(eachHitVote), 1);
+                        return hitVoteCount;
+                      }, 0)
+                    : 0;
                 return dateVoteCounts;
               }, {})
           )
@@ -1480,6 +1512,9 @@ export function Stats(props: {}) {
   );
 
   var days: number[] = [];
+  var voterDateOnlyCharts: { [day: string]: number } = {};
+  var voterCount: number = 0;
+
   var dateOnlyCharts: { [key: string]: { [key: number]: number } } = {};
   var q1ExtraOptions: IndivExtraOption[] = [];
   var dateOnlyQ1Charts: { [key: string]: Object } = {};
@@ -1498,9 +1533,9 @@ export function Stats(props: {}) {
     [day: number]: { head: string; total: number }[];
   } = {};
   var allOptionsCombinedPercentQ1Charts: { head: string; total: number }[] = [];
-  var preliminaryAllOptionsCombinedQ1Charts: {
-    [extraOptionID: string]: { head: string; total: number };
-  } = {};
+  // var preliminaryAllOptionsCombinedQ1Charts: {
+  //   [extraOptionID: string]: { head: string; total: number };
+  // } = {};
   var allOptionsCombinedQ1Charts: { head: string; total: number }[] = [];
 
   var q2ExtraOptions: IndivExtraOption[] = [];
@@ -1515,9 +1550,9 @@ export function Stats(props: {}) {
     [day: number]: { head: string; total: number }[];
   } = {};
   var allOptionsCombinedPercentQ2Charts: { head: string; total: number }[] = [];
-  var preliminaryAllOptionsCombinedQ2Charts: {
-    [extraOptionID: string]: { head: string; total: number };
-  } = {};
+  // var preliminaryAllOptionsCombinedQ2Charts: {
+  //   [extraOptionID: string]: { head: string; total: number };
+  // } = {};
   var allOptionsCombinedQ2Charts: { head: string; total: number }[] = [];
 
   try {
@@ -1549,6 +1584,45 @@ export function Stats(props: {}) {
         }),
         {}
       );
+
+    var preliminaryAppearedVoteIP: string[] = [];
+    voterDateOnlyCharts = days.reduce(
+      (preliminaryVoterDateOnlyCharts: { [day: string]: number }, eachDay) => {
+        preliminaryVoterDateOnlyCharts[eachDay] =
+          fetchedStuffToRead.votes.reduce((preliminaryVoterCount, eachVote) => {
+            if (
+              !preliminaryAppearedVoteIP.includes(eachVote.IP) &&
+              new Date(eachVote.voteTime) >= new Date(eachDay) &&
+              new Date(eachVote.voteTime) <
+                new Date(
+                  new Date(eachDay).setDate(new Date(eachDay).getDate() + 1)
+                )
+            ) {
+              preliminaryVoterCount++;
+              preliminaryAppearedVoteIP.push(eachVote.IP);
+            }
+            return preliminaryVoterCount;
+          }, 0);
+        preliminaryAppearedVoteIP = [];
+        return preliminaryVoterDateOnlyCharts;
+      },
+      {}
+    );
+
+    voterCount = fetchedStuffToRead.votes.reduce(
+      (preliminaryVoterCount, eachVote) => {
+        if (!preliminaryAppearedVoteIP.includes(eachVote.IP)) {
+          preliminaryVoterCount++;
+          preliminaryAppearedVoteIP.push(eachVote.IP);
+        }
+        return preliminaryVoterCount;
+      },
+      0
+    );
+
+    console.warn(voterDateOnlyCharts);
+    console.warn(voterCount);
+
     // dateOnlyQ1Charts = new Array(totalDays).map(empty => fetchedStuffToRead.extraOptions.filter(eachExtraOption => eachExtraOption.QID == fetchedStuffToRead.extraQuestions[0].ID)?.reduce((preliminaryChart, extraOption) => (fetchedStuff.votes.filter(eachVote => eachVote.voteOption == )),{})
     dateOnlyCharts = fetchedStuffToRead.options.reduce(
       (preliminaryEntireCharts, eachOption) => ({
@@ -1641,19 +1715,44 @@ export function Stats(props: {}) {
 
     // Initialize the structure
     days.forEach((day) => {
+      // allOptionsDateOnlyQ1Charts[day] = q1ExtraOptions.reduce(
+      //   (result, extraOption, index) => {
+      //     // Aggregate totals for each extra option
+      //     const total = Object.entries(dateOnlyQ1Charts).reduce(
+      //       (sum, [optionID, dayCounts]) => {
+      //         // Assert the type of dayCounts to avoid TypeScript error
+      //         // const {head, ...headLessDayCounts} = dayCounts ;
+      //         const counts = arrayed(dayCounts)[index] as {
+      //           [key: number]: number;
+      //         };
+      //         // console.warn(counts);
+      //         // console.log(sum, day, counts[day]);
+      //         return sum + (counts[day] ?? -99999);
+      //       },
+      //       0
+      //     );
+
+      //     return {
+      //       ...result,
+      //       [extraOption.ID]: { head: extraOption.name, total },
+      //     };
+      //   },
+      //   {}
+      // );
+
       allOptionsDateOnlyQ1Charts[day] = q1ExtraOptions.reduce(
         (result, extraOption, index) => {
           // Aggregate totals for each extra option
-          const total = Object.entries(dateOnlyQ1Charts).reduce(
-            (sum, [optionID, dayCounts]) => {
-              // Assert the type of dayCounts to avoid TypeScript error
-              // const {head, ...headLessDayCounts} = dayCounts ;
-              const counts = arrayed(dayCounts)[index] as {
-                [key: number]: number;
-              };
-              // console.warn(counts);
-              // console.log(sum, day, counts[day]);
-              return sum + (counts[day] ?? -99999);
+          const total = fetchedStuffToRead.votesExtra.reduce(
+            (preliminaryTotal, eachVoteExtra) => {
+              if (
+                eachVoteExtra.Qanswer == extraOption.ID &&
+                new Date(eachVoteExtra.voteTime) >= new Date(day) &&
+                new Date(eachVoteExtra.voteTime) <
+                  new Date(new Date(day).setDate(new Date(day).getDate() + 1))
+              )
+                preliminaryTotal++;
+              return preliminaryTotal;
             },
             0
           );
@@ -1683,30 +1782,64 @@ export function Stats(props: {}) {
       ])
     );
 
+    // combinedQ1Charts = Object.fromEntries(
+    //   q1ExtraOptions.reduce((result: any[], extraOption, index) => {
+    //     // Aggregate totals for each extra option
+    //     const total = fetchedStuffToRead.votesExtra.reduce(
+    //       (preliminaryTotal, eachVoteExtra) => {
+    //         if (eachVoteExtra.Qanswer == extraOption.ID) preliminaryTotal++;
+    //         return preliminaryTotal;
+    //       },
+    //       0
+    //     );
+
+    //     result.push({ [extraOption.ID]: { head: extraOption.name, total } });
+    //     return result;
+    //   }, [])
+    // );
+
+    console.log(combinedQ1Charts);
+
     // Iterate through combinedQ1Charts for each option
-    Object.keys(combinedQ1Charts).forEach((optionID) => {
-      combinedQ1Charts[optionID].forEach((extraOptionObj, index) => {
-        const { head, total } = extraOptionObj;
+    // Object.keys(combinedQ1Charts).forEach((optionID) => {
+    //   combinedQ1Charts[optionID].forEach((extraOptionObj, index) => {
+    //     const { head, total } = extraOptionObj;
 
-        if (!preliminaryAllOptionsCombinedQ1Charts[q1ExtraOptions[index].ID]) {
-          // Initialize if not already present
-          preliminaryAllOptionsCombinedQ1Charts[q1ExtraOptions[index].ID] = {
-            head,
-            total,
-          };
-        } else {
-          // Add up the totals if already present
-          preliminaryAllOptionsCombinedQ1Charts[
-            q1ExtraOptions[index].ID
-          ].total += total;
-        }
-      });
-    });
-    allOptionsCombinedQ1Charts = Object.values(
-      preliminaryAllOptionsCombinedQ1Charts
-    );
+    //     if (!preliminaryAllOptionsCombinedQ1Charts[q1ExtraOptions[index].ID]) {
+    //       // Initialize if not already present
+    //       preliminaryAllOptionsCombinedQ1Charts[q1ExtraOptions[index].ID] = {
+    //         head,
+    //         total,
+    //       };
+    //     } else {
+    //       // Add up the totals if already present
+    //       preliminaryAllOptionsCombinedQ1Charts[
+    //         q1ExtraOptions[index].ID
+    //       ].total += total;
+    //     }
+    //   });
+    // });
+    // allOptionsCombinedQ1Charts = Object.values(
+    //   preliminaryAllOptionsCombinedQ1Charts
+    // );
 
-    console.dir(preliminaryAllOptionsCombinedQ1Charts);
+    allOptionsCombinedQ1Charts = fetchedStuffToRead.extraOptions
+      .filter(
+        (eachExtraOption) =>
+          eachExtraOption.QID == fetchedStuffToRead.extraQuestions[0].ID
+      )
+      .map((eachExtraOption) => ({
+        head: eachExtraOption.name,
+        total: fetchedStuffToRead.votesExtra.reduce(
+          (preliminaryTotal, eachVoteExtra) => {
+            if (eachVoteExtra.Qanswer == eachExtraOption.ID) preliminaryTotal++;
+            return preliminaryTotal;
+          },
+          0
+        ),
+      }));
+
+    // console.dir(preliminaryAllOptionsCombinedQ1Charts);
     console.log(allOptionsCombinedQ1Charts);
 
     dateOnlyPercentQ1Charts = Object.fromEntries(
@@ -1766,12 +1899,13 @@ export function Stats(props: {}) {
           allOptionsDateOnlyQ1Charts[dayAsNumber][eachExtraOptionID].head;
 
         // Get the corresponding total for the day from allOptionsDateOnlyCharts
-        const dayTotal = allOptionsDateOnlyCharts[eachDay];
+        // const dayTotal = allOptionsDateOnlyCharts[eachDay];
+        const dayVoterTotal = voterDateOnlyCharts[eachDay];
 
         // Avoid division by zero
         const percentTotal =
-          dayTotal > 0
-            ? Math.round((originalTotal / dayTotal) * 10000) / 100
+          dayVoterTotal > 0
+            ? Math.round((originalTotal / dayVoterTotal) * 10000) / 100
             : 0; // we just accidentally ruled that 0 divided by 0 is 0
 
         return { head, total: percentTotal };
@@ -1810,10 +1944,13 @@ export function Stats(props: {}) {
       const { head, total } = allOptionsCombinedQ1Charts[index];
 
       // Compute the percentage by dividing the total by the overall total sum
+      // const percentTotal =
+      //   totalSumAllOptions > 0
+      //     ? Math.round((total / totalSumAllOptions) * 10000) / 100
+      //     : 0;
+
       const percentTotal =
-        totalSumAllOptions > 0
-          ? Math.round((total / totalSumAllOptions) * 10000) / 100
-          : 0;
+        voterCount > 0 ? Math.round((total / voterCount) * 10000) / 100 : 0;
 
       // Store the result in allOptionsCombinedPercentQ1Charts
       allOptionsCombinedPercentQ1Charts[index] = {
@@ -1877,22 +2014,48 @@ export function Stats(props: {}) {
     }));
 
     console.log(allOptionsCombinedTimeCharts);
+    console.warn(allOptionsDateOnlyQ2Charts);
 
     // Initialize the structure
     days.forEach((day) => {
+      // allOptionsDateOnlyQ2Charts[day] = q2ExtraOptions.reduce(
+      //   (result, extraOption, index) => {
+      //     // Aggregate totals for each extra option
+      //     const total = Object.entries(dateOnlyQ2Charts).reduce(
+      //       (sum, [optionID, dayCounts]) => {
+      //         // Assert the type of dayCounts to avoid TypeScript error
+      //         // const {head, ...headLessDayCounts} = dayCounts ;
+      //         const counts = arrayed(dayCounts)[index] as {
+      //           [key: number]: number;
+      //         };
+      //         // console.warn(counts);
+      //         // console.log(sum, day, counts[day]);
+      //         return sum + (counts[day] ?? -99999);
+      //       },
+      //       0
+      //     );
+
+      //     return {
+      //       ...result,
+      //       [extraOption.ID]: { head: extraOption.name, total },
+      //     };
+      //   },
+      //   {}
+      // );
+
       allOptionsDateOnlyQ2Charts[day] = q2ExtraOptions.reduce(
         (result, extraOption, index) => {
           // Aggregate totals for each extra option
-          const total = Object.entries(dateOnlyQ2Charts).reduce(
-            (sum, [optionID, dayCounts]) => {
-              // Assert the type of dayCounts to avoid TypeScript error
-              // const {head, ...headLessDayCounts} = dayCounts ;
-              const counts = arrayed(dayCounts)[index] as {
-                [key: number]: number;
-              };
-              // console.warn(counts);
-              // console.log(sum, day, counts[day]);
-              return sum + (counts[day] ?? -99999);
+          const total = fetchedStuffToRead.votesExtra.reduce(
+            (preliminaryTotal, eachVoteExtra) => {
+              if (
+                eachVoteExtra.Qanswer == extraOption.ID &&
+                new Date(eachVoteExtra.voteTime) >= new Date(day) &&
+                new Date(eachVoteExtra.voteTime) <
+                  new Date(new Date(day).setDate(new Date(day).getDate() + 1))
+              )
+                preliminaryTotal++;
+              return preliminaryTotal;
             },
             0
           );
@@ -1904,6 +2067,9 @@ export function Stats(props: {}) {
         },
         {}
       );
+      //   },
+      //   {}
+      // );
     });
 
     console.dir(allOptionsDateOnlyQ2Charts);
@@ -1922,30 +2088,64 @@ export function Stats(props: {}) {
       ])
     );
 
+    // combinedQ2Charts = Object.fromEntries(
+    //   q2ExtraOptions.reduce((result: any[], extraOption, index) => {
+    //     // Aggregate totals for each extra option
+    //     const total = fetchedStuffToRead.votesExtra.reduce(
+    //       (preliminaryTotal, eachVoteExtra) => {
+    //         if (eachVoteExtra.Qanswer == extraOption.ID) preliminaryTotal++;
+    //         return preliminaryTotal;
+    //       },
+    //       0
+    //     );
+
+    //     result.push({ [extraOption.ID]: { head: extraOption.name, total } });
+    //     return result;
+    //   }, [])
+    // );
+
+    console.log(combinedQ2Charts);
+
     // Iterate through combinedQ2Charts for each option
-    Object.keys(combinedQ2Charts).forEach((optionID) => {
-      combinedQ2Charts[optionID].forEach((extraOptionObj, index) => {
-        const { head, total } = extraOptionObj;
+    // Object.keys(combinedQ2Charts).forEach((optionID) => {
+    //   combinedQ2Charts[optionID].forEach((extraOptionObj, index) => {
+    //     const { head, total } = extraOptionObj;
 
-        if (!preliminaryAllOptionsCombinedQ2Charts[q2ExtraOptions[index].ID]) {
-          // Initialize if not already present
-          preliminaryAllOptionsCombinedQ2Charts[q2ExtraOptions[index].ID] = {
-            head,
-            total,
-          };
-        } else {
-          // Add up the totals if already present
-          preliminaryAllOptionsCombinedQ2Charts[
-            q2ExtraOptions[index].ID
-          ].total += total;
-        }
-      });
-    });
-    allOptionsCombinedQ2Charts = Object.values(
-      preliminaryAllOptionsCombinedQ2Charts
-    );
+    //     if (!preliminaryAllOptionsCombinedQ2Charts[q2ExtraOptions[index].ID]) {
+    //       // Initialize if not already present
+    //       preliminaryAllOptionsCombinedQ2Charts[q2ExtraOptions[index].ID] = {
+    //         head,
+    //         total,
+    //       };
+    //     } else {
+    //       // Add up the totals if already present
+    //       preliminaryAllOptionsCombinedQ2Charts[
+    //         q2ExtraOptions[index].ID
+    //       ].total += total;
+    //     }
+    //   });
+    // });
+    // allOptionsCombinedQ2Charts = Object.values(
+    //   preliminaryAllOptionsCombinedQ2Charts
+    // );
 
-    console.dir(preliminaryAllOptionsCombinedQ2Charts);
+    allOptionsCombinedQ2Charts = fetchedStuffToRead.extraOptions
+      .filter(
+        (eachExtraOption) =>
+          eachExtraOption.QID == fetchedStuffToRead.extraQuestions[1].ID
+      )
+      .map((eachExtraOption) => ({
+        head: eachExtraOption.name,
+        total: fetchedStuffToRead.votesExtra.reduce(
+          (preliminaryTotal, eachVoteExtra) => {
+            if (eachVoteExtra.Qanswer == eachExtraOption.ID) preliminaryTotal++;
+            return preliminaryTotal;
+          },
+          0
+        ),
+      }));
+
+    // console.dir(preliminaryAllOptionsCombinedQ2Charts);
     console.log(allOptionsCombinedQ2Charts);
 
     // Iterate over each day in allOptionsDateOnlyQ2Charts
@@ -1986,12 +2186,13 @@ export function Stats(props: {}) {
           allOptionsDateOnlyQ2Charts[dayAsNumber][eachExtraOptionID].head;
 
         // Get the corresponding total for the day from allOptionsDateOnlyCharts
-        const dayTotal = allOptionsDateOnlyCharts[eachDay];
+        // const dayTotal = allOptionsDateOnlyCharts[eachDay];
+        const dayVoterTotal = voterDateOnlyCharts[eachDay];
 
         // Avoid division by zero
         const percentTotal =
-          dayTotal > 0
-            ? Math.round((originalTotal / dayTotal) * 10000) / 100
+          dayVoterTotal > 0
+            ? Math.round((originalTotal / dayVoterTotal) * 10000) / 100
             : 0;
 
         return { head, total: percentTotal };
@@ -2006,11 +2207,9 @@ export function Stats(props: {}) {
 
       // Compute the percentage by dividing the total by the overall total sum
       const percentTotal =
-        totalSumAllOptions > 0
-          ? Math.round((total / totalSumAllOptions) * 10000) / 100
-          : 0;
+        voterCount > 0 ? Math.round((total / voterCount) * 10000) / 100 : 0;
 
-      // Store the result in allOptionsCombinedPercentQ2Charts
+      // Store the result in allOptionsCombinedPercentQ1Charts
       allOptionsCombinedPercentQ2Charts[index] = {
         head,
         total: percentTotal,
@@ -2023,7 +2222,7 @@ export function Stats(props: {}) {
     console.log(allOptionsDateOnlyQ2Charts);
     console.log(allOptionsCombinedPercentQ2Charts);
     console.log(allOptionsDateOnlyPercentQ2Charts);
-    console.log(preliminaryAllOptionsCombinedQ2Charts);
+    // console.log(preliminaryAllOptionsCombinedQ2Charts);
   } catch (e) {
     console.log(`oh hell naw ${e}`);
   }
@@ -2188,7 +2387,7 @@ export function Stats(props: {}) {
                         <TableRow key={optionAndCount.option.ID}>
                           <TableCell
                             className={
-                              (optionAndCount.rank <= 3
+                              (optionAndCount.rank <= 1
                                 ? "font-bold text-lg pt-2 pb-2 "
                                 : "font-medium text-sm pt-1 pb-1 ") +
                               (optionAndCount.rank <
@@ -2212,7 +2411,7 @@ export function Stats(props: {}) {
                           </TableCell>
                           <TableCell
                             className={
-                              (optionAndCount.rank <= 3
+                              (optionAndCount.rank <= 1
                                 ? "font-bold text-lg pt-2 pb-2 leading-snug "
                                 : "font-medium text-sm pt-1 pb-1 leading-snug ") +
                               (optionAndCount.rank <
@@ -2455,7 +2654,9 @@ export function Stats(props: {}) {
                       <Card className="">
                         <CardHeader>投票者数</CardHeader>
                         <CardContent className="text-3xl font-bold">
-                          {voterCount}
+                          {activeLinesOV.length == 1
+                            ? voterDateOnlyCharts[activeLinesOV[0]]
+                            : voterCount}
                         </CardContent>
                       </Card>
                     </div>

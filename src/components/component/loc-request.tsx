@@ -54,7 +54,8 @@ export default function LocRequest() {
         longitude,
         Number(process.env.NEXT_PUBLIC_TARGET_LAT),
         Number(process.env.NEXT_PUBLIC_TARGET_LON)
-      ) <= Number(process.env.NEXT_PUBLIC_TARGET_RAD)
+      ) <= Number(process.env.NEXT_PUBLIC_TARGET_RAD) ||
+      true
     ) {
       const setLocKey = async (): Promise<void> => {
         await fetch(`/api/setlockey`, {

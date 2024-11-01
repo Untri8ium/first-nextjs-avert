@@ -540,14 +540,16 @@ export async function POST(request: Request) {
       votingSet &&
       new Date(votingDateS) <= new Date() &&
       new Date(votingDateE) > new Date() &&
-      (new Date(dayStartTime) < new Date(dayEndTime)
-        ? new Date(new Date().setUTCFullYear(1970, 0, 1)) >=
-            new Date(dayStartTime) &&
-          new Date(new Date().setUTCFullYear(1970, 0, 1)) < new Date(dayEndTime)
-        : new Date(new Date().setUTCFullYear(1970, 0, 1)) >=
-            new Date(dayStartTime) ||
-          new Date(new Date().setUTCFullYear(1970, 0, 1)) <
-            new Date(dayEndTime));
+      (new Date(dayStartTime).setUTCFullYear(1970, 0, 1) <
+      new Date(dayEndTime).setUTCFullYear(1970, 0, 1)
+        ? new Date().setUTCFullYear(1970, 0, 1) >=
+            new Date(dayStartTime).setUTCFullYear(1970, 0, 1) &&
+          new Date().setUTCFullYear(1970, 0, 1) <
+            new Date(dayEndTime).setUTCFullYear(1970, 0, 1)
+        : new Date().setUTCFullYear(1970, 0, 1) >=
+            new Date(dayStartTime).setUTCFullYear(1970, 0, 1) ||
+          new Date().setUTCFullYear(1970, 0, 1) <
+            new Date(dayEndTime).setUTCFullYear(1970, 0, 1));
 
     if (!maxVotesTest) {
       throw "mv";

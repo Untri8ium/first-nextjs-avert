@@ -1057,16 +1057,18 @@ export default function VotingCore(props: {
           ))}
         </div>
 
-        <div className="px-[30px] py-[20px] block items-center bg-gradient-to-r from-gray-300 to-gray-400 dark:bg-gradient-to-r dark:from-neutral-900 dark:to-neutral-800">
+        <div className="px-[30px] py-[30px] items-center bg-gradient-to-r from-gray-300 to-gray-400 dark:bg-gradient-to-r dark:from-neutral-900 dark:to-neutral-800">
           <Label className="w-full font-medium text-md">
-            {"投票は以上です"}
-            <br />
+            {/* {"投票は以上です"} */}
+            {/* <br /> */}
             {"最後にご質問がございます"}
+            <br />
+            {"該当選択肢のない質問は飛ばしてください"}
           </Label>
-          <br />
-          <Label className="w-full font-normal text-sm text-gray-700 dark:text-neutral-400">
-            {"(該当選択肢のない質問は飛ばして結構です)"}
-          </Label>
+          {/* <br /> */}
+          {/* <Label className="w-full font-normal text-sm text-gray-700 dark:text-neutral-400"> */}
+          {/* {"(該当選択肢のない質問は飛ばして結構です)"} */}
+          {/* </Label> */}
         </div>
 
         {/*<>
