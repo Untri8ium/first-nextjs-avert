@@ -145,7 +145,7 @@ export default function ErrorLocRequest() {
                 transition={{ delay: 0.4, duration: 0.5 }}
                 className="text-lg text-gray-600 text-center mb-4 break-keep"
               >
-                以下の点をご確認の上&#8203;お試しください。&#8203;難しい場合、&#8203;投票所でご投票ください。
+                端末の位置情報設定が原因です。&#8203;設定変更が難しい場合、&#8203;投票所でご投票ください。
               </motion.p>
               <Accordion type="single" collapsible>
                 <AccordionItem value="item-iphone">
@@ -156,7 +156,7 @@ export default function ErrorLocRequest() {
                       transition={{ delay: 0.4, duration: 0.5 }}
                       className="text-lg text-gray-700"
                     >
-                      iPhoneをお使いの場合
+                      端末設定変更ガイド（iPhone）
                     </motion.p>
                   </AccordionTrigger>
                   <AccordionContent className="text-gray-600">
@@ -175,7 +175,7 @@ export default function ErrorLocRequest() {
 ②「プライバシーとセキュリティ」に入り、
 ③「位置情報サービス」に入り、
 ④「位置情報サービス」を有効にします。
-⑤下にスクロールして「SafariのWebサイト」に入り、
+⑤**下にスクロールして**「SafariのWebサイト」に入り、
 ⑥「このAppの使⽤中のみ許可」をタップします。
 ⑦「正確な位置情報」を有効にします。
 　
@@ -196,7 +196,7 @@ export default function ErrorLocRequest() {
                       transition={{ delay: 0.4, duration: 0.5 }}
                       className="text-lg text-gray-700"
                     >
-                      Androidをお使いの場合
+                      端末設定変更ガイド（Android）
                     </motion.p>
                   </AccordionTrigger>
                   <AccordionContent className="text-gray-600">

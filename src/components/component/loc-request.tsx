@@ -54,8 +54,7 @@ export default function LocRequest() {
         longitude,
         Number(process.env.NEXT_PUBLIC_TARGET_LAT),
         Number(process.env.NEXT_PUBLIC_TARGET_LON)
-      ) <= Number(process.env.NEXT_PUBLIC_TARGET_RAD) ||
-      true
+      ) <= Number(process.env.NEXT_PUBLIC_TARGET_RAD)
     ) {
       const setLocKey = async (): Promise<void> => {
         await fetch(`/api/setlockey`, {
@@ -130,9 +129,7 @@ export default function LocRequest() {
               >
                 位置情報
                 <br />
-                <span className="text-red-500 text-3xl">
-                  を許可してください
-                </span>
+                <span className="text-red-500 text-3xl">を許可ください</span>
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
