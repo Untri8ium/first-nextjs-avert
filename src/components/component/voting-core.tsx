@@ -683,7 +683,7 @@ export default function VotingCore(props: {
           router.replace("/error-incognito");
         } else {
           const checkIPinDatabase = async () => {
-            if (!cjsfp) {
+            if (cjsfp == "fp not created as data.visitorId missing") {
               return false;
             }
             try {
