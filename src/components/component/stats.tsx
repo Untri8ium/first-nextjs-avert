@@ -927,6 +927,8 @@ export function Stats(props: {}) {
   if (fetchedStuff.err.length != 0 && previousFetchedStuffRef.current)
     fetchedStuffToRead = previousFetchedStuffRef.current;
 
+  fetchedStuffToRead.options = sortOptions(fetchedStuffToRead.options);
+
   if (studentType == "all") {
   } else if (studentType == "ns") {
     fetchedStuffToRead.votesExtra = fetchedStuffToRead.votesExtra.filter(
@@ -947,6 +949,10 @@ export function Stats(props: {}) {
             eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
         )
     );
+
+    // fetchedStuffToRead.options = fetchedStuffToRead.options.filter(
+    //   (eachOption) => eachOption.ID != "07c8a9c5-15fe-4e79-8a9b-d8979655594d"
+    // );
   } else if (studentType == "s") {
     fetchedStuffToRead.votesExtra = fetchedStuffToRead.votesExtra.filter(
       (voteExtra) =>
@@ -1109,6 +1115,9 @@ export function Stats(props: {}) {
       },
       eachOption
     ) => {
+      console.log(fetchedStuffToRead.votes.length);
+      console.log(votesCopy.length);
+      console.log(eachOption.ID);
       preliminaryTimeCharts[eachOption.ID] = new Array(totalHalfHours)
         .fill(null)
         .map((empty, halfHoursElapsedFrom0800) =>
@@ -1143,18 +1152,8 @@ export function Stats(props: {}) {
             )
               .fill(null)
               .reduce((dateVoteCounts, empty, index) => {
-                const tempFiltered = votesCopy.filter(
-                  (eachVote) =>
-                    // if (
-                    //   eachOption.ID == "07c8a9c5-15fe-4e79-8a9b-d8979655594d" &&
-                    //   eachVote.voteOption ==
-                    //     "07c8a9c5-15fe-4e79-8a9b-d8979655594d"
-                    // )
-                    //   console.log(
-                    //     `Checking option ID: ${eachOption.ID} against voteOption: ${eachVote.voteOption}`
-                    //   );
-
-                    // return (
+                const tempFiltered = votesCopy.filter((eachVote) => {
+                  return (
                     eachVote.voteOption == eachOption.ID &&
                     new Date(eachVote.voteTime) >=
                       new Date(
@@ -1190,8 +1189,8 @@ export function Stats(props: {}) {
                           0
                         )
                       )
-                  // );
-                );
+                  );
+                });
                 dateVoteCounts[
                   new Date(
                     new Date(fetchedStuffToRead.vgi[0].votingstart).setDate(
@@ -1212,17 +1211,26 @@ export function Stats(props: {}) {
               }, {})
           )
         );
+      // console.log(JSON.stringify(preliminaryTimeCharts));
       return preliminaryTimeCharts;
     },
     {}
   );
+
+  console.log(JSON.stringify(timeCharts));
+  // const timeCharts: {
+  //   [x: string]: Object;
+  // } = JSON.parse(JSON.stringify(timeCharts));
+  // console.log(
+  //   timeCharts
+  // );
 
   const arrayed = (obj: Object) => {
     return Array.isArray(obj) ? [...obj] : [];
   };
 
   var allOptionsTimeCharts = arrayed(Object.values(timeCharts)[0]);
-  // Object.values(timeCharts)
+  // Object.values(a)
   Object.values(timeCharts)
     .splice(1)
     .forEach((eachOptionTimeChart, optionIndexMinusOne) => {
@@ -1257,9 +1265,7 @@ export function Stats(props: {}) {
 
   console.log(totalDays);
 
-  console.log(timeCharts);
-
-  // const timeChartsConfig = isNaN(totalDays)
+  // const aConfig = isNaN(totalDays)
   //   ? undefined
   //   : (new Array(totalDays)
   //       .fill(null)
@@ -1281,20 +1287,20 @@ export function Stats(props: {}) {
   //         return dateVoteCounts;
   //       }, {}) satisfies ChartConfig);
 
-  // console.log(timeChartsConfig);
+  // console.log(aConfig);
 
-  // console.log(timeCharts);
-  // var b = timeCharts[fetchedStuff.options[0] && fetchedStuff.options[0].ID];
+  // console.log(a);
+  // var b = a[fetchedStuff.options[0] && fetchedStuff.options[0].ID];
   // console.log(Array.isArray(b) && [...b]);
 
-  const chartData = [
-    { month: "January", desktop: 186, mobile: 80 },
-    { month: "February", desktop: 305, mobile: 200 },
-    { month: "March", desktop: 237, mobile: 120 },
-    { month: "April", desktop: 73, mobile: 190 },
-    { month: "May", desktop: 209, mobile: 130 },
-    { month: "June", desktop: 214, mobile: 140 },
-  ];
+  // const chartData = [
+  //   { month: "January", desktop: 186, mobile: 80 },
+  //   { month: "February", desktop: 305, mobile: 200 },
+  //   { month: "March", desktop: 237, mobile: 120 },
+  //   { month: "April", desktop: 73, mobile: 190 },
+  //   { month: "May", desktop: 209, mobile: 130 },
+  //   { month: "June", desktop: 214, mobile: 140 },
+  // ];
   const chartConfig = {
     desktop: {
       label: "Desktop",
@@ -1497,6 +1503,7 @@ export function Stats(props: {}) {
 
   const combinedTimeCharts = Object.fromEntries(
     Object.entries(timeCharts).map((eachOptionTimeChart) => [
+      // THIS HAS TO REMAIN AS timeCharts FOR SOME REASON
       eachOptionTimeChart[0],
       arrayed(eachOptionTimeChart[1]).map((eachHourObject) => ({
         hour: eachHourObject["hour"],
@@ -2714,6 +2721,12 @@ export function Stats(props: {}) {
                               }
                               // strokeWidth={2}
                               dot={true}
+                              stroke={
+                                isDark
+                                  ? `hsl(200 80% 55% / 0.8)`
+                                  : `hsl(218 80% 40% / 0.8)`
+                              } // Border color
+                              strokeWidth={2} // Border thickness
                             />
                           ) : (
                             <Radar
@@ -2724,8 +2737,14 @@ export function Stats(props: {}) {
                                   ? `hsl(0 80% 55% / 0.8)`
                                   : `hsl(0 80% 40% / 0.8)`
                               }
-                              // strokeWidth={2}
                               dot={true}
+                              stroke={
+                                isDark
+                                  ? `hsl(0 80% 55% / 0.8)`
+                                  : `hsl(0 80% 40% / 0.8)`
+                              } // Border color
+                              strokeWidth={2} // Border thickness
+                              // strokeWidth={2}
                             />
                           )}
                         </RadarChart>
@@ -2787,6 +2806,12 @@ export function Stats(props: {}) {
                               }
                               // strokeWidth={2}
                               dot={true}
+                              stroke={
+                                isDark
+                                  ? `hsl(200 80% 55% / 0.8)`
+                                  : `hsl(218 80% 40% / 0.8)`
+                              } // Border color
+                              strokeWidth={2} // Border thickness
                             />
                           ) : (
                             <Radar
@@ -2797,8 +2822,14 @@ export function Stats(props: {}) {
                                   ? `hsl(0 80% 55% / 0.8)`
                                   : `hsl(0 80% 40% / 0.8)`
                               }
-                              // strokeWidth={2}
                               dot={true}
+                              stroke={
+                                isDark
+                                  ? `hsl(0 80% 55% / 0.8)`
+                                  : `hsl(0 80% 40% / 0.8)`
+                              } // Border color
+                              strokeWidth={2} // Border thickness
+                              // strokeWidth={2}
                             />
                           )}
                         </RadarChart>
@@ -2982,7 +3013,7 @@ export function Stats(props: {}) {
                                               dayPropertiesThisButtonSets[0]
                                             )
                                           ]
-                                        : // ? arrayed(timeCharts[eachOption.ID]).reduce(
+                                        : // ? arrayed(a[eachOption.ID]).reduce(
                                           //     (preliminaryTotalOptionVotes, hourObject) =>
                                           //       (preliminaryTotalOptionVotes +=
                                           //         hourObject[
@@ -2993,7 +3024,7 @@ export function Stats(props: {}) {
                                           Object.values(
                                             dateOnlyCharts[eachOption.ID]
                                           ).reduce((sum, val) => sum + val, 0)
-                                      // : arrayed(timeCharts[eachOption.ID]).reduce(
+                                      // : arrayed(a[eachOption.ID]).reduce(
                                       //     (preliminaryTotalOptionVotes, hourObject) =>
                                       //       (preliminaryTotalOptionVotes +=
                                       //         Object.keys(hourObject)
@@ -3294,7 +3325,13 @@ export function Stats(props: {}) {
                                         : `hsl(218 80% 40% / 0.8)`
                                     }
                                     // strokeWidth={2}
-                                    dot={false}
+                                    dot={true}
+                                    stroke={
+                                      isDark
+                                        ? `hsl(200 80% 55% / 0.8)`
+                                        : `hsl(218 80% 40% / 0.8)`
+                                    } // Border color
+                                    strokeWidth={2} // Border thickness
                                   />
                                 ) : (
                                   <Radar
@@ -3305,8 +3342,14 @@ export function Stats(props: {}) {
                                         ? `hsl(0 80% 55% / 0.8)`
                                         : `hsl(0 80% 40% / 0.8)`
                                     }
+                                    dot={true}
+                                    stroke={
+                                      isDark
+                                        ? `hsl(0 80% 55% / 0.8)`
+                                        : `hsl(0 80% 40% / 0.8)`
+                                    } // Border color
+                                    strokeWidth={2} // Border thickness
                                     // strokeWidth={2}
-                                    dot={false}
                                   />
                                 )
                                 // <Radar
