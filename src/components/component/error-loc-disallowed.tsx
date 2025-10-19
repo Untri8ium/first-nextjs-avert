@@ -48,11 +48,11 @@ export default function ErrorLocRequest() {
   }) {
     setIsLoadingStatus(false);
 
-    // const latitude = position.coords.latitude; TODO: UNCOMMENT THIS!!!!!!
-    // const longitude = position.coords.longitude;
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
 
-    const latitude = 35.6549962709727;
-    const longitude = 139.680975602861;
+    // const latitude = 35.6549962709727;
+    // const longitude = 139.680975602861;
 
     if (
       twoPointsDistance(

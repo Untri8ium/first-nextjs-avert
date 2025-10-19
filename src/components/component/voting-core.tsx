@@ -649,12 +649,13 @@ export default function VotingCore(props: {
   // console.log(cjsfp);
 
   const { isLoading, error, data, getData } = useVisitorData(
-    { extendedResult: true },
+    { extendedResult: false },
     { immediate: true }
   );
   const cjsfp = data?.visitorId || "fp not created as data.visitorId missing";
 
   console.log(error ? error.message : JSON.stringify(data, null, 2));
+  console.log(cjsfp);
 
   const compareDimensions = (dim: string) =>
     dim.includes("x") ? +dim.split("x")[0] > +dim.split("x")[1] : undefined;

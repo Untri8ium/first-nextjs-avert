@@ -295,8 +295,11 @@ export default async function Home() {
           {/* <Suspense fallback={<div>ローディング中</div>}> */}
           <FpjsProvider
             loadOptions={{
-              apiKey: "wjpmOzc5YTaAjohHVgPC",
+              apiKey: process.env.FP_KEY ?? "NO FP KEY AVAILABLE", // REVERT THESE OR APPLY TO ERROR-VOTE
               region: "ap",
+              endpoint: "https://metrics.voxtk.mywire.org",
+              scriptUrlPattern:
+                "https://metrics.voxtk.mywire.org/web/v<version>/<apiKey>/loader_v<loaderVersion>.js",
             }}
           >
             <VotingCore
