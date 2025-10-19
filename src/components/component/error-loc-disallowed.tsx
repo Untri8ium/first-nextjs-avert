@@ -48,8 +48,11 @@ export default function ErrorLocRequest() {
   }) {
     setIsLoadingStatus(false);
 
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
+    // const latitude = position.coords.latitude; TODO: UNCOMMENT THIS!!!!!!
+    // const longitude = position.coords.longitude;
+
+    const latitude = 35.6549962709727;
+    const longitude = 139.680975602861;
 
     if (
       twoPointsDistance(
@@ -184,7 +187,7 @@ export default function ErrorLocRequest() {
                           className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                         >
                           <a
-                            href="https://qr1.jp/voxpolicy"
+                            href="https://voxtk.short.gy/policy"
                             className="underline"
                           >
                             プライバシーポリシー
@@ -213,7 +216,7 @@ export default function ErrorLocRequest() {
               {/* {e == "ed" ? ( */}
               <span className="text-sm text-gray-600">BE-LO-D</span>
               <Link
-                href="https://qr1.jp/voxpolicy"
+                href="https://voxtk.short.gy/policy"
                 className="text-sm text-gray-600 hover:text-gray-700 underline"
               >
                 プライバシーポリシー

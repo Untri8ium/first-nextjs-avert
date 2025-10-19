@@ -84,7 +84,7 @@ export default function ErrorIncognito() {
             {/* {e == "ed" ? ( */}
             <span className="text-sm text-gray-600">BE-IN</span>
             <Link
-              href="https://qr1.jp/voxpolicy"
+              href="https://voxtk.short.gy/policy"
               className="text-sm text-gray-600 hover:text-gray-700 underline"
             >
               プライバシーポリシー

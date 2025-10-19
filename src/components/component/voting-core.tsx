@@ -906,7 +906,7 @@ export default function VotingCore(props: {
         <Toaster />
         <div
           key="1"
-          className="flex p-[30px] pt-[15px] space-y-3 flex-col w-full h-full"
+          className="flex p-[30px] pt-[30px] space-y-12 flex-col w-full h-full"
         >
           {categories.map((category) => (
             <div key={category.ID} className="space-y-2">
@@ -1057,7 +1057,7 @@ export default function VotingCore(props: {
           ))}
         </div>
 
-        <div className="px-[30px] py-[30px] items-center bg-gradient-to-r from-gray-300 to-gray-400 dark:bg-gradient-to-r dark:from-neutral-900 dark:to-neutral-800">
+        <div className="my-6 px-[30px] py-[30px] items-center bg-gradient-to-r from-blue-300 to-blue-400 dark:bg-gradient-to-r dark:from-blue-900 dark:to-blue-800">
           <Label className="w-full font-medium text-md">
             {/* {"投票は以上です"} */}
             {/* <br /> */}
@@ -1081,66 +1081,107 @@ export default function VotingCore(props: {
         </div>
         </>*/}
 
-        {extraQuestions.map((extraQuestion) => (
-          <div key={extraQuestion.ID}>
-            <div className="flex p-[30px] pt-[15px] pb-0 flex-col w-full h-full">
-              <Label className="text-2xl font-bold break-keep">
-                {extraQuestion.name.replaceAll("を", "を\u200B")}
-              </Label>
-              {
-                <Label className="text-md text-gray-500 dark:text-neutral-400">
-                  {extraQuestion.maxVotes
-                    ? "" + extraQuestion.maxVotes + "票まで"
-                    : "票数上限なし"}
+        <div className="pt-[15px] pb-8 flex flex-col space-y-4">
+          {extraQuestions.map((extraQuestion) => (
+            <div key={extraQuestion.ID}>
+              <div className="flex p-[30px] pt-[15px] pb-0 flex-col w-full h-full">
+                <Label className="text-2xl font-bold break-keep">
+                  {extraQuestion.name.replaceAll("を", "を\u200B")}
                 </Label>
-              }
+                {
+                  <Label className="text-md text-gray-500 dark:text-neutral-400">
+                    {extraQuestion.maxVotes
+                      ? "" + extraQuestion.maxVotes + "票まで"
+                      : "票数上限なし"}
+                  </Label>
+                }
 
-              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {extraOptions
-                  .filter(
-                    (eachExtraOption) => eachExtraOption.QID == extraQuestion.ID
-                  )
-                  .map((extraOption) => (
-                    <label
-                      key={extraOption.ID}
-                      className={
-                        extraCheckboxes[
-                          extraOption.ID as keyof typeof extraCheckboxes
-                        ]
-                          ? "rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full flex items-center justify-center"
-                          : extraCheckboxesKeys.reduce(
-                              (objAcc: any, key: string) => {
-                                if (
-                                  extraOptions.find(
-                                    (eachExtraOption) =>
-                                      eachExtraOption.ID == key
-                                  )?.QID == extraQuestion.ID &&
-                                  extraCheckboxes[
-                                    key as keyof typeof extraCheckboxes
-                                  ]
-                                ) {
-                                  objAcc.push(key);
-                                }
-                                return objAcc;
-                              },
-                              []
-                            ).length == extraQuestion.maxVotes
-                          ? "bg-white dark:bg-gray-800 rounded-lg transition-shadow cursor-not-allowed w-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center"
-                          : "bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center"
-                      }
-                      style={
-                        extraCheckboxes[
-                          extraOption.ID as keyof typeof extraCheckboxes
-                        ]
-                          ? isDarkMode
-                            ? selectedButtonStyles.darkModeBorderGlowGreen
-                            : selectedButtonStyles.borderGlowGreen
-                          : undefined
-                      }
-                    >
-                      <div className="p-2 flex flex-col items-center justify-center space-y-2">
-                        <p
-                          className={
+                <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {extraOptions
+                    .filter(
+                      (eachExtraOption) =>
+                        eachExtraOption.QID == extraQuestion.ID
+                    )
+                    .map((extraOption) => (
+                      <label
+                        key={extraOption.ID}
+                        className={
+                          extraCheckboxes[
+                            extraOption.ID as keyof typeof extraCheckboxes
+                          ]
+                            ? "rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full flex items-center justify-center"
+                            : extraCheckboxesKeys.reduce(
+                                (objAcc: any, key: string) => {
+                                  if (
+                                    extraOptions.find(
+                                      (eachExtraOption) =>
+                                        eachExtraOption.ID == key
+                                    )?.QID == extraQuestion.ID &&
+                                    extraCheckboxes[
+                                      key as keyof typeof extraCheckboxes
+                                    ]
+                                  ) {
+                                    objAcc.push(key);
+                                  }
+                                  return objAcc;
+                                },
+                                []
+                              ).length == extraQuestion.maxVotes
+                            ? "bg-white dark:bg-gray-800 rounded-lg transition-shadow cursor-not-allowed w-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center"
+                            : "bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center"
+                        }
+                        style={
+                          extraCheckboxes[
+                            extraOption.ID as keyof typeof extraCheckboxes
+                          ]
+                            ? isDarkMode
+                              ? selectedButtonStyles.darkModeBorderGlowGreen
+                              : selectedButtonStyles.borderGlowGreen
+                            : undefined
+                        }
+                      >
+                        <div className="p-2 flex flex-col items-center justify-center space-y-2">
+                          <p
+                            className={
+                              extraCheckboxesKeys.reduce(
+                                (objAcc: any, key: string) => {
+                                  if (
+                                    extraOptions.find(
+                                      (eachExtraOption) =>
+                                        eachExtraOption.ID == key
+                                    )?.QID == extraQuestion.ID &&
+                                    extraCheckboxes[
+                                      key as keyof typeof extraCheckboxes
+                                    ]
+                                  ) {
+                                    objAcc.push(key);
+                                  }
+                                  return objAcc;
+                                },
+                                []
+                              ).length == extraQuestion.maxVotes &&
+                              !extraCheckboxes[
+                                extraOption.ID as keyof typeof extraCheckboxes
+                              ]
+                                ? "text-md md:text-sm font-semibold text-center text-gray-400 dark:text-gray-500 break-keep"
+                                : "text-md md:text-sm font-semibold text-center break-keep"
+                            }
+                          >
+                            {extraOption.name.replaceAll("・", "・\u200B")}
+                          </p>
+                        </div>
+
+                        <input
+                          className="sr-only"
+                          name={extraOption.ID}
+                          type="checkbox"
+                          checked={
+                            extraCheckboxes[
+                              extraOption.ID as keyof typeof extraCheckboxes
+                            ] || false
+                          }
+                          onChange={handleExtraCheckboxChange}
+                          disabled={
                             extraCheckboxesKeys.reduce(
                               (objAcc: any, key: string) => {
                                 if (
@@ -1161,53 +1202,16 @@ export default function VotingCore(props: {
                             !extraCheckboxes[
                               extraOption.ID as keyof typeof extraCheckboxes
                             ]
-                              ? "text-md md:text-sm font-semibold text-center text-gray-400 dark:text-gray-500 break-keep"
-                              : "text-md md:text-sm font-semibold text-center break-keep"
                           }
-                        >
-                          {extraOption.name.replaceAll("・", "・\u200B")}
-                        </p>
-                      </div>
-
-                      <input
-                        className="sr-only"
-                        name={extraOption.ID}
-                        type="checkbox"
-                        checked={
-                          extraCheckboxes[
-                            extraOption.ID as keyof typeof extraCheckboxes
-                          ] || false
-                        }
-                        onChange={handleExtraCheckboxChange}
-                        disabled={
-                          extraCheckboxesKeys.reduce(
-                            (objAcc: any, key: string) => {
-                              if (
-                                extraOptions.find(
-                                  (eachExtraOption) => eachExtraOption.ID == key
-                                )?.QID == extraQuestion.ID &&
-                                extraCheckboxes[
-                                  key as keyof typeof extraCheckboxes
-                                ]
-                              ) {
-                                objAcc.push(key);
-                              }
-                              return objAcc;
-                            },
-                            []
-                          ).length == extraQuestion.maxVotes &&
-                          !extraCheckboxes[
-                            extraOption.ID as keyof typeof extraCheckboxes
-                          ]
-                        }
-                        // aria-hidden={true}
-                      />
-                    </label>
-                  ))}
+                          // aria-hidden={true}
+                        />
+                      </label>
+                    ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
         <section className="m-6 mb-12">
           <div className="flex justify-center">
             {/* <Button
@@ -1218,33 +1222,16 @@ export default function VotingCore(props: {
             </Button> */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button
-                  className={`px-10 py-5 rounded-full text-lg font-semibold bg-gradient-to-r text-white dark:text-white transition duration-300 ease-in-out transform hover:scale-105 ${
-                    process.env.NEXT_PUBLIC_COLOR_BUTTONBORDER_LIGHT
-                      ? "border-4"
-                      : ""
-                  } ${
-                    process.env.NEXT_PUBLIC_COLOR_BUTTONBORDER_DARK
-                      ? "dark:border-4"
-                      : ""
-                  } ${
-                    process.env.NEXT_PUBLIC_COLOR_BUTTONSHADOW_LIGHT
-                      ? "shadow-md"
-                      : ""
-                  } ${
-                    process.env.NEXT_PUBLIC_COLOR_BUTTONSHADOW_DARK
-                      ? "dark:shadow-md"
-                      : ""
-                  }`}
-                  style={
-                    isDarkMode
-                      ? { ...buttonStyle, ...darkButtonStyle }
-                      : buttonStyle
+                <button
+                  className={
+                    "px-20 py-5 relative btn-living-galaxy rounded-full text-2xl font-semibold bg-gradient-to-r text-white dark:text-white transition duration-300 ease-in-out transform hover:scale-105"
                   }
-                  // type="submit"
                 >
+                  <span className="fog fog1" />
+                  <span className="fog fog2" />
+                  <span className="fog fog3" />
                   投票する
-                </Button>
+                </button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -1285,7 +1272,10 @@ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Magni, nemo!
                       htmlFor="secondEligibility"
                       className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line"
                     >
-                      <a href="https://qr1.jp/voxpolicy" className="underline">
+                      <a
+                        href="https://voxtk.short.gy/policy"
+                        className="underline"
+                      >
                         プライバシーポリシー
                       </a>
                       に同意する

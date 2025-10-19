@@ -43,6 +43,8 @@ export default function Thanks() {
               className="text-lg text-gray-600 text-center mb-3 break-keep"
             >
               ご投票&#8203;ありがとうございました。
+              <br />
+              また来年！
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -50,7 +52,7 @@ export default function Thanks() {
               transition={{ delay: 0.5, duration: 0.5 }}
               className="flex justify-center"
             >
-              <button
+              {/* <button
                 onClick={() => {
                   // const router = useRouter();
 
@@ -59,7 +61,7 @@ export default function Thanks() {
                 className="bg-red-600 hover:bg-red-700 shadow-md shadow-red-300 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
               >
                 アンケートのお願い
-              </button>
+              </button> */}
             </motion.div>
           </div>
           {/* <div className="bg-gray-100 px-8 py-4 flex justify-between items-center">
@@ -73,7 +75,7 @@ export default function Thanks() {
 
             {/* {e == "ed" ? ( */}
             <Link
-              href="https://qr1.jp/voxpolicy"
+              href="https://voxtk.short.gy/policy"
               className="text-sm text-gray-600 hover:text-gray-700 underline"
             >
               プライバシーポリシー

@@ -41,7 +41,7 @@ export default async function Home() {
 
       return rows;
 
-      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
+      // IDEA (not sure if this was implemented after all): order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
       // in the option reorder menu, list all the items flatly but color each of them with its category theme color
     } catch (error) {
       console.log("Uh oh! loadVGI failed!");
