@@ -606,60 +606,71 @@ export async function POST(request: Request) {
   }
 
   if (votingPermission) {
-    var redirectDest: string | null = null;
-
     try {
-      if (typeof votopts == "string") {
-        await sql`INSERT INTO votes VALUES (${crypto.randomUUID()}, ${new Date().toISOString()}, ${votopts}, 1, ${fp});`; // HERE AND DOWN THERE: IP IS REPLACED with UUID!
-        console.log("it worked ig");
-      } else {
-        for (const votopt in votopts) {
-          await sql`INSERT INTO votes VALUES (${crypto.randomUUID()}, ${new Date().toISOString()}, ${
-            votopts[votopt]
-          }, ${votopts.length}, ${fp});`;
-        }
+      const now = new Date().toISOString();
+
+      // === VOTES ===
+      if (typeof votopts === "string") {
+        await sql`
+        INSERT INTO votes (id, created_at, option_id, weight, fingerprint)
+        VALUES (${crypto.randomUUID()}, ${now}, ${votopts}, 1, ${fp});
+      `;
+      } else if (Array.isArray(votopts) && votopts.length > 0) {
+        // Build a VALUES clause dynamically and join it as one SQL string
+        const voteRows = votopts
+          .map(
+            (opt) =>
+              `('${crypto.randomUUID()}', '${now}', '${opt}', ${
+                votopts.length
+              }, '${fp}')`
+          )
+          .join(", ");
+
+        await sql`
+        
+        INSERT INTO votes (id, created_at, option_id, weight, fingerprint)
+           VALUES ${voteRows}
+        
+      `;
       }
 
-      if (typeof votextraopts == "string") {
-        await sql`INSERT INTO votesextra VALUES (${crypto.randomUUID()}, ${new Date().toISOString()}, ${
+      // === EXTRA VOTES ===
+      if (typeof votextraopts === "string") {
+        const questionID =
           extraQuestions.find(
-            (eachExtraQuestion) =>
-              eachExtraQuestion.ID ==
-              extraOptions.find(
-                (eachExtraOption) => eachExtraOption.ID == votextraopts
-              )?.QID
-          )?.ID
-        }, ${votextraopts}, 1, ${fp});`; // HERE AND DOWN THERE: IP IS REPLACED WITH UUID!
-        // console.log(votextraopts);
-        // console.log("LOOK ABOVE");
-      } else {
-        for (const votextraopt in votextraopts) {
-          await sql`INSERT INTO votesextra VALUES (${crypto.randomUUID()}, ${new Date().toISOString()}, ${
-            extraQuestions.find(
-              (eachExtraQuestion) =>
-                eachExtraQuestion.ID ==
-                extraOptions.find(
-                  (eachExtraOption) =>
-                    eachExtraOption.ID == votextraopts[votextraopt]
-                )?.QID
-            )?.ID
-          },  ${votextraopts[votextraopt]}, ${votextraopts.length}, ${fp});`;
-        }
+            (q) => q.ID === extraOptions.find((o) => o.ID === votextraopts)?.QID
+          )?.ID ?? null;
+
+        await sql`
+        INSERT INTO votesextra (id, created_at, question_id, option_id, weight, fingerprint)
+        VALUES (${crypto.randomUUID()}, ${now}, ${questionID}, ${votextraopts}, 1, ${fp});
+      `;
+      } else if (Array.isArray(votextraopts) && votextraopts.length > 0) {
+        const extraRows = votextraopts
+          .map((opt) => {
+            const questionID =
+              extraQuestions.find(
+                (q) => q.ID === extraOptions.find((o) => o.ID === opt)?.QID
+              )?.ID ?? null;
+
+            return `('${crypto.randomUUID()}', '${now}', '${questionID}', '${opt}', ${
+              votextraopts.length
+            }, '${fp}')`;
+          })
+          .join(", ");
+
+        await sql`
+          INSERT INTO votesextra (id, created_at, question_id, option_id, weight, fingerprint)
+           VALUES ${extraRows}
+        
+      `;
       }
 
-      redirectDest = "/thanks";
-      console.log(redirectDest);
-
-      // IDEA: order option tiles by 500*categoryORDER + optionORDER, with cOR:0-49 and oOR:0-499
-      // in the option reorder menu, list all the items flatly but color each of them with its category theme color
+      return NextResponse.json({ message: "ok" }, { status: 200 });
     } catch (error) {
-      console.log("Uh oh! actuallyVote failed!");
-      console.log(error);
+      console.error("Uh oh! actuallyVote failed!", error);
+      return NextResponse.json({ message: "error", error }, { status: 500 });
     } finally {
-      if (redirectDest) {
-        return NextResponse.json({ message: "ok" }, { status: 200 });
-        // redirect(redirectDest);
-      }
       votingPermission = false;
     }
   }

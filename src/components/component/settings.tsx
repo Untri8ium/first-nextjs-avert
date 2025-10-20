@@ -737,10 +737,10 @@ export function Settings(props: {
         );
 
         toast({
-          title: "適用完了…のはず",
-          description: "数回再読み込みしてご確認ください。",
+          title: "変更の適用を開始しました",
+          description: "必ず10秒待ち、再読み込みしてご確認ください。",
         });
-        //setSubmitText("送信完了…のはずです。数回再読み込みしてご確認ください");
+        //setSubmitText("変更の適用を開始しました。必ず10秒待ち、再読み込みしてご確認ください");
       }
     } else {
       setNameError(undefined);
@@ -766,10 +766,10 @@ export function Settings(props: {
         dayEndTime
       );
       toast({
-        title: "適用完了…のはず",
-        description: "数回再読み込みしてご確認ください。",
+        title: "変更の適用を開始しました",
+        description: "必ず10秒待ち、再読み込みしてご確認ください。",
       });
-      //setSubmitText("送信完了…のはずです。数回再読み込みしてご確認ください");
+      //setSubmitText("変更の適用を開始しました。必ず10秒待ち、再読み込みしてご確認ください");
 
       // console.log(props.loadingState);
       console.log(
