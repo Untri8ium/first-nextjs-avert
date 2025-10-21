@@ -611,27 +611,17 @@ export async function POST(request: Request) {
 
       // === VOTES ===
       if (typeof votopts === "string") {
-        await sql`
-        INSERT INTO votes (id, created_at, option_id, weight, fingerprint)
-        VALUES (${crypto.randomUUID()}, ${now}, ${votopts}, 1, ${fp});
-      `;
+        await sql`INSERT INTO votes VALUES (${crypto.randomUUID()}, ${now}, ${votopts}, 1, ${fp});`;
       } else if (Array.isArray(votopts) && votopts.length > 0) {
-        // Build a VALUES clause dynamically and join it as one SQL string
-        const voteRows = votopts
-          .map(
+        // Run all inserts in parallel (no for-await loop!)
+        await Promise.all(
+          votopts.map(
             (opt) =>
-              `('${crypto.randomUUID()}', '${now}', '${opt}', ${
+              sql`INSERT INTO votes VALUES (${crypto.randomUUID()}, ${now}, ${opt}, ${
                 votopts.length
-              }, '${fp}')`
+              }, ${fp});`
           )
-          .join(", ");
-
-        await sql`
-        
-        INSERT INTO votes (id, created_at, option_id, weight, fingerprint)
-           VALUES ${voteRows}
-        
-      `;
+        );
       }
 
       // === EXTRA VOTES ===
@@ -642,34 +632,40 @@ export async function POST(request: Request) {
           )?.ID ?? null;
 
         await sql`
-        INSERT INTO votesextra (id, created_at, question_id, option_id, weight, fingerprint)
-        VALUES (${crypto.randomUUID()}, ${now}, ${questionID}, ${votextraopts}, 1, ${fp});
+        INSERT INTO votesextra VALUES (${crypto.randomUUID()}, ${now}, ${questionID}, ${votextraopts}, 1, ${fp});
       `;
       } else if (Array.isArray(votextraopts) && votextraopts.length > 0) {
-        const extraRows = votextraopts
-          .map((opt) => {
+        await Promise.all(
+          votextraopts.map((opt) => {
             const questionID =
               extraQuestions.find(
                 (q) => q.ID === extraOptions.find((o) => o.ID === opt)?.QID
               )?.ID ?? null;
 
-            return `('${crypto.randomUUID()}', '${now}', '${questionID}', '${opt}', ${
+            return sql`
+            INSERT INTO votesextra (id, created_at, question_id, option_id, weight, fingerprint)
+            VALUES (${crypto.randomUUID()}, ${now}, ${questionID}, ${opt}, ${
               votextraopts.length
-            }, '${fp}')`;
+            }, ${fp});
+          `;
           })
-          .join(", ");
-
-        await sql`
-          INSERT INTO votesextra (id, created_at, question_id, option_id, weight, fingerprint)
-           VALUES ${extraRows}
-        
-      `;
+        );
       }
 
       return NextResponse.json({ message: "ok" }, { status: 200 });
     } catch (error) {
       console.error("Uh oh! actuallyVote failed!", error);
-      return NextResponse.json({ message: "error", error }, { status: 500 });
+      if (error instanceof Error) {
+        return NextResponse.json(
+          { message: error.message, error },
+          { status: 500 }
+        );
+      } else {
+        return NextResponse.json(
+          { message: String(error), error },
+          { status: 500 }
+        );
+      }
     } finally {
       votingPermission = false;
     }

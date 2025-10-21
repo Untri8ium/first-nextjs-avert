@@ -332,10 +332,16 @@ Vote button
   overflow: hidden;
   border: none;
   background: black;
+  border-radius: 9999px; /* rounded-full */
+  isolation: isolate; /* ensures inner blending stays clipped */
+  -webkit-mask-image: -webkit-radial-gradient(
+    white,
+    black
+  ); /* Safari fix for overflow */
+  -webkit-background-clip: padding-box; /* ensures gradient respects rounded edges */
+  mask-image: radial-gradient(white, black);
   transition: transform 0.4s ease, box-shadow 0.4s ease;
-
   box-shadow: 0 0 20px 5px rgba(64, 128, 255, 0.3);
-  transition: box-shadow 0.3s ease;
 }
 
 .dark .btn-living-galaxy {
@@ -361,6 +367,16 @@ Vote button
   filter: blur(60px) saturate(2);
   opacity: 1;
   z-index: 0;
+}
+
+.btn-living-galaxy .fog,
+.btn-living-galaxy::before,
+.btn-living-galaxy::after {
+  border-radius: inherit;
+  clip-path: inset(0 round inherit);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  will-change: transform, opacity;
 }
 
 /* create five independent fog layers */
