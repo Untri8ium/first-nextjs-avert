@@ -643,8 +643,7 @@ export async function POST(request: Request) {
               )?.ID ?? null;
 
             return sql`
-            INSERT INTO votesextra (id, created_at, question_id, option_id, weight, fingerprint)
-            VALUES (${crypto.randomUUID()}, ${now}, ${questionID}, ${opt}, ${
+            INSERT INTO votesextra VALUES (${crypto.randomUUID()}, ${now}, ${questionID}, ${opt}, ${
               votextraopts.length
             }, ${fp});
           `;
