@@ -1092,8 +1092,8 @@ export default function VotingCore(props: {
                 {
                   <Label className="text-md text-gray-500 dark:text-neutral-400">
                     {extraQuestion.maxVotes
-                      ? "" + extraQuestion.maxVotes + "票まで"
-                      : "票数上限なし"}
+                      ? "0票～" + extraQuestion.maxVotes + "票"
+                      : "0票～上限なし"}
                   </Label>
                 }
 
