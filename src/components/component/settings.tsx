@@ -738,9 +738,10 @@ export function Settings(props: {
 
         toast({
           title: "変更の適用を開始しました",
-          description: "必ず10秒待ち、再読み込みしてご確認ください。",
+          description:
+            "もう1度適用ボタンを押したら10秒待ち、再読み込みしてご確認ください。",
         });
-        //setSubmitText("変更の適用を開始しました。必ず10秒待ち、再読み込みしてご確認ください");
+        //setSubmitText("変更の適用を開始しました。もう1度適用ボタンを押したら10秒待ち、再読み込みしてご確認ください");
       }
     } else {
       setNameError(undefined);
@@ -767,9 +768,10 @@ export function Settings(props: {
       );
       toast({
         title: "変更の適用を開始しました",
-        description: "必ず10秒待ち、再読み込みしてご確認ください。",
+        description:
+          "もう1度適用ボタンを押したら10秒待ち、再読み込みしてご確認ください。",
       });
-      //setSubmitText("変更の適用を開始しました。必ず10秒待ち、再読み込みしてご確認ください");
+      //setSubmitText("変更の適用を開始しました。もう1度適用ボタンを押したら10秒待ち、再読み込みしてご確認ください");
 
       // console.log(props.loadingState);
       console.log(
