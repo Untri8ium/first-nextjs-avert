@@ -710,7 +710,7 @@ export function Settings(props: {
         dayEndTime
         // Date.parse(dayStartTime) < Date.parse(dayEndTime)
       ) {
-        router.refresh();
+        // router.refresh();
         console.log(
           votingSet,
           maxVotes,
@@ -751,7 +751,7 @@ export function Settings(props: {
       setDayStartTimeError(undefined);
       setDayEndTimeError(undefined);
 
-      router.refresh();
+      // router.refresh();
 
       props.submitCalledByChild(
         votingSet,
