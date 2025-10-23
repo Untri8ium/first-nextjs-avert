@@ -688,7 +688,7 @@ export function Stats(props: {}) {
     const intervalId = setInterval(() => {
       if (!isFetching) {
         fetchAll();
-        // console.log(fetchedStuff.votes);
+        console.log(fetchedStuff.votes);
         // console.clear();
       }
     }, 10000);
