@@ -214,6 +214,13 @@ export default async function Home() {
       await sql`BEGIN;`;
 
       try {
+        submitting = true;
+        await sql`INSERT INTO votinggeneralinfo VALUES (${votingSet}, ${votingDateS}, ${votingDateE}, 
+          ${maxvotes}, ${votingName}, ${votingDescription}, ${dayStartTime}, ${dayEndTime}, true) 
+          ON CONFLICT ON CONSTRAINT votinggeneralinfo_existence_key DO UPDATE SET "votingset" = ${votingSet}, 
+          "votingstart" = ${votingDateS}, "votingend" = ${votingDateE}, "maxvotes" = ${maxvotes}, 
+          "name" = ${votingName}, "description" = ${votingDescription}, "daystarttime" = ${dayStartTime}, "dayendtime" = ${dayEndTime}, "existence" = true;`;
+
         // Truncate the tables first
         await sql`TRUNCATE TABLE votingoptions;`;
         await sql`TRUNCATE TABLE categories;`;
