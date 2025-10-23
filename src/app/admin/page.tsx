@@ -210,9 +210,7 @@ export default async function Home() {
     let submitting = false;
 
     async function actuallySubmit() {
-      // Begin a transaction
-      await sql`BEGIN;`;
-
+      if (submitting) return 2;
       try {
         submitting = true;
         await sql`INSERT INTO votinggeneralinfo VALUES (${votingSet}, ${votingDateS}, ${votingDateE}, 
@@ -220,61 +218,76 @@ export default async function Home() {
           ON CONFLICT ON CONSTRAINT votinggeneralinfo_existence_key DO UPDATE SET "votingset" = ${votingSet}, 
           "votingstart" = ${votingDateS}, "votingend" = ${votingDateE}, "maxvotes" = ${maxvotes}, 
           "name" = ${votingName}, "description" = ${votingDescription}, "daystarttime" = ${dayStartTime}, "dayendtime" = ${dayEndTime}, "existence" = true;`;
+        // await sql`DELETE FROM votingoptions;`;
+        // await sql`DELETE FROM categories;`;
+        // for (const option of options) {
+        //   await sql`INSERT INTO votingoptions VALUES (${option.ID}, ${option.catID}, ${option.name},
+        //     ${option.description}, ${option.orderNo});`;
+        // }
+        // for (const category of categories) {
+        //   await sql`INSERT INTO categories VALUES (${category.ID}, ${category.name},
+        //     ${category.orderNo});`;
+        // }
 
-        // Truncate the tables first
-        await sql`TRUNCATE TABLE votingoptions;`;
-        await sql`TRUNCATE TABLE categories;`;
+        // Begin a transaction
+        await sql`BEGIN;`;
 
-        // === INSERT OPTIONS IN PARALLEL ===
-        if (options.length > 0) {
-          await Promise.all(
-            options.map(
-              (o: any) =>
-                sql`
-          INSERT INTO votingoptions (id, categoryid, name, description, orderno)
-          VALUES (${o.ID}, ${o.catID}, ${o.name}, ${o.description}, ${o.orderNo});
-        `
-            )
-          );
+        try {
+          // Truncate the tables to remove all existing records
+          await sql`TRUNCATE TABLE votingoptions;`;
+          await sql`TRUNCATE TABLE categories;`;
+
+          for (const option of options) {
+            await sql`INSERT INTO votingoptions VALUES (${option.ID}, ${option.catID}, ${option.name},
+              ${option.description}, ${option.orderNo});`;
+          }
+          for (const category of categories) {
+            await sql`INSERT INTO categories VALUES (${category.ID}, ${category.name},
+              ${category.orderNo});`;
+          }
+
+          await sql`WITH duplicates AS (
+  SELECT 
+    id,
+    ROW_NUMBER() OVER (PARTITION BY id ORDER BY id) AS row_num
+  FROM 
+    votingoptions
+)
+DELETE FROM votingoptions
+WHERE id IN (
+  SELECT id FROM duplicates WHERE row_num > 1
+);
+`;
+
+          await sql`WITH duplicates AS (
+  SELECT 
+    id,
+    ROW_NUMBER() OVER (PARTITION BY id ORDER BY id) AS row_num
+  FROM 
+    categories
+)
+DELETE FROM categories
+WHERE id IN (
+  SELECT id FROM duplicates WHERE row_num > 1
+);
+`;
+
+          // Commit the transaction
+          await sql`COMMIT;`;
+        } catch (error) {
+          // Rollback the transaction in case of an error
+          await sql`ROLLBACK;`;
+          console.error("Error replacing database:", error);
+          throw error; // Re-throw the error for further handling
         }
+        submitting = false;
 
-        // === INSERT CATEGORIES IN PARALLEL ===
-        if (categories.length > 0) {
-          await Promise.all(
-            categories.map(
-              (c: any) =>
-                sql`
-          INSERT INTO categories (id, name, orderno)
-          VALUES (${c.ID}, ${c.name}, ${c.orderNo});
-        `
-            )
-          );
-        }
-
-        // === Deduplicate ===
-        await sql`
-    WITH duplicates AS (
-      SELECT id, ROW_NUMBER() OVER (PARTITION BY id ORDER BY id) AS row_num
-      FROM votingoptions
-    )
-    DELETE FROM votingoptions
-    WHERE id IN (SELECT id FROM duplicates WHERE row_num > 1);
-  `;
-
-        await sql`
-    WITH duplicates AS (
-      SELECT id, ROW_NUMBER() OVER (PARTITION BY id ORDER BY id) AS row_num
-      FROM categories
-    )
-    DELETE FROM categories
-    WHERE id IN (SELECT id FROM duplicates WHERE row_num > 1);
-  `;
-
-        await sql`COMMIT;`;
+        return 0;
       } catch (error) {
-        await sql`ROLLBACK;`;
-        console.error("Error replacing database:", error);
-        throw error;
+        console.log("Uh oh! actuallySubmit failed!");
+        console.log(error);
+        submitting = false;
+        return 2;
       }
     }
 
