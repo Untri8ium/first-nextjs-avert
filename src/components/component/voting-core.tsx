@@ -909,25 +909,29 @@ export default function VotingCore(props: {
           key="1"
           className="flex p-[30px] pt-[30px] space-y-12 flex-col w-full h-full"
         >
-          {categories.map((category) => (
-            <div key={category.ID} className="space-y-2">
-              <div className="space-x-2">
-                <Label className="text-2xl font-bold">{category.name}</Label>
-                {/*<Label className="text-md text-[#666666] dark:text-[#999999]">
+          {categories
+            .sort((categoryPrev, categoryNext) => {
+              return categoryPrev.orderNo - categoryPrev.orderNo;
+            })
+            .map((category) => (
+              <div key={category.ID} className="space-y-2">
+                <div className="space-x-2">
+                  <Label className="text-2xl font-bold">{category.name}</Label>
+                  {/*<Label className="text-md text-[#666666] dark:text-[#999999]">
                 {category.maxvotes + "票まで"}
               </Label>*/}
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {options
-                  .filter((eachOption) => eachOption.catID == category.ID)
-                  .map((option) => (
-                    <label
-                      key={option.ID}
-                      //className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
-                      className={
-                        checkboxes[option.ID as keyof typeof checkboxes]
-                          ? "rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full"
-                          : /*checkboxesKeys.reduce((objAcc: any, key: string) => {
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {options
+                    .filter((eachOption) => eachOption.catID == category.ID)
+                    .map((option) => (
+                      <label
+                        key={option.ID}
+                        //className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
+                        className={
+                          checkboxes[option.ID as keyof typeof checkboxes]
+                            ? "rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full"
+                            : /*checkboxesKeys.reduce((objAcc: any, key: string) => {
                             if (
                               options.find((eachOption) => eachOption.ID == key)
                                 ?.catID == category.ID &&
@@ -937,31 +941,31 @@ export default function VotingCore(props: {
                             }
                             return objAcc;
                           }, [])*/ checkboxesKeys.reduce(
-                              (objAcc: any, key: string) => {
-                                if (
-                                  checkboxes[key as keyof typeof checkboxes]
-                                ) {
-                                  objAcc.push(key);
-                                }
-                                return objAcc;
-                              },
-                              []
-                            ).length == maxVotes
-                          ? "bg-white dark:bg-gray-800 rounded-lg transition-shadow cursor-not-allowed w-full border-2 border-gray-300 dark:border-gray-700"
-                          : "bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full border-2 border-gray-300 dark:border-gray-700"
-                      }
-                      style={
-                        checkboxes[option.ID as keyof typeof checkboxes]
-                          ? isDarkMode
-                            ? selectedButtonStyles.darkModeBorderGlowGreen
-                            : selectedButtonStyles.borderGlowGreen
-                          : undefined
-                      }
-                    >
-                      <div className="p-2 flex flex-col items-center justify-center space-y-1">
-                        <p
-                          className={
-                            /*checkboxesKeys.reduce((objAcc: any, key: string) => {
+                                (objAcc: any, key: string) => {
+                                  if (
+                                    checkboxes[key as keyof typeof checkboxes]
+                                  ) {
+                                    objAcc.push(key);
+                                  }
+                                  return objAcc;
+                                },
+                                []
+                              ).length == maxVotes
+                            ? "bg-white dark:bg-gray-800 rounded-lg transition-shadow cursor-not-allowed w-full border-2 border-gray-300 dark:border-gray-700"
+                            : "bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer w-full border-2 border-gray-300 dark:border-gray-700"
+                        }
+                        style={
+                          checkboxes[option.ID as keyof typeof checkboxes]
+                            ? isDarkMode
+                              ? selectedButtonStyles.darkModeBorderGlowGreen
+                              : selectedButtonStyles.borderGlowGreen
+                            : undefined
+                        }
+                      >
+                        <div className="p-2 flex flex-col items-center justify-center space-y-1">
+                          <p
+                            className={
+                              /*checkboxesKeys.reduce((objAcc: any, key: string) => {
                             if (
                               options.find((eachOption) => eachOption.ID == key)
                                 ?.catID == category.ID &&
@@ -971,26 +975,26 @@ export default function VotingCore(props: {
                             }
                             return objAcc;
                           }, [])*/ checkboxesKeys.reduce(
-                              (objAcc: any, key: string) => {
-                                if (
-                                  checkboxes[key as keyof typeof checkboxes]
-                                ) {
-                                  objAcc.push(key);
-                                }
-                                return objAcc;
-                              },
-                              []
-                            ).length == maxVotes &&
-                            !checkboxes[option.ID as keyof typeof checkboxes]
-                              ? "text-sm text-center text-gray-200 dark:text-gray-600"
-                              : "text-sm text-center text-gray-500 dark:text-gray-400"
-                          }
-                        >
-                          {option.name}
-                        </p>
-                        <p
-                          className={
-                            /*checkboxesKeys.reduce((objAcc: any, key: string) => {
+                                (objAcc: any, key: string) => {
+                                  if (
+                                    checkboxes[key as keyof typeof checkboxes]
+                                  ) {
+                                    objAcc.push(key);
+                                  }
+                                  return objAcc;
+                                },
+                                []
+                              ).length == maxVotes &&
+                              !checkboxes[option.ID as keyof typeof checkboxes]
+                                ? "text-sm text-center text-gray-200 dark:text-gray-600"
+                                : "text-sm text-center text-gray-500 dark:text-gray-400"
+                            }
+                          >
+                            {option.name}
+                          </p>
+                          <p
+                            className={
+                              /*checkboxesKeys.reduce((objAcc: any, key: string) => {
                             if (
                               options.find((eachOption) => eachOption.ID == key)
                                 ?.catID == category.ID &&
@@ -1000,36 +1004,36 @@ export default function VotingCore(props: {
                             }
                             return objAcc;
                           }, [])*/ checkboxesKeys.reduce(
-                              (objAcc: any, key: string) => {
-                                if (
-                                  checkboxes[key as keyof typeof checkboxes]
-                                ) {
-                                  objAcc.push(key);
-                                }
-                                return objAcc;
-                              },
-                              []
-                            ).length == maxVotes &&
-                            !checkboxes[option.ID as keyof typeof checkboxes]
-                              ? "text-md md:text-sm font-semibold text-center text-gray-400 dark:text-gray-500"
-                              : "text-md md:text-sm font-semibold text-center"
-                          }
-                        >
-                          {option.description}
-                        </p>
-                      </div>
+                                (objAcc: any, key: string) => {
+                                  if (
+                                    checkboxes[key as keyof typeof checkboxes]
+                                  ) {
+                                    objAcc.push(key);
+                                  }
+                                  return objAcc;
+                                },
+                                []
+                              ).length == maxVotes &&
+                              !checkboxes[option.ID as keyof typeof checkboxes]
+                                ? "text-md md:text-sm font-semibold text-center text-gray-400 dark:text-gray-500"
+                                : "text-md md:text-sm font-semibold text-center"
+                            }
+                          >
+                            {option.description}
+                          </p>
+                        </div>
 
-                      <input
-                        className="sr-only"
-                        name={option.ID}
-                        type="checkbox"
-                        checked={
-                          checkboxes[option.ID as keyof typeof checkboxes] ||
-                          false
-                        }
-                        onChange={handleCheckboxChange}
-                        disabled={
-                          /*checkboxesKeys.reduce((objAcc: any, key: string) => {
+                        <input
+                          className="sr-only"
+                          name={option.ID}
+                          type="checkbox"
+                          checked={
+                            checkboxes[option.ID as keyof typeof checkboxes] ||
+                            false
+                          }
+                          onChange={handleCheckboxChange}
+                          disabled={
+                            /*checkboxesKeys.reduce((objAcc: any, key: string) => {
                             if (
                               options.find((eachOption) => eachOption.ID == key)
                                 ?.catID == category.ID &&
@@ -1039,23 +1043,25 @@ export default function VotingCore(props: {
                             }
                             return objAcc;
                           }, [])*/ checkboxesKeys.reduce(
-                            (objAcc: any, key: string) => {
-                              if (checkboxes[key as keyof typeof checkboxes]) {
-                                objAcc.push(key);
-                              }
-                              return objAcc;
-                            },
-                            []
-                          ).length == maxVotes &&
-                          !checkboxes[option.ID as keyof typeof checkboxes]
-                        }
-                        // aria-hidden={true}
-                      />
-                    </label>
-                  ))}
+                              (objAcc: any, key: string) => {
+                                if (
+                                  checkboxes[key as keyof typeof checkboxes]
+                                ) {
+                                  objAcc.push(key);
+                                }
+                                return objAcc;
+                              },
+                              []
+                            ).length == maxVotes &&
+                            !checkboxes[option.ID as keyof typeof checkboxes]
+                          }
+                          // aria-hidden={true}
+                        />
+                      </label>
+                    ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
 
         <div className="my-6 px-[30px] py-[30px] items-center bg-gradient-to-r from-blue-300 to-blue-400 dark:bg-gradient-to-r dark:from-blue-900 dark:to-blue-800">
