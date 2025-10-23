@@ -911,7 +911,7 @@ export default function VotingCore(props: {
         >
           {categories
             .sort((categoryPrev, categoryNext) => {
-              return categoryPrev.orderNo - categoryPrev.orderNo;
+              return categoryPrev.orderNo - categoryNext.orderNo;
             })
             .map((category) => (
               <div key={category.ID} className="space-y-2">
