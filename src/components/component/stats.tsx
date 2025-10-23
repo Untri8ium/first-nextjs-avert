@@ -696,8 +696,6 @@ export function Stats(props: {}) {
     return () => clearInterval(intervalId);
   }, [isFetching]);
 
-  var fetchedStuffToRead = fetchedStuff;
-
   const previousFetchedStuffRef = useRef<
     | {
         err: any[];
@@ -713,8 +711,13 @@ export function Stats(props: {}) {
     | undefined
   >();
 
-  if (fetchedStuff.err.length != 0 && previousFetchedStuffRef.current)
-    fetchedStuffToRead = previousFetchedStuffRef.current;
+  var fetchedStuffToRead = JSON.parse(
+    JSON.stringify(
+      fetchedStuff.err.length != 0 && previousFetchedStuffRef.current
+        ? previousFetchedStuffRef.current
+        : fetchedStuff
+    )
+  );
 
   fetchedStuffToRead.options = sortOptions(fetchedStuffToRead.options);
 
