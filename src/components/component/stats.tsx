@@ -11,6 +11,7 @@ import {
   useState,
   useEffect,
   useRef,
+  useMemo,
   PureComponent,
 } from "react";
 import { format } from "date-fns";
@@ -576,23 +577,10 @@ export function Stats(props: {}) {
     }));
   };
 
-  // const [previousOptionsAndCounts, setPreviousOptionsAndCounts] =
-  // useState<OptionAndCount[]>();
-  // const [fetchedStuff.categories, setFetchedCategories] = useState<IndivCat[]>();
-  // const [fetchedStuff.options, setfetchedStuff.options] = useState<IndivOption[]>();
-  // const [fetchedStuff.votes, setfetchedStuff.votes] = useState<IndivVote[]>();
-  // const [fetchedExtraQuestions, setFetchedExtraQuestions] =
-  //   useState<IndivExtraQuestion[]>();
-  // const [fetchedExtraOptions, setFetchedExtraOptions] =
-  //   useState<IndivExtraOption[]>();
-  // const [fetchedStuff.votesExtra, setfetchedStuff.votesExtra] =
-  //   useState<IndivVoteExtra[]>();
-  // const [err, setErr] = useState<any[]>([]);
+  // --- START OF REWRITE ---
 
-  // const [counts, setCounts] = useState<OIDandCount[]>([]);
-  // var countsLocal: OIDandCount[] = [];
-
-  const [fetchedStuff, setFetchedStuff] = useState<{
+  // Centralized voting data shape
+  interface VotingData {
     err: any[];
     categories: IndivCat[];
     options: IndivOption[];
@@ -602,7 +590,9 @@ export function Stats(props: {}) {
     votesExtra: IndivVoteExtra[];
     vgi: any[];
     time: Date | undefined;
-  }>({
+  }
+
+  const [fetchedStuff, setFetchedStuff] = useState<VotingData>({
     err: [],
     categories: [],
     options: [],
@@ -614,182 +604,160 @@ export function Stats(props: {}) {
     time: undefined,
   });
 
-  const [isFetching, setIsFetching] = useState(false);
-
   const [studentType, setStudentType] = useState<any>("ns");
+  const [isFetching, setIsFetching] = useState(false);
+  const previousFetchedStuffRef = useRef<VotingData | null>(null);
 
+  /**
+   * Fetch and normalize all voting data.
+   * Automatically updates only when valid payload is returned.
+   */
   const fetchAll = async () => {
+    if (isFetching) return;
     setIsFetching(true);
-
     try {
-      const initialFetch = await fetch("/api/getvotes").then((res) =>
-        res.json()
-      );
-      // fetch("/api/getextraquestions").then((res) => res.json()),
-      // fetch("/api/getextraoptions").then((res) => res.json()),
-      // fetch("/api/getvotesextra").then((res) => res.json()),
-      // fetch("/api/getvgi").then((res) => res.json()),
+      const res = await fetch("/api/getvotes", { cache: "no-store" });
+      if (!res.ok) throw new Error(`Fetch failed: ${res.statusText}`);
+      const raw = await res.json();
 
-      console.log(initialFetch);
-
-      // const [
-      //   categoriesResponse,
-      //   optionsResponse,
-      //   votesResponse,
-      //   extraQuestionsResponse,
-      //   extraOptionsResponse,
-      //   votesExtraResponse,
-      //   vgiResponse,
-      // ] = [
-      //   initialFetch.categories.rows,
-      //   initialFetch.votingoptions.rows,
-      //   initialFetch.votes.rows,
-      //   initialFetch.extraquestions.rows,
-      //   initialFetch.extraoptions.rows,
-      //   initialFetch.votesextra.rows,
-      //   initialFetch.vgi.rows,
-      // ];
-
-      const newFetchedStuff = {
+      const newFetchedStuff: VotingData = {
         err: [],
-        categories: transformPlainObjectToCategories(
-          initialFetch.categories.rows
-        ),
-        options: transformPlainObjectToOptions(initialFetch.votingoptions.rows),
-        votes: transformPlainObjectToVotes(initialFetch.votes.rows),
+        categories: transformPlainObjectToCategories(raw.categories.rows ?? []),
+        options: transformPlainObjectToOptions(raw.votingoptions.rows ?? []),
+        votes: transformPlainObjectToVotes(raw.votes.rows ?? []),
         extraQuestions: transformPlainObjectToExtraQuestions(
-          initialFetch.extraquestions.rows
+          raw.extraquestions.rows ?? []
         ),
         extraOptions: transformPlainObjectToExtraOptions(
-          initialFetch.extraoptions.rows
+          raw.extraoptions.rows ?? []
         ),
-        votesExtra: transformPlainObjectToVotesExtra(
-          initialFetch.votesextra.rows
-        ),
-        vgi: initialFetch.vgi.rows,
+        votesExtra: transformPlainObjectToVotesExtra(raw.votesextra.rows ?? []),
+        vgi: raw.vgi.rows ?? [],
         time: new Date(),
       };
 
-      console.log(initialFetch.votesextra.rows);
-      console.error(newFetchedStuff.votes);
-      console.log(newFetchedStuff.votesExtra);
+      // Always refresh the visible state so non-vote props update
       setFetchedStuff(newFetchedStuff);
-    } catch (error) {
-      setFetchedStuff((prevState) => ({
-        ...prevState,
-        err: [error],
-      }));
+
+      // Only advance the "good fallback" when votes are non-empty (or improving)
+      const hadVotesBefore = previousFetchedStuffRef.current?.votes.length ?? 0;
+      const hasVotesNow = newFetchedStuff.votes.length;
+      if (hasVotesNow > 0 || hasVotesNow >= hadVotesBefore) {
+        previousFetchedStuffRef.current = newFetchedStuff;
+      } else {
+        console.warn(
+          "New fetch has empty/poorer votes — keeping previous snapshot for fallback."
+        );
+      }
+    } catch (err) {
+      console.error("❌ Error while fetching:", err);
+      setFetchedStuff((prev) => ({ ...prev, err: [...prev.err, err] }));
     } finally {
       setIsFetching(false);
     }
   };
 
+  // Fetch once on mount and then every 10 seconds
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (!isFetching) {
-        fetchAll();
-        console.log(fetchedStuff.votes);
-        // console.clear();
-      }
-    }, 10000);
+    fetchAll();
+    const interval = setInterval(fetchAll, 10_000);
+    return () => clearInterval(interval);
+  }, []);
 
-    return () => clearInterval(intervalId);
-  }, [isFetching]);
+  // Compute a "read-only" snapshot that auto-rolls back if the last fetch failed or was empty
+  const fetchedStuffToRead = useMemo(() => {
+    if (fetchedStuff.err.length && previousFetchedStuffRef.current) {
+      return previousFetchedStuffRef.current;
+    }
+    if (!fetchedStuff.votes.length && previousFetchedStuffRef.current) {
+      console.warn("Using previous snapshot (empty votes)");
+      return previousFetchedStuffRef.current;
+    }
+    return fetchedStuff;
+  }, [fetchedStuff]);
 
-  var fetchedStuffToRead = fetchedStuff;
+  // --- END OF REWRITE ---
 
-  const previousFetchedStuffRef = useRef<
-    | {
-        err: any[];
-        categories: IndivCat[];
-        options: IndivOption[];
-        votes: IndivVote[];
-        extraQuestions: IndivExtraQuestion[];
-        extraOptions: IndivExtraOption[];
-        votesExtra: IndivVoteExtra[];
-        vgi: any[];
-        time: Date | undefined;
-      }
-    | undefined
-  >();
+  console.log(fetchedStuffToRead.votes);
+  console.log(fetchedStuffToRead);
 
-  if (fetchedStuff.err.length != 0 && previousFetchedStuffRef.current)
-    fetchedStuffToRead = previousFetchedStuffRef.current;
+  const sortedOptions = useMemo(
+    () => sortOptions([...fetchedStuffToRead.options]),
+    [fetchedStuffToRead.options]
+  );
 
-  fetchedStuffToRead.options = sortOptions(fetchedStuffToRead.options);
+  // When cloning, also base it on fetchedStuffToRead
+  const clonedFetchedStuff = useMemo(
+    () => ({
+      ...fetchedStuffToRead,
+      votes: [...fetchedStuffToRead.votes],
+      votesExtra: [...fetchedStuffToRead.votesExtra],
+    }),
+    [fetchedStuffToRead]
+  );
 
-  if (studentType == "all") {
-  } else if (studentType == "ns") {
-    fetchedStuffToRead.votesExtra = fetchedStuffToRead.votesExtra.filter(
-      (voteExtra) =>
-        voteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID ||
-        !fetchedStuffToRead.votesExtra.find(
-          (eachVoteExtra) =>
-            eachVoteExtra.IP == voteExtra.IP &&
-            eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
+  console.log(clonedFetchedStuff);
+
+  const targetQ = fetchedStuffToRead.extraQuestions?.[2]; // see guard below
+  const filtered = useMemo(() => {
+    let votesExtra = [...fetchedStuffToRead.votesExtra];
+    let votes = [...fetchedStuffToRead.votes];
+
+    if (!targetQ) return { votesExtra, votes }; // nothing to filter against yet
+
+    if (studentType === "ns") {
+      votesExtra = votesExtra.filter(
+        (vx) =>
+          vx.QID === targetQ.ID ||
+          !votesExtra.find((e) => e.IP === vx.IP && e.QID === targetQ.ID)
+      );
+      votes = votes.filter(
+        (v) => !votesExtra.find((e) => e.IP === v.IP && e.QID === targetQ.ID)
+      );
+    } else if (studentType === "s") {
+      votesExtra = votesExtra.filter(
+        (vx) =>
+          vx.QID === targetQ.ID ||
+          votesExtra.find((e) => e.IP === vx.IP && e.QID === targetQ.ID)
+      );
+      votes = votes.filter((v) =>
+        votesExtra.find((e) => e.IP === v.IP && e.QID === targetQ.ID)
+      );
+    } else {
+      votesExtra = votesExtra.filter(
+        (vx) =>
+          vx.QID === targetQ.ID ||
+          votesExtra.find(
+            (e) =>
+              e.IP === vx.IP &&
+              e.QID === targetQ.ID &&
+              e.Qanswer === studentType
+          )
+      );
+      votes = votes.filter((v) =>
+        votesExtra.find(
+          (e) =>
+            e.IP === v.IP && e.QID === targetQ.ID && e.Qanswer === studentType
         )
-    );
+      );
+    }
 
-    fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter(
-      (eachVote) =>
-        !fetchedStuffToRead.votesExtra.find(
-          (eachVoteExtra) =>
-            eachVoteExtra.IP == eachVote.IP &&
-            eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
-        )
-    );
+    return { votesExtra, votes };
+  }, [
+    fetchedStuffToRead.votes,
+    fetchedStuffToRead.votesExtra,
+    targetQ?.ID,
+    studentType,
+  ]);
 
-    // fetchedStuffToRead.options = fetchedStuffToRead.options.filter(
-    //   (eachOption) => eachOption.ID != "07c8a9c5-15fe-4e79-8a9b-d8979655594d"
-    // );
-  } else if (studentType == "s") {
-    fetchedStuffToRead.votesExtra = fetchedStuffToRead.votesExtra.filter(
-      (voteExtra) =>
-        voteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID ||
-        fetchedStuffToRead.votesExtra.find(
-          (eachVoteExtra) =>
-            eachVoteExtra.IP == voteExtra.IP &&
-            eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
-        )
-    );
-
-    fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter((eachVote) =>
-      fetchedStuffToRead.votesExtra.find(
-        (eachVoteExtra) =>
-          eachVoteExtra.IP == eachVote.IP &&
-          eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID
-      )
-    );
-  } else {
-    fetchedStuffToRead.votesExtra = fetchedStuffToRead.votesExtra.filter(
-      (voteExtra) =>
-        voteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID ||
-        fetchedStuffToRead.votesExtra.find(
-          (eachVoteExtra) =>
-            eachVoteExtra.IP == voteExtra.IP &&
-            eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID &&
-            eachVoteExtra.Qanswer == studentType
-        )
-    );
-
-    fetchedStuffToRead.votes = fetchedStuffToRead.votes.filter((eachVote) =>
-      fetchedStuffToRead.votesExtra.find(
-        (eachVoteExtra) =>
-          eachVoteExtra.IP == eachVote.IP &&
-          eachVoteExtra.QID == fetchedStuffToRead.extraQuestions[2].ID &&
-          eachVoteExtra.Qanswer == studentType
-      )
-    );
-  }
-
-  const optionsAndCounts = fetchedStuffToRead?.options
+  const optionsAndCounts = clonedFetchedStuff?.options
     ? sortOptionsAndCounts(
-        fetchedStuffToRead.options.map(
+        clonedFetchedStuff.options.map(
           (eachOption) =>
             new OptionAndCount(
               eachOption,
-              fetchedStuffToRead?.votes
-                ? fetchedStuffToRead.votes.reduce(
+              clonedFetchedStuff?.votes
+                ? clonedFetchedStuff.votes.reduce(
                     (accCount: number, curVote) =>
                       accCount + (eachOption.ID == curVote.voteOption ? 1 : 0),
                     0
@@ -809,7 +777,7 @@ export function Stats(props: {}) {
 
   var rankingPreviousCount = Infinity;
   var rankingPreviousRank = 0;
-  fetchedStuffToRead?.categories?.map((eachFetchedCategory) =>
+  clonedFetchedStuff?.categories?.map((eachFetchedCategory) =>
     optionsAndCounts
       .filter(
         (eachOptionAndCount) =>
@@ -857,8 +825,9 @@ export function Stats(props: {}) {
   }, [optionsAndCounts]); // Update the ref whenever optionsAndCounts changes
 
   useEffect(() => {
-    if (fetchedStuff.err.length == 0)
-      previousFetchedStuffRef.current = fetchedStuffToRead;
+    if (fetchedStuff.err.length === 0 && fetchedStuff.votes.length > 0) {
+      previousFetchedStuffRef.current = fetchedStuff;
+    }
   }, [fetchedStuff]);
 
   // console.log(
@@ -886,25 +855,25 @@ export function Stats(props: {}) {
 
   // if (err.length != 0) console.log(err);
 
-  console.log(fetchedStuff);
+  // console.log(fetchedStuff);
   // console.log(fetchedStuff.votes.length);
   // console.log([...fetchedStuff.votes]);
   // console.log(previousFetchedStuffRef.current);
-  console.log(fetchedStuffToRead);
+  // console.log(clonedFetchedStuff);
 
   interface PreliminaryTimeCharts {
     [key: string]: Object;
   }
 
-  let votesCopy = [...fetchedStuffToRead.votes];
-  const timeCharts = fetchedStuffToRead.options.reduce(
+  let votesCopy = [...clonedFetchedStuff.votes];
+  const timeCharts = clonedFetchedStuff.options.reduce(
     (
       preliminaryTimeCharts: {
         [key: string]: Object;
       },
       eachOption
     ) => {
-      console.log(fetchedStuffToRead.votes.length);
+      console.log(clonedFetchedStuff.votes.length);
       console.log(votesCopy.length);
       console.log(eachOption.ID);
       preliminaryTimeCharts[eachOption.ID] = new Array(totalHalfHours)
@@ -925,11 +894,11 @@ export function Stats(props: {}) {
               Math.round(
                 (new Date(
                   new Date(
-                    new Date(fetchedStuffToRead.vgi[0].votingend).getTime() - 1
+                    new Date(clonedFetchedStuff.vgi[0].votingend).getTime() - 1
                   ).setHours(0, 0, 0, 0)
                 ).getTime() -
                   new Date(
-                    new Date(fetchedStuffToRead.vgi[0].votingstart).setHours(
+                    new Date(clonedFetchedStuff.vgi[0].votingstart).setHours(
                       0,
                       0,
                       0,
@@ -948,10 +917,10 @@ export function Stats(props: {}) {
                       new Date(
                         new Date(
                           new Date(
-                            fetchedStuffToRead.vgi[0].votingstart
+                            clonedFetchedStuff.vgi[0].votingstart
                           ).setDate(
                             new Date(
-                              fetchedStuffToRead.vgi[0].votingstart
+                              clonedFetchedStuff.vgi[0].votingstart
                             ).getDate() + index
                           )
                         ).setHours(
@@ -965,10 +934,10 @@ export function Stats(props: {}) {
                       new Date(
                         new Date(
                           new Date(
-                            fetchedStuffToRead.vgi[0].votingstart
+                            clonedFetchedStuff.vgi[0].votingstart
                           ).setDate(
                             new Date(
-                              fetchedStuffToRead.vgi[0].votingstart
+                              clonedFetchedStuff.vgi[0].votingstart
                             ).getDate() + index
                           )
                         ).setHours(
@@ -982,9 +951,9 @@ export function Stats(props: {}) {
                 });
                 dateVoteCounts[
                   new Date(
-                    new Date(fetchedStuffToRead.vgi[0].votingstart).setDate(
+                    new Date(clonedFetchedStuff.vgi[0].votingstart).setDate(
                       new Date(
-                        fetchedStuffToRead.vgi[0].votingstart
+                        clonedFetchedStuff.vgi[0].votingstart
                       ).getDate() + index
                     )
                   ).setHours(0, 0, 0, 0)
@@ -1043,11 +1012,11 @@ export function Stats(props: {}) {
     Math.round(
       (new Date(
         new Date(
-          new Date(fetchedStuffToRead.vgi[0]?.votingend).getTime() - 1
+          new Date(clonedFetchedStuff.vgi[0]?.votingend).getTime() - 1
         ).setHours(0, 0, 0, 0)
       ).getTime() -
         new Date(
-          new Date(fetchedStuffToRead.vgi[0]?.votingstart).setHours(0, 0, 0, 0)
+          new Date(clonedFetchedStuff.vgi[0]?.votingstart).setHours(0, 0, 0, 0)
         ).getTime()) /
         86400000
     ) + 1;
@@ -1247,11 +1216,11 @@ export function Stats(props: {}) {
 
   useEffect(() => {
     if (
-      (fetchedStuffToRead &&
+      (clonedFetchedStuff &&
         JSON.stringify(activeLinesForEachOption) == "{}") ||
       activeLinesOV.length == 0
     ) {
-      const initialActiveLinesForEachOption = fetchedStuffToRead.options.reduce(
+      const initialActiveLinesForEachOption = clonedFetchedStuff.options.reduce(
         (
           preliminaryActiveLinesForEachOption: { [key: string]: Object },
           eachOption
@@ -1288,7 +1257,7 @@ export function Stats(props: {}) {
         )
       );
     }
-  }, [fetchedStuffToRead]);
+  }, [clonedFetchedStuff]);
 
   const combinedTimeCharts = Object.fromEntries(
     Object.entries(timeCharts).map((eachOptionTimeChart) => [
@@ -1362,19 +1331,19 @@ export function Stats(props: {}) {
       },
       [] as number[]
     );
-    q1ExtraOptions = fetchedStuffToRead.extraOptions.filter(
+    q1ExtraOptions = clonedFetchedStuff.extraOptions.filter(
       (eachExtraOption) =>
-        eachExtraOption.QID == fetchedStuffToRead.extraQuestions[0].ID
+        eachExtraOption.QID == clonedFetchedStuff.extraQuestions[0].ID
     );
-    q2ExtraOptions = fetchedStuffToRead.extraOptions.filter(
+    q2ExtraOptions = clonedFetchedStuff.extraOptions.filter(
       (eachExtraOption) =>
-        eachExtraOption.QID == fetchedStuffToRead.extraQuestions[1].ID
+        eachExtraOption.QID == clonedFetchedStuff.extraQuestions[1].ID
     );
     const byOptionVotesList: { [key: string]: Object } =
-      fetchedStuffToRead.options.reduce(
+      clonedFetchedStuff.options.reduce(
         (acc, eachOption) => ({
           ...acc,
-          [eachOption.ID]: fetchedStuffToRead.votes.filter(
+          [eachOption.ID]: clonedFetchedStuff.votes.filter(
             (eachVote) => eachVote.voteOption == eachOption.ID
           ),
         }),
@@ -1385,7 +1354,7 @@ export function Stats(props: {}) {
     voterDateOnlyCharts = days.reduce(
       (preliminaryVoterDateOnlyCharts: { [day: string]: number }, eachDay) => {
         preliminaryVoterDateOnlyCharts[eachDay] =
-          fetchedStuffToRead.votes.reduce((preliminaryVoterCount, eachVote) => {
+          clonedFetchedStuff.votes.reduce((preliminaryVoterCount, eachVote) => {
             if (
               !preliminaryAppearedVoteIP.includes(eachVote.IP) &&
               new Date(eachVote.voteTime) >= new Date(eachDay) &&
@@ -1405,7 +1374,7 @@ export function Stats(props: {}) {
       {}
     );
 
-    voterCount = fetchedStuffToRead.votes.reduce(
+    voterCount = clonedFetchedStuff.votes.reduce(
       (preliminaryVoterCount, eachVote) => {
         if (!preliminaryAppearedVoteIP.includes(eachVote.IP)) {
           preliminaryVoterCount++;
@@ -1419,14 +1388,14 @@ export function Stats(props: {}) {
     console.warn(voterDateOnlyCharts);
     console.warn(voterCount);
 
-    // dateOnlyQ1Charts = new Array(totalDays).map(empty => fetchedStuffToRead.extraOptions.filter(eachExtraOption => eachExtraOption.QID == fetchedStuffToRead.extraQuestions[0].ID)?.reduce((preliminaryChart, extraOption) => (fetchedStuff.votes.filter(eachVote => eachVote.voteOption == )),{})
-    dateOnlyCharts = fetchedStuffToRead.options.reduce(
+    // dateOnlyQ1Charts = new Array(totalDays).map(empty => clonedFetchedStuff.extraOptions.filter(eachExtraOption => eachExtraOption.QID == clonedFetchedStuff.extraQuestions[0].ID)?.reduce((preliminaryChart, extraOption) => (fetchedStuff.votes.filter(eachVote => eachVote.voteOption == )),{})
+    dateOnlyCharts = clonedFetchedStuff.options.reduce(
       (preliminaryEntireCharts, eachOption) => ({
         ...preliminaryEntireCharts,
         [eachOption.ID]: days.reduce(
           (preliminaryOptionCharts, eachDay, index) => ({
             ...preliminaryOptionCharts,
-            [eachDay]: fetchedStuffToRead.votes.reduce(
+            [eachDay]: clonedFetchedStuff.votes.reduce(
               (dayVoteCount, eachVote) => {
                 if (
                   eachVote.voteOption == eachOption.ID &&
@@ -1461,7 +1430,7 @@ export function Stats(props: {}) {
 
     console.dir(allOptionsDateOnlyCharts);
 
-    dateOnlyQ1Charts = fetchedStuffToRead.options.reduce(
+    dateOnlyQ1Charts = clonedFetchedStuff.options.reduce(
       (preliminaryEntireCharts, eachOption) => ({
         ...preliminaryEntireCharts,
         [eachOption.ID]: q1ExtraOptions.map((eachExtraOption) => ({
@@ -1482,7 +1451,7 @@ export function Stats(props: {}) {
                 )
                 .reduce((preliminaryExtraVotesCount, eachHitVote) => {
                   if (
-                    fetchedStuffToRead.votesExtra.some(
+                    clonedFetchedStuff.votesExtra.some(
                       (eachVoteExtra) =>
                         eachVoteExtra.IP == eachHitVote.IP &&
                         eachVoteExtra.Qanswer == eachExtraOption.ID
@@ -1539,7 +1508,7 @@ export function Stats(props: {}) {
       allOptionsDateOnlyQ1Charts[day] = q1ExtraOptions.reduce(
         (result, extraOption, index) => {
           // Aggregate totals for each extra option
-          const total = fetchedStuffToRead.votesExtra.reduce(
+          const total = clonedFetchedStuff.votesExtra.reduce(
             (preliminaryTotal, eachVoteExtra) => {
               if (
                 eachVoteExtra.Qanswer == extraOption.ID &&
@@ -1581,7 +1550,7 @@ export function Stats(props: {}) {
     // combinedQ1Charts = Object.fromEntries(
     //   q1ExtraOptions.reduce((result: any[], extraOption, index) => {
     //     // Aggregate totals for each extra option
-    //     const total = fetchedStuffToRead.votesExtra.reduce(
+    //     const total = clonedFetchedStuff.votesExtra.reduce(
     //       (preliminaryTotal, eachVoteExtra) => {
     //         if (eachVoteExtra.Qanswer == extraOption.ID) preliminaryTotal++;
     //         return preliminaryTotal;
@@ -1619,14 +1588,14 @@ export function Stats(props: {}) {
     //   preliminaryAllOptionsCombinedQ1Charts
     // );
 
-    allOptionsCombinedQ1Charts = fetchedStuffToRead.extraOptions
+    allOptionsCombinedQ1Charts = clonedFetchedStuff.extraOptions
       .filter(
         (eachExtraOption) =>
-          eachExtraOption.QID == fetchedStuffToRead.extraQuestions[0].ID
+          eachExtraOption.QID == clonedFetchedStuff.extraQuestions[0].ID
       )
       .map((eachExtraOption) => ({
         head: eachExtraOption.name,
-        total: fetchedStuffToRead.votesExtra.reduce(
+        total: clonedFetchedStuff.votesExtra.reduce(
           (preliminaryTotal, eachVoteExtra) => {
             if (eachVoteExtra.Qanswer == eachExtraOption.ID) preliminaryTotal++;
             return preliminaryTotal;
@@ -1757,13 +1726,13 @@ export function Stats(props: {}) {
 
     console.dir(allOptionsCombinedPercentQ1Charts);
 
-    // console.dir(fetchedStuffToRead.votesExtra);
+    // console.dir(clonedFetchedStuff.votesExtra);
     console.log(byOptionVotesList);
     console.log(q1ExtraOptions);
     console.dir(dateOnlyQ1Charts);
     console.dir(combinedQ1Charts);
 
-    dateOnlyQ2Charts = fetchedStuffToRead.options.reduce(
+    dateOnlyQ2Charts = clonedFetchedStuff.options.reduce(
       (preliminaryEntireCharts, eachOption) => ({
         ...preliminaryEntireCharts,
         [eachOption.ID]: q2ExtraOptions.map((eachExtraOption) => ({
@@ -1784,7 +1753,7 @@ export function Stats(props: {}) {
                 )
                 .reduce((preliminaryExtraVotesCount, eachHitVote) => {
                   if (
-                    fetchedStuffToRead.votesExtra.some(
+                    clonedFetchedStuff.votesExtra.some(
                       (eachVoteExtra) =>
                         eachVoteExtra.IP == eachHitVote.IP &&
                         eachVoteExtra.Qanswer == eachExtraOption.ID
@@ -1842,7 +1811,7 @@ export function Stats(props: {}) {
       allOptionsDateOnlyQ2Charts[day] = q2ExtraOptions.reduce(
         (result, extraOption, index) => {
           // Aggregate totals for each extra option
-          const total = fetchedStuffToRead.votesExtra.reduce(
+          const total = clonedFetchedStuff.votesExtra.reduce(
             (preliminaryTotal, eachVoteExtra) => {
               if (
                 eachVoteExtra.Qanswer == extraOption.ID &&
@@ -1887,7 +1856,7 @@ export function Stats(props: {}) {
     // combinedQ2Charts = Object.fromEntries(
     //   q2ExtraOptions.reduce((result: any[], extraOption, index) => {
     //     // Aggregate totals for each extra option
-    //     const total = fetchedStuffToRead.votesExtra.reduce(
+    //     const total = clonedFetchedStuff.votesExtra.reduce(
     //       (preliminaryTotal, eachVoteExtra) => {
     //         if (eachVoteExtra.Qanswer == extraOption.ID) preliminaryTotal++;
     //         return preliminaryTotal;
@@ -1925,14 +1894,14 @@ export function Stats(props: {}) {
     //   preliminaryAllOptionsCombinedQ2Charts
     // );
 
-    allOptionsCombinedQ2Charts = fetchedStuffToRead.extraOptions
+    allOptionsCombinedQ2Charts = clonedFetchedStuff.extraOptions
       .filter(
         (eachExtraOption) =>
-          eachExtraOption.QID == fetchedStuffToRead.extraQuestions[1].ID
+          eachExtraOption.QID == clonedFetchedStuff.extraQuestions[1].ID
       )
       .map((eachExtraOption) => ({
         head: eachExtraOption.name,
-        total: fetchedStuffToRead.votesExtra.reduce(
+        total: clonedFetchedStuff.votesExtra.reduce(
           (preliminaryTotal, eachVoteExtra) => {
             if (eachVoteExtra.Qanswer == eachExtraOption.ID) preliminaryTotal++;
             return preliminaryTotal;
@@ -2057,7 +2026,7 @@ export function Stats(props: {}) {
               className="text-3xl font-bold"
               style={{ verticalAlign: "middle", marginBottom: "2px" }}
             >
-              {/* {"全" + fetchedStuffToRead?.categories?.length + "カテゴリ"} */}
+              {/* {"全" + clonedFetchedStuff?.categories?.length + "カテゴリ"} */}
               ランキング
             </Label>
             {/* <pre>{JSON.stringify(fetchedStuff)}</pre> */}
@@ -2129,11 +2098,11 @@ export function Stats(props: {}) {
                   <SelectItem value="s" key="s">
                     生徒
                   </SelectItem>
-                  {fetchedStuffToRead.extraOptions
+                  {clonedFetchedStuff.extraOptions
                     .filter(
                       (eachExtraOption) =>
                         eachExtraOption.QID ==
-                        fetchedStuffToRead.extraQuestions[2].ID
+                        clonedFetchedStuff.extraQuestions[2].ID
                     )
                     .map((eachExtraOptionQ3: any) => (
                       <SelectItem
@@ -2148,7 +2117,7 @@ export function Stats(props: {}) {
             </Select>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {fetchedStuffToRead?.categories?.map((eachFetchedCategory) => (
+            {clonedFetchedStuff?.categories?.map((eachFetchedCategory) => (
               <label
                 key={eachFetchedCategory.ID}
                 //className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
@@ -2277,11 +2246,11 @@ export function Stats(props: {}) {
                   <SelectItem value="s" key="s">
                     生徒
                   </SelectItem>
-                  {fetchedStuffToRead.extraOptions
+                  {clonedFetchedStuff.extraOptions
                     .filter(
                       (eachExtraOption) =>
                         eachExtraOption.QID ==
-                        fetchedStuffToRead.extraQuestions[2].ID
+                        clonedFetchedStuff.extraQuestions[2].ID
                     )
                     .map((eachExtraOptionQ3: any) => (
                       <SelectItem
@@ -2295,7 +2264,7 @@ export function Stats(props: {}) {
               </SelectContent>
             </Select>
           </div>
-          {fetchedStuffToRead.options.length == 0 ? null : (
+          {clonedFetchedStuff.options.length == 0 ? null : (
             <Card
               className={
                 "mb-4 dark:border-gray-700 border-2 " +
@@ -2632,7 +2601,7 @@ export function Stats(props: {}) {
         </div>
       </TabsContent>
       <TabsContent value="individual">
-        {/* {`oh: ${fetchedStuffToRead.options.map((eachOption) =>
+        {/* {`oh: ${clonedFetchedStuff.options.map((eachOption) =>
           activeLinesForEachOption[eachOption.ID]["votesChart"].toString()
         )}`} */}
         <div className="px-[20px] md:px-[30px] py-[20px] grid grid-cols-1 gap-4">
@@ -2662,11 +2631,11 @@ export function Stats(props: {}) {
                   <SelectItem value="s" key="s">
                     生徒
                   </SelectItem>
-                  {fetchedStuffToRead.extraOptions
+                  {clonedFetchedStuff.extraOptions
                     .filter(
                       (eachExtraOption) =>
                         eachExtraOption.QID ==
-                        fetchedStuffToRead.extraQuestions[2].ID
+                        clonedFetchedStuff.extraQuestions[2].ID
                     )
                     .map((eachExtraOptionQ3: any) => (
                       <SelectItem
@@ -2680,14 +2649,14 @@ export function Stats(props: {}) {
               </SelectContent>
             </Select>
           </div>
-          {fetchedStuffToRead.categories.map((eachCategory) => (
+          {clonedFetchedStuff.categories.map((eachCategory) => (
             <div className="mb-8" key={eachCategory.ID}>
               <div className="mb-4">
                 <Label className="text-3xl font-bold">
                   {eachCategory.name}
                 </Label>
               </div>
-              {fetchedStuffToRead.options
+              {clonedFetchedStuff.options
                 .filter((eachOption) => eachOption.catID == eachCategory.ID)
                 .map((eachOption) => (
                   <Card
