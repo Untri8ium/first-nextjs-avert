@@ -924,6 +924,9 @@ export default function VotingCore(props: {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {options
                     .filter((eachOption) => eachOption.catID == category.ID)
+                    .sort((optionPrev, optionNext) => {
+                      return optionPrev.orderNo - optionNext.orderNo;
+                    })
                     .map((option) => (
                       <label
                         key={option.ID}
