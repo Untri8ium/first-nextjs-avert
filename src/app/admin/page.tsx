@@ -52,7 +52,7 @@ export default async function Home() {
   async function loadOPTS() {
     try {
       var result =
-        await sql`CREATE TABLE IF NOT EXISTS votingoptions (id text, categoryid text, name text, 
+        await sql`CREATE TABLE IF NOT EXISTS votingoptions (id text PRIMARY KEY, categoryid text, name text, 
             description text, orderno smallint
         );`;
 
@@ -74,7 +74,7 @@ export default async function Home() {
   async function loadCATS() {
     try {
       var result =
-        await sql`CREATE TABLE IF NOT EXISTS categories (id text, name text, orderno smallint);`;
+        await sql`CREATE TABLE IF NOT EXISTS categories (id text PRIMARY KEY, name text, orderno smallint);`;
 
       const { rows } = await sql`
         SELECT * FROM categories;`;
@@ -94,7 +94,7 @@ export default async function Home() {
   async function loadVOTS() {
     try {
       var result =
-        await sql`CREATE TABLE IF NOT EXISTS votes (id text, votetime text, voteoption text, entrycount smallint, ip text);`;
+        await sql`CREATE TABLE IF NOT EXISTS votes (id text PRIMARY KEY, votetime text, voteoption text, entrycount smallint, ip text);`;
 
       const { rows } = await sql`
         SELECT * FROM votes;`;
@@ -112,7 +112,7 @@ export default async function Home() {
   async function loadVOTX() {
     try {
       var result =
-        await sql`CREATE TABLE IF NOT EXISTS votesextra (id text, votetime text, qid text, qanswer varchar(65535), entrycount smallint, ip text);`; // what
+        await sql`CREATE TABLE IF NOT EXISTS votesextra (id text PRIMARY KEY, votetime text, qid text, qanswer varchar(65535), entrycount smallint, ip text);`; // what
 
       const { rows } = await sql`
         SELECT * FROM votes;`;
@@ -130,7 +130,7 @@ export default async function Home() {
   async function loadEXQS() {
     try {
       var result =
-        await sql`CREATE TABLE IF NOT EXISTS extraquestions (id text, name text, maxvotes smallint, orderno smallint);`;
+        await sql`CREATE TABLE IF NOT EXISTS extraquestions (id text PRIMARY KEY, name text, maxvotes smallint, orderno smallint);`;
 
       const { rows } = await sql`
         SELECT * FROM extraquestions;`;
@@ -148,7 +148,7 @@ export default async function Home() {
   async function loadEXOP() {
     try {
       var result =
-        await sql`CREATE TABLE IF NOT EXISTS extraoptions (id text, name text, orderno smallint);`;
+        await sql`CREATE TABLE IF NOT EXISTS extraoptions (id text PRIMARY KEY, name text, orderno smallint);`;
 
       const { rows } = await sql`
         SELECT * FROM extraoptions;`;
