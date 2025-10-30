@@ -446,6 +446,9 @@ export async function POST(request: Request) {
       optionnames &&
       opts.toString() == optionnames.toString(); // options matching test (only fails if option existence or order has changed)
 
+    console.warn(opts.toString());
+    console.warn(optionnames.toString());
+
     if (!optMatchTest) {
       throw "mc";
       // redirect("/error-vote?e=mc");
