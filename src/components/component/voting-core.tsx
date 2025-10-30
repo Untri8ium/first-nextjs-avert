@@ -1096,7 +1096,12 @@ export default function VotingCore(props: {
             <div key={extraQuestion.ID}>
               <div className="flex p-[30px] pt-[15px] pb-0 flex-col w-full h-full">
                 <Label className="text-2xl font-bold break-keep">
-                  {extraQuestion.name.replaceAll("を", "を\u200B")}
+                  {extraQuestion.name
+                    .replaceAll("を", "を\u200B")
+                    .replaceAll("に", "に\u200B")
+                    .replaceAll("で", "で\u200B")
+                    .replaceAll("は", "は\u200B")
+                    .replaceAll("が", "が\u200B")}
                 </Label>
                 {
                   <Label className="text-md text-gray-500 dark:text-neutral-400">

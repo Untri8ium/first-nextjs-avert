@@ -625,68 +625,84 @@ export function Stats(props: {}) {
   );
 
   // When cloning, also base it on fetchedStuffToRead
-  const clonedFetchedStuff = useMemo(
-    () => ({
+  const clonedFetchedStuff = useMemo(() => {
+    const targetQ = fetchedStuffToRead.extraQuestions?.[2]; // assuming this exists in your data
+
+    // Clone arrays
+    let votesExtra = [...fetchedStuffToRead.votesExtra];
+    let votes = [...fetchedStuffToRead.votes];
+
+    // Apply the same filtering logic
+    votesExtra = votesExtra.filter(
+      (vx) =>
+        vx.QID === targetQ.ID ||
+        !votesExtra.find((e) => e.IP === vx.IP && e.QID === targetQ.ID)
+    );
+
+    votes = votes.filter(
+      (v) => !votesExtra.find((e) => e.IP === v.IP && e.QID === targetQ.ID)
+    );
+
+    return {
       ...fetchedStuffToRead,
-      votes: [...fetchedStuffToRead.votes],
-      votesExtra: [...fetchedStuffToRead.votesExtra],
-    }),
-    [fetchedStuffToRead]
-  );
+      votes,
+      votesExtra,
+    };
+  }, [fetchedStuffToRead]);
 
   console.log(clonedFetchedStuff);
 
   const targetQ = fetchedStuffToRead.extraQuestions?.[2]; // see guard below
-  const filtered = useMemo(() => {
-    let votesExtra = [...fetchedStuffToRead.votesExtra];
-    let votes = [...fetchedStuffToRead.votes];
+  // const filtered = useMemo(() => {
+  //   let votesExtra = [...fetchedStuffToRead.votesExtra];
+  //   let votes = [...fetchedStuffToRead.votes];
 
-    if (!targetQ) return { votesExtra, votes }; // nothing to filter against yet
+  //   if (!targetQ) return { votesExtra, votes }; // nothing to filter against yet
 
-    if (studentType === "ns") {
-      votesExtra = votesExtra.filter(
-        (vx) =>
-          vx.QID === targetQ.ID ||
-          !votesExtra.find((e) => e.IP === vx.IP && e.QID === targetQ.ID)
-      );
-      votes = votes.filter(
-        (v) => !votesExtra.find((e) => e.IP === v.IP && e.QID === targetQ.ID)
-      );
-    } else if (studentType === "s") {
-      votesExtra = votesExtra.filter(
-        (vx) =>
-          vx.QID === targetQ.ID ||
-          votesExtra.find((e) => e.IP === vx.IP && e.QID === targetQ.ID)
-      );
-      votes = votes.filter((v) =>
-        votesExtra.find((e) => e.IP === v.IP && e.QID === targetQ.ID)
-      );
-    } else {
-      votesExtra = votesExtra.filter(
-        (vx) =>
-          vx.QID === targetQ.ID ||
-          votesExtra.find(
-            (e) =>
-              e.IP === vx.IP &&
-              e.QID === targetQ.ID &&
-              e.Qanswer === studentType
-          )
-      );
-      votes = votes.filter((v) =>
-        votesExtra.find(
-          (e) =>
-            e.IP === v.IP && e.QID === targetQ.ID && e.Qanswer === studentType
-        )
-      );
-    }
+  //   if (studentType === "ns") {
+  //     votesExtra = votesExtra.filter(
+  //       (vx) =>
+  //         vx.QID === targetQ.ID ||
+  //         !votesExtra.find((e) => e.IP === vx.IP && e.QID === targetQ.ID)
+  //     );
+  //     votes = votes.filter(
+  //       (v) => !votesExtra.find((e) => e.IP === v.IP && e.QID === targetQ.ID)
+  //     );
+  //   } else if (studentType === "s") {
+  //     votesExtra = votesExtra.filter(
+  //       (vx) =>
+  //         vx.QID === targetQ.ID ||
+  //         votesExtra.find((e) => e.IP === vx.IP && e.QID === targetQ.ID)
+  //     );
+  //     votes = votes.filter((v) =>
+  //       votesExtra.find((e) => e.IP === v.IP && e.QID === targetQ.ID)
+  //     );
+  //   } else {
+  //     votesExtra = votesExtra.filter(
+  //       (vx) =>
+  //         vx.QID === targetQ.ID ||
+  //         votesExtra.find(
+  //           (e) =>
+  //             e.IP === vx.IP &&
+  //             e.QID === targetQ.ID &&
+  //             e.Qanswer === studentType
+  //         )
+  //     );
+  //     votes = votes.filter((v) =>
+  //       votesExtra.find(
+  //         (e) =>
+  //           e.IP === v.IP && e.QID === targetQ.ID && e.Qanswer === studentType
+  //       )
+  //     );
+  //   }
 
-    return { votesExtra, votes };
-  }, [
-    fetchedStuffToRead.votes,
-    fetchedStuffToRead.votesExtra,
-    targetQ?.ID,
-    studentType,
-  ]);
+  //   return { votesExtra, votes };
+  // }, [
+  //   fetchedStuffToRead.votes,
+  //   fetchedStuffToRead.votesExtra,
+  //   targetQ?.ID,
+  //   studentType,
+  // ]);
 
   const optionsAndCounts = clonedFetchedStuff?.options
     ? sortOptionsAndCounts(
@@ -785,7 +801,7 @@ export function Stats(props: {}) {
           </Label>
         )}
       </div>
-      <div className="">
+      {/* <div className="">
         <Label className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-pre-line">
           票の種類
         </Label>
@@ -825,7 +841,7 @@ export function Stats(props: {}) {
             </SelectGroup>
           </SelectContent>
         </Select>
-      </div>
+      </div> */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {clonedFetchedStuff?.categories?.map((eachFetchedCategory) => (
           <label
@@ -855,6 +871,11 @@ export function Stats(props: {}) {
                     (eachOptionAndCount) =>
                       eachOptionAndCount.option.catID == eachFetchedCategory.ID
                   )
+                  .sort((optionPrev, optionNext) => {
+                    return (
+                      optionPrev.option.orderNo - optionNext.option.orderNo
+                    );
+                  })
                   .map((optionAndCount, index) => (
                     <TableRow key={optionAndCount.option.ID}>
                       <TableCell
