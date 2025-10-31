@@ -871,11 +871,6 @@ export function Stats(props: {}) {
                     (eachOptionAndCount) =>
                       eachOptionAndCount.option.catID == eachFetchedCategory.ID
                   )
-                  .sort((optionPrev, optionNext) => {
-                    return (
-                      optionPrev.option.orderNo - optionNext.option.orderNo
-                    );
-                  })
                   .map((optionAndCount, index) => (
                     <TableRow key={optionAndCount.option.ID}>
                       <TableCell
