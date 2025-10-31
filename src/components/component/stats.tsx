@@ -843,98 +843,103 @@ export function Stats(props: {}) {
         </Select>
       </div> */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {clonedFetchedStuff?.categories?.map((eachFetchedCategory) => (
-          <label
-            key={eachFetchedCategory.ID}
-            //className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
-            className={
-              "bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow w-full border relative " +
-              (fetchedStuff.err.length == 0 ? "border-dead" : "border-dead")
-            }
-          >
-            <div className="flex flex-col items-center justify-center space-y-2">
-              <h3 className="text-lg font-semibold text-center">
-                {eachFetchedCategory.name}
-              </h3>
-            </div>
-            <Table className="">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[60px]">順位</TableHead>
-                  <TableHead>団体名</TableHead>
-                  <TableHead className="text-right">票数</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {optionsAndCounts
-                  .filter(
-                    (eachOptionAndCount) =>
-                      eachOptionAndCount.option.catID == eachFetchedCategory.ID
-                  )
-                  .map((optionAndCount, index) => (
-                    <TableRow key={optionAndCount.option.ID}>
-                      <TableCell
-                        className={
-                          (optionAndCount.rank <= 1
-                            ? "font-bold text-lg pt-2 pb-2 "
-                            : "font-medium text-sm pt-1 pb-1 ") +
-                          (optionAndCount.rank <
-                          (previousOptionsAndCounts?.find(
-                            (eachPreviousOptionAndCount) =>
-                              eachPreviousOptionAndCount.option.ID ==
-                              optionAndCount.option.ID
-                          )?.rank ?? 0)
-                            ? "flash-up "
-                            : optionAndCount.rank >
-                              (previousOptionsAndCounts?.find(
-                                (eachPreviousOptionAndCount) =>
-                                  eachPreviousOptionAndCount.option.ID ==
-                                  optionAndCount.option.ID
-                              )?.rank ?? Infinity)
-                            ? "flash-down "
-                            : "")
-                        }
-                      >
-                        {optionAndCount.rank}
-                      </TableCell>
-                      <TableCell
-                        className={
-                          (optionAndCount.rank <= 1
-                            ? "font-bold text-lg pt-2 pb-2 leading-snug "
-                            : "font-medium text-sm pt-1 pb-1 leading-snug ") +
-                          (optionAndCount.rank <
-                          (previousOptionsAndCounts?.find(
-                            (eachPreviousOptionAndCount) =>
-                              eachPreviousOptionAndCount.option.ID ==
-                              optionAndCount.option.ID
-                          )?.rank ?? 0)
-                            ? "flash-up "
-                            : optionAndCount.rank >
-                              (previousOptionsAndCounts?.find(
-                                (eachPreviousOptionAndCount) =>
-                                  eachPreviousOptionAndCount.option.ID ==
-                                  optionAndCount.option.ID
-                              )?.rank ?? Infinity)
-                            ? "flash-down "
-                            : "")
-                        }
-                      >
-                        {optionAndCount.option.name}
-                      </TableCell>
-                      <TableCell
-                        className={"text-right font-medium text-md pt-1 pb-1"}
-                      >
-                        {optionAndCount.count}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-            {/* <label className="bottom-3 inset-x-0 flex justify-center absolute text-gray-400 font-light">
+        {clonedFetchedStuff?.categories
+          ?.sort((categoryPrev, categoryNext) => {
+            return categoryPrev.orderNo - categoryNext.orderNo;
+          })
+          .map((eachFetchedCategory) => (
+            <label
+              key={eachFetchedCategory.ID}
+              //className="option-tile bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full border border-gray-200 dark:border-gray-700"
+              className={
+                "bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow w-full border relative " +
+                (fetchedStuff.err.length == 0 ? "border-dead" : "border-dead")
+              }
+            >
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <h3 className="text-lg font-semibold text-center">
+                  {eachFetchedCategory.name}
+                </h3>
+              </div>
+              <Table className="">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[60px]">順位</TableHead>
+                    <TableHead>団体名</TableHead>
+                    <TableHead className="text-right">票数</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {optionsAndCounts
+                    .filter(
+                      (eachOptionAndCount) =>
+                        eachOptionAndCount.option.catID ==
+                        eachFetchedCategory.ID
+                    )
+                    .map((optionAndCount, index) => (
+                      <TableRow key={optionAndCount.option.ID}>
+                        <TableCell
+                          className={
+                            (optionAndCount.rank <= 1
+                              ? "font-bold text-lg pt-2 pb-2 "
+                              : "font-medium text-sm pt-1 pb-1 ") +
+                            (optionAndCount.rank <
+                            (previousOptionsAndCounts?.find(
+                              (eachPreviousOptionAndCount) =>
+                                eachPreviousOptionAndCount.option.ID ==
+                                optionAndCount.option.ID
+                            )?.rank ?? 0)
+                              ? "flash-up "
+                              : optionAndCount.rank >
+                                (previousOptionsAndCounts?.find(
+                                  (eachPreviousOptionAndCount) =>
+                                    eachPreviousOptionAndCount.option.ID ==
+                                    optionAndCount.option.ID
+                                )?.rank ?? Infinity)
+                              ? "flash-down "
+                              : "")
+                          }
+                        >
+                          {optionAndCount.rank}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            (optionAndCount.rank <= 1
+                              ? "font-bold text-lg pt-2 pb-2 leading-snug "
+                              : "font-medium text-sm pt-1 pb-1 leading-snug ") +
+                            (optionAndCount.rank <
+                            (previousOptionsAndCounts?.find(
+                              (eachPreviousOptionAndCount) =>
+                                eachPreviousOptionAndCount.option.ID ==
+                                optionAndCount.option.ID
+                            )?.rank ?? 0)
+                              ? "flash-up "
+                              : optionAndCount.rank >
+                                (previousOptionsAndCounts?.find(
+                                  (eachPreviousOptionAndCount) =>
+                                    eachPreviousOptionAndCount.option.ID ==
+                                    optionAndCount.option.ID
+                                )?.rank ?? Infinity)
+                              ? "flash-down "
+                              : "")
+                          }
+                        >
+                          {optionAndCount.option.name}
+                        </TableCell>
+                        <TableCell
+                          className={"text-right font-medium text-md pt-1 pb-1"}
+                        >
+                          {optionAndCount.count}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+              {/* <label className="bottom-3 inset-x-0 flex justify-center absolute text-gray-400 font-light">
                   123
                 </label> */}
-          </label>
-        ))}
+            </label>
+          ))}
       </div>
     </div>
   );
