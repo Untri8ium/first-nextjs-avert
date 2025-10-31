@@ -52,16 +52,16 @@ export default function Thanks() {
               transition={{ delay: 0.5, duration: 0.5 }}
               className="flex justify-center"
             >
-              {/* <button
+              <button
                 onClick={() => {
                   // const router = useRouter();
 
-                  router.push("https://qr1.jp/rebootfb");
+                  router.push("https://voxtk.short.gy/survey2025");
                 }}
                 className="bg-red-600 hover:bg-red-700 shadow-md shadow-red-300 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
               >
                 アンケートのお願い
-              </button> */}
+              </button>
             </motion.div>
           </div>
           {/* <div className="bg-gray-100 px-8 py-4 flex justify-between items-center">
